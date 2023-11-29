@@ -1,4 +1,5 @@
 import datetime
+import psycopg2
 from enum import Enum
 
 ##########################################
@@ -20,14 +21,14 @@ class TradeDirection(Enum):
 class Asset:
     def __init__(
             self, 
-            coin: str, 
+            symbol: str, 
             entry_price: float,
             entry_date: datetime.datetime,
             current_profit_percentage: float,
             direction: TradeDirection,
             amount: float
         ):
-        self.coin = coin
+        self.symbol = symbol
         self.entry_price = entry_price
         self.entry_date = entry_date
         self.amount = amount
