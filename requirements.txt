@@ -1,0 +1,6 @@
+flask
+pandas
+psycopg2
+peewee
+requests
+pandas_ta

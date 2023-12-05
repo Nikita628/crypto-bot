@@ -25,107 +25,116 @@ LOOCKBACK = 501 # need 501 for proper calculation of EMA according to Binance
 INTERVAL = BinanceInterval.day
 
 def search_entry():
-    usdt_symbols = sorted(get_all_usdt_symbols())
-    checked_symbols = 0
-
-    while True:
-        print(f'searching entry...')
+    try:
+        usdt_symbols = sorted(get_all_usdt_symbols())
         checked_symbols = 0
-        for symbol in usdt_symbols:
-            checked_symbols += 1
-            try:
-                if checked_symbols % 10 == 0:
-                    print(f'searched {checked_symbols} symbols...')
 
-                # is_asset(symbol)
-                if is_symbol_in_open_transaction(symbol):
-                    continue
+        while True:
+            print(f'searching entry...')
+            checked_symbols = 0
+            for symbol in usdt_symbols:
+                checked_symbols += 1
+                try:
+                    if checked_symbols % 10 == 0:
+                        print(f'searched {checked_symbols} symbols...')
 
-                df = get_kline(symbol, INTERVAL, LOOCKBACK)
+                    # is_asset(symbol)
+                    if is_symbol_in_open_transaction(symbol):
+                        continue
 
-                if len(df) < LOOCKBACK:
-                    continue
-        
-                add_gmma(df)
-                add_200ema(df)
-                add_rsi(df)
-                add_volume_sma(df)
-                add_stoch_osc(df, 5, 3, 2, 'short')
-                add_stoch_osc(df, 20, 3, 8, 'long')
-                is_long = is_long_entry(df)
-                is_short = is_short_entry(df)
+                    df = get_kline(symbol, INTERVAL, LOOCKBACK)
 
-                if is_long or is_short:
-                    print(f'going {TransactionDirection.long.value if is_long else TransactionDirection.short.value} - {symbol}')
-
-                    # buy(asset)
-                    create_transaction(Transaction(
-                        id=get_next_transaction_id(),
-                        pair=symbol,
-                        entry_price=df['close'].iloc[-1],
-                        entry_date=datetime.datetime.utcnow(),
-                        direction=TransactionDirection.long if is_long else TransactionDirection.short,
-                        exit_price=0,
-                        exit_date='',
-                        profit_percentage=0,
-                        running_profit_percentage=0,
-                        running_price=0,
-                    ))
-            except Exception as e:
-                print(f"Failed to process data for {symbol}: {e}")
-                
-            time.sleep(2)
+                    if len(df) < LOOCKBACK:
+                        continue
             
-        time.sleep(300) # 5 minutes
+                    add_gmma(df)
+                    add_200ema(df)
+                    add_rsi(df)
+                    add_volume_sma(df)
+                    add_stoch_osc(df, 5, 3, 2, 'short')
+                    add_stoch_osc(df, 20, 3, 8, 'long')
+                    is_long = is_long_entry(df)
+                    is_short = is_short_entry(df)
+
+                    if is_long or is_short:
+                        print(f'going {TransactionDirection.long.value if is_long else TransactionDirection.short.value} - {symbol}')
+
+                        # buy(asset)
+                        create_transaction(Transaction(
+                            id=get_next_transaction_id(),
+                            pair=symbol,
+                            entry_price=df['close'].iloc[-1],
+                            entry_date=datetime.datetime.utcnow(),
+                            direction=TransactionDirection.long if is_long else TransactionDirection.short,
+                            exit_price=0,
+                            exit_date='',
+                            profit_percentage=0,
+                            running_profit_percentage=0,
+                            running_price=0,
+                        ))
+                except Exception as e:
+                    print(f"Failed to process data for {symbol}: {e}")
+                    
+                time.sleep(2)
+                
+            time.sleep(300) # 5 minutes
+    except:
+        print(f"search_entry error")
+
 
 def search_exit():
-    while True:
-        print(f'searching exit...')
+    try:
+        while True:
+            print(f'searching exit...')
 
-        # get_all_assets()
-        open_transactions = get_open_transactions()
+            # get_all_assets()
+            open_transactions = get_open_transactions()
 
-        for transaction in open_transactions:
-            try:
-                df = get_kline(transaction['pair'], INTERVAL, LOOCKBACK)
-                add_rsi(df)
-                add_stoch_osc(df, 5, 3, 2, 'short')
-                add_stoch_osc(df, 20, 3, 8, 'long')
-                trade_direction = transaction['direction']
+            for transaction in open_transactions:
+                try:
+                    df = get_kline(transaction['pair'], INTERVAL, LOOCKBACK)
+                    add_rsi(df)
+                    add_stoch_osc(df, 5, 3, 2, 'short')
+                    add_stoch_osc(df, 20, 3, 8, 'long')
+                    trade_direction = transaction['direction']
 
-                if trade_direction == TransactionDirection.long.value and is_long_exit(df):
-                    # sell(asset)
-                    print(f'exiting long - {transaction["pair"]}')
-                    transaction['exit_price'] = df['close'].iloc[-1]
-                    transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-                    profit = df['close'].iloc[-1] - float(transaction['entry_price'])
-                    transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
-                elif trade_direction == TransactionDirection.short.value and is_short_exit(df):
-                    print(f'exiting short - {transaction["pair"]}')
-                    transaction['exit_price'] = df['close'].iloc[-1]
-                    transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
-                    profit = float(transaction['entry_price']) - df['close'].iloc[-1]
-                    transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
-                elif is_expired(transaction):
-                    print('expired transaction')
-                    # sell and rebalance
-                elif is_trailing_stop_hit():
-                    # sell and rebalance
-                    print('trailing stop hit')
-                else:
-                    profit = (
-                        df['close'].iloc[-1] - float(transaction['entry_price']) 
-                        if trade_direction == TransactionDirection.long.value
-                        else float(transaction['entry_price']) - df['close'].iloc[-1]
-                    )
-                    transaction['running_profit_%'] = profit * 100 / float(transaction['entry_price'])
-                    transaction['running_price'] = df['close'].iloc[-1]
+                    if trade_direction == TransactionDirection.long.value and is_long_exit(df):
+                        # sell(asset)
+                        print(f'exiting long - {transaction["pair"]}')
+                        transaction['exit_price'] = df['close'].iloc[-1]
+                        transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                        profit = df['close'].iloc[-1] - float(transaction['entry_price'])
+                        transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
+                    elif trade_direction == TransactionDirection.short.value and is_short_exit(df):
+                        print(f'exiting short - {transaction["pair"]}')
+                        transaction['exit_price'] = df['close'].iloc[-1]
+                        transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                        profit = float(transaction['entry_price']) - df['close'].iloc[-1]
+                        transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
+                    elif is_expired(transaction):
+                        print('expired transaction')
+                        # sell and rebalance
+                    elif is_trailing_stop_hit():
+                        # sell and rebalance
+                        print('trailing stop hit')
+                    else:
+                        profit = (
+                            df['close'].iloc[-1] - float(transaction['entry_price']) 
+                            if trade_direction == TransactionDirection.long.value
+                            else float(transaction['entry_price']) - df['close'].iloc[-1]
+                        )
+                        transaction['running_profit_%'] = profit * 100 / float(transaction['entry_price'])
+                        transaction['running_price'] = df['close'].iloc[-1]
 
-                update_transaction(transaction)
-            except Exception as e:
-                print(f"Failed to process data for {transaction['pair']}: {e}")
+                    update_transaction(transaction)
+                except Exception as e:
+                    print(f"Failed to process data for {transaction['pair']}: {e}")
 
-        time.sleep(300)  # 5 minutes
+            time.sleep(300)  # 5 minutes
+    except:
+        print(f"search_exit error")
+
+
 
 def is_short_entry(df: pd.DataFrame):
     is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]

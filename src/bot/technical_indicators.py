@@ -1,5 +1,5 @@
 import pandas as pd
-import pandas_ta
+import pandas_ta # required import, without it extension method will not work
 
 def add_gmma(df: pd.DataFrame):
     short_emas = [3, 5, 8, 10, 12, 15]

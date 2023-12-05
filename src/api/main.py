@@ -1,0 +1,26 @@
+from flask import Flask
+from database.models import HistoryData, Asset
+
+app = Flask(__name__)
+
+@app.route('/')
+def landing_page():
+    return "landing page"
+
+@app.route('/create-history-data')
+def create_history_data():
+    HistoryData.create()
+    return 'created'
+
+@app.route('/create-asset')
+def create_asset():
+    Asset.create(
+        coin='USDT',
+        amount=1000000,
+        user_id=1
+    )
+    return 'created'
+    
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=5000, debug=True)
