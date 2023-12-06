@@ -3,7 +3,7 @@ services:
   server:
     container_name: crypto-bot-server
     build:
-      context: .
+      context: ./app
       dockerfile: Dockerfile.local
     ports:
       - "5010:5000"
