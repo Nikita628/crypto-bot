@@ -13,16 +13,15 @@ from transaction import (
     get_next_transaction_id, 
     get_open_transactions, 
     create_transaction,
-    is_expired, 
     is_symbol_in_open_transaction,
     update_transaction,
-    is_trailing_stop_hit
 )
 import datetime
 import time
 
 LOOCKBACK = 501 # need 501 for proper calculation of EMA according to Binance
 INTERVAL = BinanceInterval.day
+SLEEP = 120
 
 def search_entry():
     usdt_symbols = sorted(get_all_usdt_symbols())
@@ -37,7 +36,6 @@ def search_entry():
                 if checked_symbols % 10 == 0:
                     print(f'searched {checked_symbols} symbols...')
 
-                # is_asset(symbol)
                 if is_symbol_in_open_transaction(symbol):
                     continue
 
@@ -58,9 +56,7 @@ def search_entry():
                 if is_long or is_short:
                     print(f'going {TransactionDirection.long.value if is_long else TransactionDirection.short.value} - {symbol}')
 
-                    # buy(asset)
                     create_transaction(Transaction(
-                        id=get_next_transaction_id(),
                         pair=symbol,
                         entry_price=df['close'].iloc[-1],
                         entry_date=datetime.datetime.utcnow(),
@@ -76,13 +72,12 @@ def search_entry():
                 
             time.sleep(2)
             
-        time.sleep(300) # 5 minutes
+        time.sleep(SLEEP)
 
 def search_exit():
     while True:
         print(f'searching exit...')
 
-        # get_all_assets()
         open_transactions = get_open_transactions()
 
         for transaction in open_transactions:
@@ -94,7 +89,6 @@ def search_exit():
                 trade_direction = transaction['direction']
 
                 if trade_direction == TransactionDirection.long.value and is_long_exit(df):
-                    # sell(asset)
                     print(f'exiting long - {transaction["pair"]}')
                     transaction['exit_price'] = df['close'].iloc[-1]
                     transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
@@ -106,12 +100,6 @@ def search_exit():
                     transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                     profit = float(transaction['entry_price']) - df['close'].iloc[-1]
                     transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
-                elif is_expired(transaction):
-                    print('expired transaction')
-                    # sell and rebalance
-                elif is_trailing_stop_hit():
-                    # sell and rebalance
-                    print('trailing stop hit')
                 else:
                     profit = (
                         df['close'].iloc[-1] - float(transaction['entry_price']) 
@@ -125,7 +113,7 @@ def search_exit():
             except Exception as e:
                 print(f"Failed to process data for {transaction['pair']}: {e}")
 
-        time.sleep(300)  # 5 minutes
+        time.sleep(SLEEP)
 
 def is_short_entry(df: pd.DataFrame):
     is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]
