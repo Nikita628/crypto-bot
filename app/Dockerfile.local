@@ -1,6 +1,7 @@
 FROM python:3.8
 
 RUN pip install debugpy
+RUN pip install watchdog
 
 WORKDIR /app
 
@@ -12,4 +13,4 @@ COPY . /app
 
 RUN chmod +x entry_point.sh
 
-CMD ["./entry_point.sh"]
+CMD ["python", "-u", "change_watcher.py"]
