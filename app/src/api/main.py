@@ -1,7 +1,10 @@
 from flask import Flask
 from database.models import HistoryData, Asset
+from flask_cors import CORS
+import os
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": os.environ.get('UI_URL')}})
 
 @app.route('/')
 def landing_page():

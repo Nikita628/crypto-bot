@@ -1,5 +1,17 @@
 version: '3.8'
 services:
+  ui:
+    container_name: crypto-bot-ui
+    build:
+      context: ./ui
+      dockerfile: Dockerfile.local
+    ports:
+      - "5012:3000"
+    depends_on:
+      - server
+    environment:
+      REACT_APP_API_URL: http://localhost:5010
+
   server:
     container_name: crypto-bot-server
     build:
@@ -7,12 +19,13 @@ services:
       dockerfile: Dockerfile.local
     ports:
       - "5010:5000"
-      - "5011:5001"
+      - "5011:5001" # debug port
     depends_on:
       - db
     environment:
       API_KEY: ""
       API_SECRET: ""
+      UI_URL: http://localhost:5012
       PYTHONPATH: /app/src
       POSTGRES_DB: postgres
       POSTGRES_USER: postgres
