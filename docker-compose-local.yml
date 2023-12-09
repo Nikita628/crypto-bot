@@ -7,10 +7,15 @@ services:
       dockerfile: Dockerfile.local
     ports:
       - "5012:3000"
+      # - "5013:9229" # debug port
     depends_on:
       - server
     environment:
       REACT_APP_API_URL: http://localhost:5010
+      WATCHPACK_POLLING: true
+    volumes:
+      - ./ui:/app
+      - /app/node_modules
 
   server:
     container_name: crypto-bot-server
@@ -31,6 +36,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: db
+    volumes:
+      - ./app:/app
       
   db:
     image: postgres:latest
