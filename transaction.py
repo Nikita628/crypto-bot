@@ -40,7 +40,6 @@ class TransactionDirection(Enum):
     long = 'long'
     short = 'short'
 
-# convert to Asset
 class Transaction:
     def __init__(
             self, 
@@ -119,3 +118,14 @@ def create_transaction(transaction: Transaction):
             writer = csv.writer(file)
             writer.writerow(row)
 
+def exit_all():
+    global transaction_id
+    transaction_id = 0
+
+    with open(CSV_FILE, mode='r', newline='') as file:
+        reader = csv.reader(file)
+        headers = next(reader)
+
+    with open(CSV_FILE, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)

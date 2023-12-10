@@ -14,6 +14,7 @@ from transaction import (
     create_transaction,
     is_symbol_in_open_transaction,
     update_transaction,
+    exit_all
 )
 import datetime
 import time
@@ -128,8 +129,15 @@ def search_exit():
             except Exception as e:
                 print(f"search_exit: Failed to process data for {transaction['pair']}: {e}")
 
+        average_profit_percentage = sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)
+        current_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
         with open('log.txt', 'a') as file:
-            print(f'{datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}: average profit: {sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)}', file=file)
+            if (average_profit_percentage > 1):
+                print(f'{current_date}: sell all, take profit: {average_profit_percentage}', file=file)
+                exit_all()
+            else:
+                print(f'{current_date}: average profit: {average_profit_percentage}', file=file)
 
         time.sleep(SLEEP)
 
