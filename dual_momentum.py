@@ -128,7 +128,8 @@ def search_exit():
             except Exception as e:
                 print(f"search_exit: Failed to process data for {transaction['pair']}: {e}")
 
-        print(f'----- average profit: {sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)} -----')
+        with open('log.txt', 'a') as file:
+            print(f'{datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")}: average profit: {sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)}', file=file)
 
         time.sleep(SLEEP)
 
