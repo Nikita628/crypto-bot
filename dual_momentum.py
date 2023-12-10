@@ -10,7 +10,6 @@ from binance import BinanceInterval, get_all_usdt_symbols, get_kline
 from transaction import (
     Transaction,
     TransactionDirection,
-    get_next_transaction_id, 
     get_open_transactions, 
     create_transaction,
     is_symbol_in_open_transaction,
@@ -68,7 +67,7 @@ def search_entry():
                         running_price=0,
                     ))
             except Exception as e:
-                print(f"Failed to process data for {symbol}: {e}")
+                print(f"search_entry: Failed to process data for {symbol}: {e}")
                 
             time.sleep(2)
             
@@ -94,12 +93,22 @@ def search_exit():
                     transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                     profit = df['close'].iloc[-1] - float(transaction['entry_price'])
                     transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
+                    transaction['highest_profit_%'] = (
+                        transaction['profit_%'] 
+                        if float(transaction['profit_%'] or 0) > float(transaction['highest_profit_%'] or 0) 
+                        else transaction['highest_profit_%'] or transaction['profit_%']
+                    )
                 elif trade_direction == TransactionDirection.short.value and is_short_exit(df):
                     print(f'exiting short - {transaction["pair"]}')
                     transaction['exit_price'] = df['close'].iloc[-1]
                     transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
                     profit = float(transaction['entry_price']) - df['close'].iloc[-1]
                     transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
+                    transaction['highest_profit_%'] = (
+                        transaction['profit_%'] 
+                        if float(transaction['profit_%'] or 0) > float(transaction['highest_profit_%'] or 0) 
+                        else transaction['highest_profit_%'] or transaction['profit_%']
+                    )
                 else:
                     profit = (
                         df['close'].iloc[-1] - float(transaction['entry_price']) 
@@ -108,10 +117,18 @@ def search_exit():
                     )
                     transaction['running_profit_%'] = profit * 100 / float(transaction['entry_price'])
                     transaction['running_price'] = df['close'].iloc[-1]
+                    transaction['highest_profit_%'] = (
+                        transaction['running_profit_%'] 
+                        if float(transaction['running_profit_%'] or 0) > float(transaction['highest_profit_%'] or 0) 
+                        else transaction['highest_profit_%'] or transaction['running_profit_%'] 
+                    )
 
                 update_transaction(transaction)
+
             except Exception as e:
-                print(f"Failed to process data for {transaction['pair']}: {e}")
+                print(f"search_exit: Failed to process data for {transaction['pair']}: {e}")
+
+        print(f'----- average profit: {sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)} -----')
 
         time.sleep(SLEEP)
 

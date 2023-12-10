@@ -3,7 +3,11 @@ import csv
 import datetime
 from enum import Enum
 
-csv_header = ['id', 'pair', 'entry_price', 'entry_date', 'exit_price', 'exit_date', 'profit_%', 'running_profit_%', 'running_price', 'direction']
+csv_header = [
+    'id', 'pair', 'entry_price', 'entry_date', 'exit_price', 
+    'exit_date', 'profit_%', 'running_profit_%', 
+    'running_price', 'direction', 'highest_profit_%'
+]
 CSV_FILE = 'transactions.csv'
 FILE_LOCK = threading.Lock()
 EXPIRATION_PERIOD_HOURS = 48
@@ -107,7 +111,8 @@ def create_transaction(transaction: Transaction):
         '', 
         '', 
         '', 
-        transaction.direction.value
+        transaction.direction.value,
+        transaction.entry_price,
     ])
     with FILE_LOCK:
         with open(CSV_FILE, 'a', newline='') as file:
