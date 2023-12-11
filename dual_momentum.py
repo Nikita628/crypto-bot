@@ -21,7 +21,8 @@ import time
 
 LOOCKBACK = 501 # need 501 for proper calculation of EMA according to Binance
 INTERVAL = BinanceInterval.day
-SLEEP = 120
+SLEEP_ENTRY = 120
+SLEEP_EXIT = 60
 
 def search_entry():
     usdt_symbols = sorted(get_all_usdt_symbols())
@@ -72,7 +73,7 @@ def search_entry():
                 
             time.sleep(2)
             
-        time.sleep(SLEEP)
+        time.sleep(SLEEP_ENTRY)
 
 def search_exit():
     while True:
@@ -129,7 +130,11 @@ def search_exit():
             except Exception as e:
                 print(f"search_exit: Failed to process data for {transaction['pair']}: {e}")
 
-        average_profit_percentage = sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)
+        average_profit_percentage = (
+            sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)
+            if len(open_transactions) > 0
+            else 0
+        )
         current_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
 
         with open('log.txt', 'a') as file:
@@ -139,7 +144,7 @@ def search_exit():
             else:
                 print(f'{current_date}: average profit: {average_profit_percentage}', file=file)
 
-        time.sleep(SLEEP)
+        time.sleep(SLEEP_EXIT)
 
 def is_short_entry(df: pd.DataFrame):
     is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]
