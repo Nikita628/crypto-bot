@@ -111,7 +111,7 @@ def create_transaction(transaction: Transaction):
         '', 
         '', 
         transaction.direction.value,
-        transaction.entry_price,
+        0,
     ])
     with FILE_LOCK:
         with open(CSV_FILE, 'a', newline='') as file:

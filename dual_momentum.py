@@ -22,7 +22,7 @@ import time
 LOOCKBACK = 501 # need 501 for proper calculation of EMA according to Binance
 INTERVAL = BinanceInterval.day
 SLEEP_ENTRY = 120
-SLEEP_EXIT = 60
+SLEEP_EXIT = 30
 
 def search_entry():
     usdt_symbols = sorted(get_all_usdt_symbols())
@@ -125,28 +125,32 @@ def search_exit():
                         else transaction['highest_profit_%'] or transaction['running_profit_%'] 
                     )
 
-                update_transaction(transaction)
+                # trailing stop
+                highest_profit_percentage = float(transaction['highest_profit_%'])
+                running_profit_percentage = float(transaction['running_profit_%'])
 
+                if running_profit_percentage < -1 or abs(highest_profit_percentage - running_profit_percentage) > 2:
+                    print(f'exiting by trailing stop - {transaction["pair"]}')
+                    profit = (
+                        df['close'].iloc[-1] - float(transaction['entry_price']) 
+                        if trade_direction == TransactionDirection.long.value
+                        else float(transaction['entry_price']) - df['close'].iloc[-1]
+                    )
+                    transaction['running_profit_%'] = profit * 100 / float(transaction['entry_price'])
+                    transaction['running_price'] = df['close'].iloc[-1]
+                    transaction['exit_price'] = df['close'].iloc[-1]
+                    transaction['exit_date'] = datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S')
+                    transaction['profit_%'] = profit * 100 / float(transaction['entry_price'])
+
+                update_transaction(transaction)
+                
             except Exception as e:
                 print(f"search_exit: Failed to process data for {transaction['pair']}: {e}")
-
-        average_profit_percentage = (
-            sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)
-            if len(open_transactions) > 0
-            else 0
-        )
-        current_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-
-        with open('log.txt', 'a') as file:
-            if (average_profit_percentage > 1):
-                print(f'{current_date}: sell all, take profit: {average_profit_percentage}', file=file)
-                exit_all()
-            else:
-                print(f'{current_date}: average profit: {average_profit_percentage}', file=file)
 
         time.sleep(SLEEP_EXIT)
 
 def is_short_entry(df: pd.DataFrame):
+    ### 200 EMA #############################
     is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]
 
     #### long term GMMA ######################
@@ -177,13 +181,19 @@ def is_short_entry(df: pd.DataFrame):
 
     ### short term STOCH #####################
     is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
+    is_short_term_stoch_oversold = df['stoch_short'].iloc[-1] < 20
+    
     ### long term STOCH ######################
     is_long_term_stoch_downward = (df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
                                    and df['stoch_long'].iloc[-2] < df['stoch_long'].iloc[-3])
+    is_long_term_stoch_oversold = df['stoch_long'].iloc[-1] < 20
+
     ### RSI #################################
     is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
     is_rsi_below_50 = df['rsi'].iloc[-1] < 50
+    is_rsi_oversold = df['rsi'].iloc[-1] < 20
 
+    ### Volume ##############################
     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
     return all([
@@ -198,15 +208,20 @@ def is_short_entry(df: pd.DataFrame):
         is_short_gmma_separation,
 
         is_short_term_stoch_downward,
+        (not is_short_term_stoch_oversold),
+
         is_long_term_stoch_downward,
+        (not is_long_term_stoch_oversold),
 
         is_rsi_downward,
         is_rsi_below_50,
+        (not is_rsi_oversold),
 
         is_volume_growing
     ])
 
 def is_long_entry(df: pd.DataFrame):
+    ### 200 EMA ############################
     is_200ema_upward = False
     if df['ema_200'].iloc[-1] > df['ema_200'].iloc[-2]:
         is_200ema_upward = True
@@ -239,13 +254,19 @@ def is_long_entry(df: pd.DataFrame):
 
     ### short term STOCH #####################
     is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
+    is_short_term_stoch_overbought = df['stoch_short'].iloc[-1] > 85
+
     ### long term STOCH ######################
     is_long_term_stoch_upward = (df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2] 
                             and df['stoch_long'].iloc[-2] > df['stoch_long'].iloc[-3]) 
+    is_long_term_stoch_overbought = df['stoch_long'].iloc[-1] > 85
+
     ### RSI #################################
     is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
     is_rsi_above_50 = df['rsi'].iloc[-1] > 50
+    is_rsi_overbought = df['rsi'].iloc[-1] > 85
 
+    ### Volume ##############################
     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
     return all([
@@ -260,10 +281,14 @@ def is_long_entry(df: pd.DataFrame):
         is_short_gmma_separation,
 
         is_short_term_stoch_upward,
+        (not is_short_term_stoch_overbought),
+
         is_long_term_stoch_upward,
+        # (not is_long_term_stoch_overbought),
 
         is_rsi_upward,
         is_rsi_above_50,
+        (not is_rsi_overbought),
 
         is_volume_growing
     ])
@@ -271,8 +296,10 @@ def is_long_entry(df: pd.DataFrame):
 def is_long_exit(df: pd.DataFrame):
     ### short term STOCH #####################
     is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
+
     ### long term STOCH ######################
     is_long_term_stoch_downward = df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
+
     ### RSI #################################
     is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
     is_rsi_below_50 = df['rsi'].iloc[-1] < 50
@@ -290,8 +317,10 @@ def is_long_exit(df: pd.DataFrame):
 def is_short_exit(df: pd.DataFrame):
     ### short term STOCH #####################
     is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
+
     ### long term STOCH ######################
     is_long_term_stoch_upward = df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2]
+
     ### RSI #################################
     is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
     is_rsi_above_50 = df['rsi'].iloc[-1] > 50
@@ -305,3 +334,18 @@ def is_short_exit(df: pd.DataFrame):
             is_rsi_upward,
         ])
     )
+
+
+#average_profit_percentage = (
+        #     sum([float(transaction["running_profit_%"] or 0) for transaction in open_transactions]) / len(open_transactions)
+        #     if len(open_transactions) > 0
+        #     else 0
+        # )
+        # current_date = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+
+        # with open('log.txt', 'a') as file:
+        #     if (average_profit_percentage > 1):
+        #         print(f'{current_date}: sell all ({len(open_transactions)}), take profit: {average_profit_percentage}', file=file)
+        #         exit_all()
+        #     else:
+        #         print(f'{current_date}: average profit: {average_profit_percentage}', file=file)

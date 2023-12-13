@@ -31,5 +31,5 @@ def add_rsi(df: pd.DataFrame, window=7):
 def add_200ema(df: pd.DataFrame):
     df['ema_200'] = df.ta.ema(close=df['close'], length=200)
 
-def add_volume_sma(df: pd.DataFrame):
-    df['volume_sma'] = df['volume'].rolling(window=9).mean()
+def add_volume_sma(df: pd.DataFrame, window=7):
+    df['volume_sma'] = df['volume'].rolling(window=window).mean()
