@@ -12,7 +12,7 @@ def landing_page():
 
 @app.route('/create-history-data')
 def create_history_data():
-    HistoryData.create()
+    """ HistoryData.create() """
     return 'created'
 
 @app.route('/create-asset')

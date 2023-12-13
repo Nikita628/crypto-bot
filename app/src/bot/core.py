@@ -1,7 +1,6 @@
 import datetime
 import psycopg2
 from enum import Enum
-
 ##########################################
 #
 # one of the assets will be USDT, not for trading
@@ -34,6 +33,10 @@ class Asset:
         self.amount = amount
         self.current_profit_percentage = current_profit_percentage
         self.direction = direction
+
+
+def buy(asset):
+    return 1
 
 # buy(asset)
 # check if limit, rebalance if needed

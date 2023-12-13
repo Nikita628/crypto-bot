@@ -34,11 +34,14 @@ class Asset(Base):
 
 class Deal(Base):
     id = AutoField(column_name='id', primary_key=True)
-    symbol = FixedCharField(column_name='symbol', null=False)
+    symbol = FixedCharField(column_name='symbol', null=True)
+    base_asset = FixedCharField(column_name='base_asset', null=False)
+    quote_asset = FixedCharField(column_name='quote_asset', null=False)
     entry_price = FloatField(column_name='entry_price', null=False)
     entry_date = DateTimeField(column_name='entry_date', null=False)
     exit_price = FloatField(column_name='exit_price', null=True)
     exit_date = DateTimeField(column_name='exit_date', null=True)
+    profit_percentage = FloatField(column_name='profit_percentage', null=False)
     running_profit_percentage = FloatField(column_name='running_profit_percentage', null=False)
     running_price = FloatField(column_name='running_price', null=False)
     direction = FixedCharField(column_name='direction', null=False)
@@ -57,7 +60,14 @@ class SuspendedSymbol(Base):
 
 
 class HistoryData(Base):
-    date = DateTimeField(column_name='date', primary_key=True)
+    symbol = FixedCharField(column_name='symbol', primary_key=True)
+    open_time = DateTimeField(column_name='open_time', null=False)
+    open_price = FloatField(column_name='open_price', null=False)
+    high_price = FloatField(column_name='high_price', null=False)
+    low_price = FloatField(column_name='low_price', null=False)
+    close_price = FloatField(column_name='close_price', null=False)
+    close_time = DateTimeField(column_name='close_time', null=False)
+    volume = FloatField(column_name='volume', null=False)
     
     class Meta:
         table_name = 'history_data'
