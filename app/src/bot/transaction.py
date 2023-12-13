@@ -11,6 +11,8 @@ from enum import Enum
 EXPIRATION_PERIOD_HOURS = 48
 #################################################
 
+# TODO: rename file to deal.py
+
 class DealDirection(Enum):
     long = 'long'
     short = 'short'
@@ -25,8 +27,8 @@ class Deal:
             entry_date: datetime.datetime,
             exit_price: float or None,
             exit_date: datetime.datetime or None,
-            profit_percentage: float,
-            running_profit_percentage: float,
+            profit_percentage: float, # TODO: - remove, make computable in db
+            running_profit_percentage: float, # - remove, make computable in db
             running_price: float,
             direction: DealDirection,
             user_id: int,
@@ -44,6 +46,8 @@ class Deal:
         self.direction = direction
         self.user_id = user_id
 
+
+# TODO: do not pass user_id, hardcode in this file, later will read from the context
 
 # is_asset(symbol)
 def is_symbol_in_open_deal(symbol: str, user_id: int):
@@ -80,13 +84,13 @@ def is_expired(deal: Deal) -> bool:
 def is_trailing_stop_hit() -> bool:
     return False
 
-# buy_asset
+# buy_asset TODO: remove comments
 def create_deal(deal: Deal):
     database.models.Deal.create(
            base_asset = deal.base_asset,
            quote_asset = deal.quote_asset,
            entry_price = deal.entry_price,
-           entry_date = deal.entry_date,
+           entry_date = deal.entry_date, # TODO: should be filled in by DB, by default
            exit_price = deal.exit_price,
            exit_date = deal.exit_date,
            profit_percentage=deal.profit_percentage,
@@ -96,6 +100,7 @@ def create_deal(deal: Deal):
            user_id = deal.user_id)
     
 # sell_asset
+# TODO: pass id of deal ?
 def exit_deal(exit_price: float, exit_date: datetime, profit_percentage: float, symbol: str, user_id: int):
     query = database.models.Deal.update(
         exit_price = exit_price,
@@ -103,7 +108,7 @@ def exit_deal(exit_price: float, exit_date: datetime, profit_percentage: float, 
         profit_percentage = profit_percentage
         ).where(
             (database.models.Deal.symbol == symbol) 
-            & (database.models.Deal.user_id == user_id))
+            & (database.models.Deal.user_id == user_id)) # TODO: replace & with 'and' ?
     query.execute()
     
 # update deal

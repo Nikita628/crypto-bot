@@ -74,10 +74,11 @@ def search_entry():
                             exit_date=None,
                             profit_percentage=0,
                             running_profit_percentage=0,
-                            running_price=0,
+                            running_price=0, # TODO: = should be equal entry price
                             user_id=1
                         )
                         create_deal(deal)
+                        # TODO: deal.enter(deal)
                 
                 except Exception as e:
                     print(f"Failed to process data for {symbol}: {e}")
@@ -122,6 +123,7 @@ def search_exit():
                         profit = float(deal.entry_price) - df['close'].iloc[-1]
                         profit_percentage = profit * 100 / float(deal.entry_price)
                         exit_deal(exit_price, exit_date, profit_percentage, deal.symbol, 1)
+                        # TODO: deal.exit(id, running_price)
                     
                     elif is_expired(deal):
                         print('expired transaction')
@@ -140,6 +142,7 @@ def search_exit():
                         running_profit_percentage = profit * 100 / float(deal.entry_price)
                         running_price =  df['close'].iloc[-1]
                         update_deal(running_profit_percentage, running_price, deal.symbol, 1)
+                        # TODO: deal.update(id, running_price)
 
                 except Exception as e:
                     print(f"Failed to process data for {deal.symbol}: {e}")
