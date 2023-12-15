@@ -4,7 +4,9 @@ from technical_indicators import (
     add_gmma,
     add_rsi,
     add_stoch_osc,
-    add_volume_sma
+    add_volume_sma,
+    add_mfi,
+    add_pvt,
 )
 from binance import BinanceInterval, get_all_usdt_symbols, get_kline
 from transaction import (
@@ -51,6 +53,8 @@ def search_entry():
                 add_volume_sma(df)
                 add_stoch_osc(df, 5, 3, 2, 'short')
                 add_stoch_osc(df, 20, 3, 8, 'long')
+                add_pvt(df)
+                add_mfi(df)
                 is_long = is_long_entry(df)
                 is_short = is_short_entry(df)
 
@@ -128,8 +132,11 @@ def search_exit():
                 # trailing stop
                 highest_profit_percentage = float(transaction['highest_profit_%'])
                 running_profit_percentage = float(transaction['running_profit_%'])
+                trailing_stop_percentage = 1 if highest_profit_percentage > 2 else 6
+                max_allowed_loss_percentage = -4
 
-                if running_profit_percentage < -1 or abs(highest_profit_percentage - running_profit_percentage) > 2:
+                if (running_profit_percentage < max_allowed_loss_percentage 
+                    or abs(highest_profit_percentage - running_profit_percentage) > trailing_stop_percentage):
                     print(f'exiting by trailing stop - {transaction["pair"]}')
                     profit = (
                         df['close'].iloc[-1] - float(transaction['entry_price']) 
@@ -196,6 +203,15 @@ def is_short_entry(df: pd.DataFrame):
     ### Volume ##############################
     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
+    ### PVT #################################
+    is_pvt_downward = (df['pvt'].iloc[-1] < df['pvt'].iloc[-2] 
+                    and df['pvt'].iloc[-2] < df['pvt'].iloc[-3])
+    
+    ### MFI #################################
+    is_mfi_downward = df['mfi'].iloc[-1] < df['mfi'].iloc[-2]
+    is_mfi_below_highest = df['mfi'].iloc[-1] < 60
+    is_mfi_oversold = df['mfi'].iloc[-1] < 20
+
     return all([
         is_200ema_downward, 
 
@@ -211,13 +227,19 @@ def is_short_entry(df: pd.DataFrame):
         (not is_short_term_stoch_oversold),
 
         is_long_term_stoch_downward,
-        (not is_long_term_stoch_oversold),
+        # (not is_long_term_stoch_oversold),
 
-        is_rsi_downward,
-        is_rsi_below_50,
-        (not is_rsi_oversold),
+        # is_rsi_downward,
+        # is_rsi_below_50,
+        # (not is_rsi_oversold),
 
-        is_volume_growing
+        # is_volume_growing,
+
+        is_pvt_downward,
+
+        is_mfi_downward,
+        is_mfi_below_highest,
+        (not is_mfi_oversold),
     ])
 
 def is_long_entry(df: pd.DataFrame):
@@ -269,6 +291,15 @@ def is_long_entry(df: pd.DataFrame):
     ### Volume ##############################
     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
+    ### PVT #################################
+    is_pvt_upward = (df['pvt'].iloc[-1] > df['pvt'].iloc[-2] 
+                    and df['pvt'].iloc[-2] > df['pvt'].iloc[-3])
+    
+    ### MFI #################################
+    is_mfi_upward = df['mfi'].iloc[-1] > df['mfi'].iloc[-2]
+    is_mfi_above_lowest = df['mfi'].iloc[-1] > 40
+    is_mfi_overbought = df['mfi'].iloc[-1] > 85
+
     return all([
         is_200ema_upward, 
 
@@ -286,11 +317,17 @@ def is_long_entry(df: pd.DataFrame):
         is_long_term_stoch_upward,
         # (not is_long_term_stoch_overbought),
 
-        is_rsi_upward,
-        is_rsi_above_50,
-        (not is_rsi_overbought),
+        # is_rsi_upward,
+        # is_rsi_above_50,
+        # (not is_rsi_overbought),
 
-        is_volume_growing
+        # is_volume_growing
+
+        is_pvt_upward,
+
+        is_mfi_upward,
+        is_mfi_above_lowest,
+        (not is_mfi_overbought),
     ])
 
 def is_long_exit(df: pd.DataFrame):

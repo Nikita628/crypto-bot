@@ -12,8 +12,6 @@ from dual_momentum import search_entry, search_exit
 # beware of 'dangerous' coins
 # make sure only one instance of a coin is bought a time
 
-
-
 def main():
     buy_thread = threading.Thread(target=search_entry)
     sell_thread = threading.Thread(target=search_exit)
