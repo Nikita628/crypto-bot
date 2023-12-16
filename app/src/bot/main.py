@@ -1,14 +1,19 @@
 import threading
 from dual_momentum import search_entry, search_exit
 
+
+# TODO: incorporate latest changes from main branch:
+# new tech indicators - pvt, mfi
+# trailing stop (needs modifications)
+# overbought, oversold
+
+
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min
 # logging
 # error handling global
-# class models for DataFrame shape, for csv file shape
 # beware of delisting
 # beware of 'dangerous' coins
-# make sure only one instance of a coin is bought a time
 def start_bot():
     print('starting bot...')
 

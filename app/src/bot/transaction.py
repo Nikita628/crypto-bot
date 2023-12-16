@@ -2,6 +2,7 @@ import threading
 import datetime
 import database.models
 from enum import Enum
+from typing import List
 
 # connect DB and phycopg2
 # add 'asset' table
@@ -62,10 +63,11 @@ def is_symbol_in_open_deal(symbol: str, user_id: int):
     return False
 
 # get_assets()
-def get_open_deals(user_id: int):
+def get_open_deals(user_id: int) -> List[Deal]:
     deals = database.models.Deal.select().where(
        (database.models.Deal.exit_price.is_null(True))
         & (database.models.Deal.user_id == user_id))
+    # TODO: map to model, dont return from DB directly, because we don't want to mixup abstraction layers
     return deals
 
 
