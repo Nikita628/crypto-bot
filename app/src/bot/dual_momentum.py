@@ -2,12 +2,13 @@ import pandas as pd
 import core
 import database.models
 
+from core import KLineShape
 from technical_indicators import (
-    add_200ema,
+    add_ema,
     add_gmma,
     add_rsi,
     add_stoch_osc,
-    add_volume_sma
+    add_sma
 )
 from binance import BinanceInterval, get_all_usdt_symbols, get_kline
 from transaction import (
@@ -53,9 +54,9 @@ def search_entry():
                         continue
             
                     add_gmma(df)
-                    add_200ema(df)
+                    add_ema('ema_200', df, 200)
                     add_rsi(df)
-                    add_volume_sma(df)
+                    add_sma(KLineShape.volume_sma, 'volume', df) # TODO: replace all strings to KLineShape
                     add_stoch_osc(df, 5, 3, 2, 'short')
                     add_stoch_osc(df, 20, 3, 8, 'long')
                     is_long = is_long_entry(df)

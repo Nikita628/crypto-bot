@@ -9,6 +9,14 @@ from enum import Enum
 #
 ##########################################
 
+class KLineShape:
+    open = 'open'
+    close = 'close'
+    rsi = 'rsi'
+    volume_sma = 'volume_sma'
+    # TODO: more fields...
+
+
 MAX_ASSETS_AMOUNT = 10
 EXPIRATION_PERIOD_HOURS = 48
 TRAILING_STOP_PERCENTAGE = -1
