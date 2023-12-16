@@ -1,5 +1,11 @@
 import threading
+from .technical_indicators import PandasMixin
 from dual_momentum import search_entry, search_exit
+import pandas as pd
+
+@pd.api.extensions.register_dataframe_accessor("custom")
+def _custom_accessor(pandas_obj):
+    return PandasMixin(pandas_obj)
 
 
 # TODO: incorporate latest changes from main branch:

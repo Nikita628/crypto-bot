@@ -40,4 +40,22 @@ def is_upward(source_column: str, df: pd.DataFrame) -> bool:
 def is_above(source_column: str, value: float, df: pd.DataFrame) -> bool:
     return df[source_column].iloc[-1] > value
 
-# TODO: is_below, etc...
+# TODO: move the above functions into the mixin below
+class PandasMixin:
+    def __init__(self, pandas_obj):
+        self._obj = pandas_obj
+
+    def is_upward(self, source_column: str) -> bool:
+        return df[source_column].iloc[-1] > df[source_column].iloc[-2] 
+    
+    def is_above(self, source_column: str, value: float) -> bool:
+        return df[source_column].iloc[-1] > value
+    
+    # add_rsi:
+    # add_sma:
+    # ...
+
+# somewhere in code far far away ....  Using the custom accessor
+df = pd.DataFrame()
+df.custom.is_upward("volume")
+
