@@ -13,6 +13,11 @@ def _custom_accessor(pandas_obj):
 # trailing stop (needs modifications)
 # overbought, oversold
 
+# implement KLineShape
+# implement pandas mixin
+# implement BaseStrategy
+# implement DualMomentum
+# add logging to file, one logger per strategy
 
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min

@@ -62,7 +62,7 @@ def is_symbol_in_open_deal(symbol: str, user_id: int):
     print('false')
     return False
 
-# get_assets()
+# get_open
 def get_open_deals(user_id: int) -> List[Deal]:
     deals = database.models.Deal.select().where(
        (database.models.Deal.exit_price.is_null(True))
@@ -86,7 +86,8 @@ def is_expired(deal: Deal) -> bool:
 def is_trailing_stop_hit() -> bool:
     return False
 
-# buy_asset TODO: remove comments
+#  TODO: remove comments
+# enter
 def create_deal(deal: Deal):
     database.models.Deal.create(
            base_asset = deal.base_asset,
@@ -101,8 +102,8 @@ def create_deal(deal: Deal):
            direction = deal.direction.value, 
            user_id = deal.user_id)
     
-# sell_asset
 # TODO: pass id of deal ?
+# exit
 def exit_deal(exit_price: float, exit_date: datetime, profit_percentage: float, symbol: str, user_id: int):
     query = database.models.Deal.update(
         exit_price = exit_price,
@@ -113,7 +114,7 @@ def exit_deal(exit_price: float, exit_date: datetime, profit_percentage: float, 
             & (database.models.Deal.user_id == user_id)) # TODO: replace & with 'and' ?
     query.execute()
     
-# update deal
+# extend()
 def update_deal(running_profit_percentage: float, running_price: float, symbol: str, user_id: int):
     query = database.models.Deal.update(
         running_profit_percentage = running_profit_percentage,
