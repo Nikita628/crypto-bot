@@ -46,6 +46,7 @@ class Deal(Base):
     running_price = FloatField(column_name='running_price', null=False)
     direction = FixedCharField(column_name='direction', null=False)
     user_id = ForeignKeyField(User, related_name='id', null=False)
+    # TODO: add 'strategy' text field
 
     class Meta:
         table_name = 'deal'
