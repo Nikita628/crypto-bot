@@ -18,6 +18,7 @@ def _custom_accessor(pandas_obj):
 # implement BaseStrategy
 # implement DualMomentum
 # add logging to file, one logger per strategy
+# run all strategies in threads
 
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min
