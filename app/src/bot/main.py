@@ -1,21 +1,9 @@
 import threading
-from .technical_indicators import PandasMixin
-from dual_momentum import search_entry, search_exit
-import pandas as pd
-
-@pd.api.extensions.register_dataframe_accessor("custom")
-def _custom_accessor(pandas_obj):
-    return PandasMixin(pandas_obj)
-
 
 # TODO: incorporate latest changes from main branch:
-# new tech indicators - pvt, mfi
 # trailing stop (needs modifications)
 # overbought, oversold
 
-# implement KLineShape
-# implement pandas mixin
-# implement BaseStrategy
 # implement DualMomentum
 # add logging to file, one logger per strategy
 # run all strategies in threads

@@ -3,15 +3,8 @@ import core
 import database.models
 
 from core import KLineShape
-from technical_indicators import (
-    add_ema,
-    add_gmma,
-    add_rsi,
-    add_stoch_osc,
-    add_sma
-)
 from binance import BinanceInterval, get_all_usdt_symbols, get_kline
-from transaction import (
+from app.src.bot.deal import (
     Deal,
     DealDirection, 
     get_open_deals, 
@@ -29,128 +22,123 @@ LOOCKBACK = 501 # need 501 for proper calculation of EMA according to Binance
 INTERVAL = BinanceInterval.day
 
 
-def search_entry():
-    try:
-        usdt_symbols = sorted(get_all_usdt_symbols())
+# def search_entry():
+#     try:
+#         usdt_symbols = sorted(get_all_usdt_symbols())
 
-        while True:
-            print(f'searching entry...')
-            checked_symbols = 0
+#         while True:
+#             print(f'searching entry...')
+#             checked_symbols = 0
             
-            for symbol in usdt_symbols:
-                checked_symbols += 1
-                try:
-                    if checked_symbols % 10 == 0:
-                        print(f'searched {checked_symbols} symbols...')
+#             for symbol in usdt_symbols:
+#                 checked_symbols += 1
+#                 try:
+#                     if is_symbol_in_open_deal(symbol, 1):
+#                         continue
 
-                    # current pair(symbol) is already in deal
-                    if is_symbol_in_open_deal(symbol, 1):
-                        continue
+#                     df = get_kline(symbol, INTERVAL, LOOCKBACK)
 
-                    df = get_kline(symbol, INTERVAL, LOOCKBACK)
-                    """ print(df) """
-
-                    if len(df) < LOOCKBACK:
-                        continue
+#                     if len(df) < LOOCKBACK:
+#                         continue
             
-                    add_gmma(df)
-                    add_ema('ema_200', df, 200)
-                    add_rsi(df)
-                    add_sma(KLineShape.volume_sma, 'volume', df) # TODO: replace all strings to KLineShape
-                    add_stoch_osc(df, 5, 3, 2, 'short')
-                    add_stoch_osc(df, 20, 3, 8, 'long')
-                    is_long = is_long_entry(df)
-                    is_short = is_short_entry(df)
+#                     df.add_gmma()
+#                     df.add_ema(KLineShape.ema_200, 200)
+#                     df.add_rsi()
+#                     df.add_sma(KLineShape.volume_sma, KLineShape.volume)
+#                     df.add_stoch(5, 3, 2, KLineShape.stoch_short)
+#                     df.add_stoch(20, 3, 8, KLineShape.stoch_long)
+#                     is_long = is_long_entry(df)
+#                     is_short = is_short_entry(df)
 
-                    if is_long or is_short:
-                        print(f'going {DealDirection.long.value if is_long else DealDirection.short.value} - {symbol}')
+#                     if is_long or is_short:
+#                         print(f'going {DealDirection.long.value if is_long else DealDirection.short.value} - {symbol}')
 
-                        deal = Deal(
-                            base_asset=symbol.replace('USDT', ''),
-                            quote_asset='USDT',
-                            entry_price=df['close'].iloc[-1],
-                            entry_date=datetime.datetime.utcnow(),
-                            direction=DealDirection.long if is_long else DealDirection.short,
-                            exit_price=None,
-                            exit_date=None,
-                            profit_percentage=0,
-                            running_profit_percentage=0,
-                            running_price=0, # TODO: = should be equal entry price
-                            user_id=1
-                        )
-                        create_deal(deal)
-                        # TODO: deal.enter(deal)
+#                         deal = Deal(
+#                             base_asset=symbol.replace('USDT', ''),
+#                             quote_asset='USDT',
+#                             entry_price=df['close'].iloc[-1],
+#                             entry_date=datetime.datetime.utcnow(),
+#                             direction=DealDirection.long if is_long else DealDirection.short,
+#                             exit_price=None,
+#                             exit_date=None,
+#                             profit_percentage=0,
+#                             running_profit_percentage=0,
+#                             running_price=0, # TODO: = should be equal entry price
+#                             user_id=1
+#                         )
+#                         create_deal(deal)
+#                         # TODO: deal.enter(deal)
                 
-                except Exception as e:
-                    print(f"Failed to process data for {symbol}: {e}")
+#                 except Exception as e:
+#                     print(f"Failed to process data for {symbol}: {e}")
                     
-                time.sleep(2)
+#                 time.sleep(2)
                 
-            time.sleep(300) # 5 minutes
-    except:
-        print(f"search_entry error")
+#             time.sleep(300) # 5 minutes
+#     except:
+#         print(f"search_entry error")
 
 
-def search_exit():
-    try:
-        while True:
-            print(f'searching exit...')
+# def search_exit():
+#     try:
+#         while True:
+#             print(f'searching exit...')
 
-            # get open deals for current user by iser_id
-            open_deals = get_open_deals(1)
+#             # get open deals for current user by iser_id
+#             open_deals = get_open_deals(1)
 
-            for deal in open_deals:
-                try:
-                    df = get_kline(deal.symbol, INTERVAL, LOOCKBACK)
-                    add_rsi(df)
-                    add_stoch_osc(df, 5, 3, 2, 'short')
-                    add_stoch_osc(df, 20, 3, 8, 'long')
-                    trade_direction = deal.direction
+#             for deal in open_deals:
+#                 try:
+#                     df = get_kline(deal.symbol, INTERVAL, LOOCKBACK)
+#                     add_rsi(df)
+#                     add_stoch_osc(df, 5, 3, 2, 'short')
+#                     add_stoch_osc(df, 20, 3, 8, 'long')
+#                     trade_direction = deal.direction
 
-                    if trade_direction == DealDirection.long.value and is_long_exit(df):
-                        # sell(asset)
-                        print(f'exiting long - {deal.symbol}')
-                        exit_price = df['close'].iloc[-1]
-                        exit_date =  datetime.datetime.utcnow()
-                        profit = df['close'].iloc[-1] - float(deal.entry_price)
-                        profit_percentage = profit * 100 / float(deal.entry_price)
-                        print(profit_percentage)
-                        exit_deal(exit_price, exit_date, profit_percentage, deal.symbol, 1)
+#                     if trade_direction == DealDirection.long.value and is_long_exit(df):
+#                         # sell(asset)
+#                         print(f'exiting long - {deal.symbol}')
+#                         exit_price = df['close'].iloc[-1]
+#                         exit_date =  datetime.datetime.utcnow()
+#                         profit = df['close'].iloc[-1] - float(deal.entry_price)
+#                         profit_percentage = profit * 100 / float(deal.entry_price)
+#                         print(profit_percentage)
+#                         exit_deal(exit_price, exit_date, profit_percentage, deal.symbol, 1)
                     
-                    elif trade_direction == DealDirection.short.value and is_short_exit(df):
-                        print(f'exiting short - {deal.symbol}')
-                        exit_price = df['close'].iloc[-1]
-                        exit_date =  datetime.datetime.utcnow()
-                        profit = float(deal.entry_price) - df['close'].iloc[-1]
-                        profit_percentage = profit * 100 / float(deal.entry_price)
-                        exit_deal(exit_price, exit_date, profit_percentage, deal.symbol, 1)
-                        # TODO: deal.exit(id, running_price)
+#                     elif trade_direction == DealDirection.short.value and is_short_exit(df):
+#                         print(f'exiting short - {deal.symbol}')
+#                         exit_price = df['close'].iloc[-1]
+#                         exit_date =  datetime.datetime.utcnow()
+#                         profit = float(deal.entry_price) - df['close'].iloc[-1]
+#                         profit_percentage = profit * 100 / float(deal.entry_price)
+#                         exit_deal(exit_price, exit_date, profit_percentage, deal.symbol, 1)
+#                         # TODO: deal.exit(id, running_price)
                     
-                    elif is_expired(deal):
-                        print('expired transaction')
-                        # sell and rebalance
+#                     elif is_expired(deal):
+#                         print('expired transaction')
+#                         # sell and rebalance
                     
-                    elif is_trailing_stop_hit():
-                        # sell and rebalance
-                        print('trailing stop hit')
+#                     elif is_trailing_stop_hit():
+#                         # sell and rebalance
+#                         print('trailing stop hit')
                     
-                    else:
-                        profit = (
-                            df['close'].iloc[-1] - float(deal.entry_price) 
-                            if trade_direction == DealDirection.long.value
-                            else float(deal.entry_price) - df['close'].iloc[-1]
-                        )
-                        running_profit_percentage = profit * 100 / float(deal.entry_price)
-                        running_price =  df['close'].iloc[-1]
-                        update_deal(running_profit_percentage, running_price, deal.symbol, 1)
-                        # TODO: deal.update(id, running_price)
+#                     else:
+#                         profit = (
+#                             df['close'].iloc[-1] - float(deal.entry_price) 
+#                             if trade_direction == DealDirection.long.value
+#                             else float(deal.entry_price) - df['close'].iloc[-1]
+#                         )
+#                         running_profit_percentage = profit * 100 / float(deal.entry_price)
+#                         running_price =  df['close'].iloc[-1]
+#                         update_deal(running_profit_percentage, running_price, deal.symbol, 1)
+#                         # TODO: deal.update(id, running_price)
 
-                except Exception as e:
-                    print(f"Failed to process data for {deal.symbol}: {e}")
+#                 except Exception as e:
+#                     print(f"Failed to process data for {deal.symbol}: {e}")
 
-            time.sleep(300)  # 5 minutes
-    except:
-        print(f"search_exit error")
+#             time.sleep(300)  # 5 minutes
+#     except:
+#         print(f"search_exit error")
 
 
 

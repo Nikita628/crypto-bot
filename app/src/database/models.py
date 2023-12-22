@@ -42,11 +42,10 @@ class Deal(Base):
     exit_price = FloatField(column_name='exit_price', null=True)
     exit_date = DateTimeField(column_name='exit_date', null=True)
     profit_percentage = FloatField(column_name='profit_percentage', null=False)
-    running_profit_percentage = FloatField(column_name='running_profit_percentage', null=False)
     running_price = FloatField(column_name='running_price', null=False)
     direction = FixedCharField(column_name='direction', null=False)
     user_id = ForeignKeyField(User, related_name='id', null=False)
-    # TODO: add 'strategy' text field
+    strategy = FixedCharField(column_name='strategy', null=False)
 
     class Meta:
         table_name = 'deal'

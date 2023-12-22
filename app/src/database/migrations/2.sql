@@ -19,11 +19,16 @@ CREATE TABLE public.deal (
     entry_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     exit_price real,
     exit_date TIMESTAMP WITH TIME ZONE,
-    profit_percentage real NOT NULL default 0,
-    running_profit_percentage real NOT NULL default 0,
+    profit_percentage real GENERATED ALWAYS AS 
+    (CASE 
+        WHEN direction = 'long' THEN (running_price - entry_price) / entry_price * 100
+        WHEN direction = 'short' THEN (entry_price - running_price) / entry_price * 100
+        ELSE 0
+     END) STORED,
     running_price real NOT NULL,
     direction public.deal_direction NOT NULL,
-    user_id integer NOT NULL references public.user(id)
+    user_id integer NOT NULL references public.user(id),
+	strategy character(200) NOT NULL unique
 );
 
 CREATE TABLE public.history_data (
