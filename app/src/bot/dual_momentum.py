@@ -142,162 +142,165 @@ INTERVAL = BinanceInterval.day
 
 
 
-def is_short_entry(df: pd.DataFrame):
-    is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]
+# def is_short_entry(df: pd.DataFrame):
+#     is_200ema_downward = df['ema_200'].iloc[-1] < df['ema_200'].iloc[-2]
 
-    #### long term GMMA ######################
-    long_term_emas = [30, 35, 40, 45, 50, 60]
-    is_long_gmma_below_200ema = df[f'long_ema_{60}'].iloc[-1] < df['ema_200'].iloc[-1]
-    is_long_gmma_downward = all(
-        (df[f'long_ema_{ema}'].iloc[-1] < df[f'long_ema_{ema}'].iloc[-2]) 
-        for ema in long_term_emas
-    )
-    is_long_gmma_separation = True
-    for i in range(0, len(long_term_emas) - 1):
-        if df[f'long_ema_{long_term_emas[i]}'].iloc[-1] >= df[f'long_ema_{long_term_emas[i + 1]}'].iloc[-1]:
-            is_long_gmma_separation = False
-            break
+#     #### long term GMMA ######################
+#     long_term_emas = [30, 35, 40, 45, 50, 60]
+#     is_long_gmma_below_200ema = df[f'long_ema_{60}'].iloc[-1] < df['ema_200'].iloc[-1]
+#     is_long_gmma_downward = all(
+#         (df[f'long_ema_{ema}'].iloc[-1] < df[f'long_ema_{ema}'].iloc[-2]) 
+#         for ema in long_term_emas
+#     )
+#     is_long_gmma_separation = True
+#     for i in range(0, len(long_term_emas) - 1):
+#         if df[f'long_ema_{long_term_emas[i]}'].iloc[-1] >= df[f'long_ema_{long_term_emas[i + 1]}'].iloc[-1]:
+#             is_long_gmma_separation = False
+#             break
 
-    #### short term GMMA #######################
-    short_term_emas = [3, 5, 8, 10, 12, 15]
-    is_short_term_GMMA_below_long_term_GMMA = df[f'short_ema_{15}'].iloc[-1] < df[f'long_ema_{30}'].iloc[-1]
-    is_short_gmma_downward = all(
-        (df[f'short_ema_{ema}'].iloc[-1] < df[f'short_ema_{ema}'].iloc[-2]) 
-        for ema in short_term_emas
-    )
-    is_short_gmma_separation = True
-    for i in range(0, len(short_term_emas) - 1):
-        if df[f'short_ema_{short_term_emas[i]}'].iloc[-1] >= df[f'short_ema_{short_term_emas[i + 1]}'].iloc[-1]:
-            is_short_gmma_separation = False
-            break
+#     #### short term GMMA #######################
+#     short_term_emas = [3, 5, 8, 10, 12, 15]
+#     is_short_term_GMMA_below_long_term_GMMA = df[f'short_ema_{15}'].iloc[-1] < df[f'long_ema_{30}'].iloc[-1]
+#     is_short_gmma_downward = all(
+#         (df[f'short_ema_{ema}'].iloc[-1] < df[f'short_ema_{ema}'].iloc[-2]) 
+#         for ema in short_term_emas
+#     )
+#     is_short_gmma_separation = True
+#     for i in range(0, len(short_term_emas) - 1):
+#         if df[f'short_ema_{short_term_emas[i]}'].iloc[-1] >= df[f'short_ema_{short_term_emas[i + 1]}'].iloc[-1]:
+#             is_short_gmma_separation = False
+#             break
 
-    ### short term STOCH #####################
-    is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
-    ### long term STOCH ######################
-    is_long_term_stoch_downward = (df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
-                                   and df['stoch_long'].iloc[-2] < df['stoch_long'].iloc[-3])
-    ### RSI #################################
-    is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
-    is_rsi_below_50 = df['rsi'].iloc[-1] < 50
+#     ### short term STOCH #####################
+#     is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
+#     ### long term STOCH ######################
+#     is_long_term_stoch_downward = (df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
+#                                    and df['stoch_long'].iloc[-2] < df['stoch_long'].iloc[-3])
+#     ### RSI #################################
+#     is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
+#     is_rsi_below_50 = df['rsi'].iloc[-1] < 50
 
-    is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
+#     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
-    return all([
-        is_200ema_downward, 
+#     return all([
+#         is_200ema_downward, 
 
-        is_long_gmma_below_200ema, 
-        is_long_gmma_downward,
-        is_long_gmma_separation,
+#         is_long_gmma_below_200ema, 
+#         is_long_gmma_downward,
+#         is_long_gmma_separation,
 
-        is_short_term_GMMA_below_long_term_GMMA,
-        is_short_gmma_downward,
-        is_short_gmma_separation,
+#         is_short_term_GMMA_below_long_term_GMMA,
+#         is_short_gmma_downward,
+#         is_short_gmma_separation,
 
-        is_short_term_stoch_downward,
-        is_long_term_stoch_downward,
+#         is_short_term_stoch_downward,
+#         is_long_term_stoch_downward,
 
-        is_rsi_downward,
-        is_rsi_below_50,
+#         is_rsi_downward,
+#         is_rsi_below_50,
 
-        is_volume_growing
-    ])
+#         is_volume_growing
+#     ])
 
-def is_long_entry(df: pd.DataFrame):
-    is_200ema_upward = False
-    if df['ema_200'].iloc[-1] > df['ema_200'].iloc[-2]:
-        is_200ema_upward = True
+# def is_long_entry(df: pd.DataFrame):
+#     is_200ema_upward = False
+#     if df['ema_200'].iloc[-1] > df['ema_200'].iloc[-2]:
+#         is_200ema_upward = True
 
-    #### long term GMMA ######################
-    long_term_emas = [30, 35, 40, 45, 50, 60]
-    is_long_gmma_above_200ema = df[f'long_ema_{60}'].iloc[-1] > df['ema_200'].iloc[-1]
-    is_long_gmma_upward = all(
-        (df[f'long_ema_{ema}'].iloc[-1] > df[f'long_ema_{ema}'].iloc[-2]) 
-        for ema in long_term_emas
-    )
-    is_long_gmma_separation = True
-    for i in range(0, len(long_term_emas) - 1):
-        if df[f'long_ema_{long_term_emas[i]}'].iloc[-1] <= df[f'long_ema_{long_term_emas[i + 1]}'].iloc[-1]:
-            is_long_gmma_separation = False
-            break
+#     #### long term GMMA ######################
+#     long_term_emas = [30, 35, 40, 45, 50, 60]
+#     is_long_gmma_above_200ema = df[f'long_ema_{60}'].iloc[-1] > df['ema_200'].iloc[-1]
+#     is_long_gmma_upward = all(
+#         (df[f'long_ema_{ema}'].iloc[-1] > df[f'long_ema_{ema}'].iloc[-2]) 
+#         for ema in long_term_emas
+#     )
+#     is_long_gmma_separation = True
+#     for i in range(0, len(long_term_emas) - 1):
+#         if df[f'long_ema_{long_term_emas[i]}'].iloc[-1] <= df[f'long_ema_{long_term_emas[i + 1]}'].iloc[-1]:
+#             is_long_gmma_separation = False
+#             break
 
-    #### short term GMMA #######################
-    short_term_emas = [3, 5, 8, 10, 12, 15]
-    is_short_term_GMMA_above_long_term_GMMA = df[f'short_ema_{15}'].iloc[-1] > df[f'long_ema_{30}'].iloc[-1]
-    is_short_gmma_upward = all(
-        (df[f'short_ema_{ema}'].iloc[-1] > df[f'short_ema_{ema}'].iloc[-2]) 
-        for ema in short_term_emas
-    )
-    is_short_gmma_separation = True
-    for i in range(0, len(short_term_emas) - 1):
-        if df[f'short_ema_{short_term_emas[i]}'].iloc[-1] <= df[f'short_ema_{short_term_emas[i + 1]}'].iloc[-1]:
-            is_short_gmma_separation = False
-            break
+#     #### short term GMMA #######################
+#     short_term_emas = [3, 5, 8, 10, 12, 15]
+#     is_short_term_GMMA_above_long_term_GMMA = df[f'short_ema_{15}'].iloc[-1] > df[f'long_ema_{30}'].iloc[-1]
+#     is_short_gmma_upward = all(
+#         (df[f'short_ema_{ema}'].iloc[-1] > df[f'short_ema_{ema}'].iloc[-2]) 
+#         for ema in short_term_emas
+#     )
+#     is_short_gmma_separation = True
+#     for i in range(0, len(short_term_emas) - 1):
+#         if df[f'short_ema_{short_term_emas[i]}'].iloc[-1] <= df[f'short_ema_{short_term_emas[i + 1]}'].iloc[-1]:
+#             is_short_gmma_separation = False
+#             break
 
-    ### short term STOCH #####################
-    is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
-    ### long term STOCH ######################
-    is_long_term_stoch_upward = (df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2] 
-                            and df['stoch_long'].iloc[-2] > df['stoch_long'].iloc[-3]) 
-    ### RSI #################################
-    is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
-    is_rsi_above_50 = df['rsi'].iloc[-1] > 50
+#     ### short term STOCH #####################
+#     is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
+#     ### long term STOCH ######################
+#     is_long_term_stoch_upward = (df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2] 
+#                             and df['stoch_long'].iloc[-2] > df['stoch_long'].iloc[-3]) 
+#     ### RSI #################################
+#     is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
+#     is_rsi_above_50 = df['rsi'].iloc[-1] > 50
 
-    is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
+#     is_volume_growing = df['volume_sma'].iloc[-1] > df['volume_sma'].iloc[-2]
 
-    return all([
-        is_200ema_upward, 
+#     return all([
+#         is_200ema_upward, 
 
-        is_long_gmma_above_200ema, 
-        is_long_gmma_upward,
-        is_long_gmma_separation,
+#         is_long_gmma_above_200ema, 
+#         is_long_gmma_upward,
+#         is_long_gmma_separation,
 
-        is_short_term_GMMA_above_long_term_GMMA,
-        is_short_gmma_upward,
-        is_short_gmma_separation,
+#         is_short_term_GMMA_above_long_term_GMMA,
+#         is_short_gmma_upward,
+#         is_short_gmma_separation,
 
-        is_short_term_stoch_upward,
-        is_long_term_stoch_upward,
+#         is_short_term_stoch_upward,
+#         is_long_term_stoch_upward,
 
-        is_rsi_upward,
-        is_rsi_above_50,
+#         is_rsi_upward,
+#         is_rsi_above_50,
 
-        is_volume_growing
-    ])
+#         is_volume_growing
+#     ])
 
-def is_long_exit(df: pd.DataFrame):
-    ### short term STOCH #####################
-    is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
-    ### long term STOCH ######################
-    is_long_term_stoch_downward = df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
-    ### RSI #################################
-    is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
-    is_rsi_below_50 = df['rsi'].iloc[-1] < 50
 
-    return (
-        all([
-            is_long_term_stoch_downward,
-            is_short_term_stoch_downward,
-        ]) or all([
-            is_rsi_below_50,
-            is_rsi_downward,
-        ])
-    )
 
-def is_short_exit(df: pd.DataFrame):
-    ### short term STOCH #####################
-    is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
-    ### long term STOCH ######################
-    is_long_term_stoch_upward = df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2]
-    ### RSI #################################
-    is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
-    is_rsi_above_50 = df['rsi'].iloc[-1] > 50
 
-    return (
-        all([
-            is_long_term_stoch_upward,
-            is_short_term_stoch_upward,
-        ]) or all([
-            is_rsi_above_50,
-            is_rsi_upward,
-        ])
-    )
+# def is_long_exit(df: pd.DataFrame):
+#     ### short term STOCH #####################
+#     is_short_term_stoch_downward = df['stoch_short'].iloc[-1] < df['stoch_short'].iloc[-2]
+#     ### long term STOCH ######################
+#     is_long_term_stoch_downward = df['stoch_long'].iloc[-1] < df['stoch_long'].iloc[-2]
+#     ### RSI #################################
+#     is_rsi_downward = df['rsi'].iloc[-1] < df['rsi'].iloc[-2]
+#     is_rsi_below_50 = df['rsi'].iloc[-1] < 50
+
+#     return (
+#         all([
+#             is_long_term_stoch_downward,
+#             is_short_term_stoch_downward,
+#         ]) or all([
+#             is_rsi_below_50,
+#             is_rsi_downward,
+#         ])
+#     )
+
+# def is_short_exit(df: pd.DataFrame):
+#     ### short term STOCH #####################
+#     is_short_term_stoch_upward = df['stoch_short'].iloc[-1] > df['stoch_short'].iloc[-2]
+#     ### long term STOCH ######################
+#     is_long_term_stoch_upward = df['stoch_long'].iloc[-1] > df['stoch_long'].iloc[-2]
+#     ### RSI #################################
+#     is_rsi_upward = df['rsi'].iloc[-1] > df['rsi'].iloc[-2]
+#     is_rsi_above_50 = df['rsi'].iloc[-1] > 50
+
+#     return (
+#         all([
+#             is_long_term_stoch_upward,
+#             is_short_term_stoch_upward,
+#         ]) or all([
+#             is_rsi_above_50,
+#             is_rsi_upward,
+#         ])
+#     )

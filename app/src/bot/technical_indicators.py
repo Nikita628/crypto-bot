@@ -6,6 +6,62 @@ class DataFrameDecorator:
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
+    def is_long_gmma_upward(self):
+        _is_long_gmma_upward = all(
+            (self.df[f'long_ema_{ema}'].iloc[-1] > self.df[f'long_ema_{ema}'].iloc[-2]) 
+            for ema in KLineShape.long_emas
+        )
+
+        is_long_gmma_separation = True
+        for i in range(0, len(KLineShape.long_emas) - 1):
+            if self.df[f'long_ema_{KLineShape.long_emas[i]}'].iloc[-1] <= self.df[f'long_ema_{KLineShape.long_emas[i + 1]}'].iloc[-1]:
+                is_long_gmma_separation = False
+                break
+
+        return _is_long_gmma_upward and is_long_gmma_separation
+
+    def is_short_gmma_upward(self):
+        _is_short_gmma_upward = all(
+            (self.df[f'short_ema_{ema}'].iloc[-1] > self.df[f'short_ema_{ema}'].iloc[-2]) 
+            for ema in KLineShape.short_emas
+        )
+
+        is_short_gmma_separation = True
+        for i in range(0, len(KLineShape.short_emas) - 1):
+            if self.df[f'short_ema_{KLineShape.short_emas[i]}'].iloc[-1] <= self.df[f'short_ema_{KLineShape.short_emas[i + 1]}'].iloc[-1]:
+                is_short_gmma_separation = False
+                break
+
+        return _is_short_gmma_upward and is_short_gmma_separation
+
+    def is_long_gmma_downward(self):
+        _is_long_gmma_downward = all(
+            (self.df[f'long_ema_{ema}'].iloc[-1] < self.df[f'long_ema_{ema}'].iloc[-2]) 
+            for ema in KLineShape.long_emas
+        )
+
+        is_long_gmma_separation = True
+        for i in range(0, len(KLineShape.long_emas) - 1):
+            if self.df[f'long_ema_{KLineShape.long_emas[i]}'].iloc[-1] >= self.df[f'long_ema_{KLineShape.long_emas[i + 1]}'].iloc[-1]:
+                is_long_gmma_separation = False
+                break
+
+        return _is_long_gmma_downward and is_long_gmma_separation
+
+    def is_short_gmma_downward(self):
+        _is_short_gmma_downward = all(
+            (self.df[f'short_ema_{ema}'].iloc[-1] < self.df[f'short_ema_{ema}'].iloc[-2]) 
+            for ema in KLineShape.short_emas
+        )
+
+        is_short_gmma_separation = True
+        for i in range(0, len(KLineShape.short_emas) - 1):
+            if self.df[f'short_ema_{KLineShape.short_emas[i]}'].iloc[-1] >= self.df[f'short_ema_{KLineShape.short_emas[i + 1]}'].iloc[-1]:
+                is_short_gmma_separation = False
+                break
+
+        return _is_short_gmma_downward and is_short_gmma_separation
+
     def add_gmma(self):
         for ema in KLineShape.short_emas:
             self.df[f'short_ema_{ema}'] = pandas_ta.ema(close=self.df[KLineShape.close], length=ema)
