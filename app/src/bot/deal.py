@@ -5,26 +5,26 @@ from typing import List
 
 EXPIRATION_PERIOD_HOURS = 48
 
-class DealDirection(Enum):
+class TradeDirection(Enum):
     long = 'long'
     short = 'short'
 
 class Deal:
     def __init__(
             self,
-            id: int,
-            symbol: str,
-            base_asset: str,
-            quote_asset: str, 
-            entry_price: float,
-            entry_date: datetime.datetime,
-            exit_price: float or None,
-            exit_date: datetime.datetime or None,
-            profit_percentage: float,
-            running_price: float,
-            direction: DealDirection,
-            user_id: int,
-            strategy: str
+            id: int = None,
+            symbol: str = None,
+            base_asset: str = None,
+            quote_asset: str = None, 
+            entry_price: float = None,
+            entry_date: datetime.datetime = None,
+            exit_price: float or None = None,
+            exit_date: datetime.datetime or None = None,
+            profit_percentage: float = None,
+            running_price: float = None,
+            direction: TradeDirection = None,
+            user_id: int = None,
+            strategy: str = None,
         ):
         self.id = id
         self.symbol = symbol
@@ -88,10 +88,10 @@ def enter(deal: Deal):
            base_asset = deal.base_asset,
            quote_asset = deal.quote_asset,
            entry_price = deal.entry_price,
-           entry_date = deal.entry_date,
            running_price = deal.entry_price,
            direction = deal.direction.value, 
-           user_id = USER_ID
+           user_id = USER_ID,
+           strategy = deal.strategy
         )
     
 

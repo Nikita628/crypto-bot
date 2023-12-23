@@ -1,7 +1,7 @@
 import requests
 import pandas as pd
 from enum import Enum
-from app.src.bot.kline import KLine
+from bot.kline import KLine
 from typing import List
 
 class BinanceInterval(Enum):
