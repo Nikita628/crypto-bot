@@ -4,13 +4,14 @@ from bot.deal import Deal, TradeDirection
 from bot.binance import BinanceInterval
 from typing import Optional
 
-# Pure dual momentum as described by the book
+# Dual momentum on lower timeframes
+# starting on 5 min
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
-class DualMomentum(Base):
+class DualMomentumLowerTimeframe(Base):
     def __init__(self):
-        super().__init__(BinanceInterval.day, LOOCKBACK, 'dual_momentum')
+        super().__init__(BinanceInterval.min_5, LOOCKBACK, 'dual_momentum_5_min')
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -30,7 +31,7 @@ class DualMomentum(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
         kline.add_rsi(KLine.Col.rsi)
-
+        
         reason = None
         if deal.direction == TradeDirection.long.value and self.is_long_exit(kline):
             reason = 'long exit'

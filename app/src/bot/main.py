@@ -1,5 +1,8 @@
 import threading
-from strategies.dual_momentum import DualMomentum
+from strategies import (
+    DualMomentum,
+    DualMomentumLowerTimeframe,
+)
 from typing import List
 
 # TODO: incorporate latest changes from main branch:
@@ -15,7 +18,7 @@ from typing import List
 # beware of delisting
 # beware of 'dangerous' coins
 
-strategies = [DualMomentum()]
+strategies = [DualMomentum(), DualMomentumLowerTimeframe()]
 
 def start_bot():
     threads: List[threading.Thread] = []

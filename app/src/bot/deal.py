@@ -97,7 +97,7 @@ def enter(deal: Deal):
         )
     
 
-def exit(id: int, running_price: float):
+def exit(id: int, running_price: float, reason: str):
     query = database.models.Deal.update(
         exit_price = running_price,
         exit_date =  datetime.datetime.utcnow()).where(

@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import time
+from typing import Optional
 from bot.kline import KLine
 from bot.binance import get_kline, get_all_usdt_symbols
 from bot.deal import (
@@ -30,7 +31,7 @@ class Base(ABC):
             for symbol in usdt_symbols:
                 checked_symbols += 1
                 if (checked_symbols % 10 == 0):
-                    self.log(f'total symbols checked: {checked_symbols}')
+                    self.log(f'total symbols checked for entry: {checked_symbols}')
 
                 try:
                     if is_asset(symbol):
@@ -72,10 +73,11 @@ class Base(ABC):
                 try:
                     kline = get_kline(deal.symbol, self.timeframe, self.loockback)
                     running_price = kline.get_running_price()
+                    exit_reason = self.determine_exit_reason(kline, deal)
 
-                    if self.is_exit(kline, deal):
+                    if exit_reason:
                         exit(deal.id, running_price)
-                        self.log(f'exited {deal.symbol}')
+                        self.log(f'exited {deal.symbol}, reason {exit_reason}')
                     else:
                         extend(deal.id, running_price)
 
@@ -86,11 +88,11 @@ class Base(ABC):
 
 
     @abstractmethod
-    def is_exit(self, kline: KLine, deal: Deal) -> bool:
+    def determine_exit_reason(self, kline: KLine, deal: Deal) -> Optional[str]:
         pass
 
     @abstractmethod
-    def determine_trade_direction(self, kline: KLine) -> TradeDirection or None:
+    def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         pass
 
     def log(self, msg: str):
