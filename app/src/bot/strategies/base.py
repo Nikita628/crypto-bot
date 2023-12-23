@@ -9,8 +9,8 @@ from bot.deal import (
     enter,
     exit,
     extend,
-    get_all_opened,
-    is_asset,
+    get_all_active,
+    has_active_deal,
 )
 from bot.binance import BinanceInterval
 
@@ -34,7 +34,7 @@ class Base(ABC):
                     self.log(f'total symbols checked for entry: {checked_symbols}')
 
                 try:
-                    if is_asset(symbol):
+                    if has_active_deal(symbol):
                         continue
 
                     kline = get_kline(symbol, self.timeframe, self.loockback)
@@ -65,7 +65,7 @@ class Base(ABC):
     def search_exit(self):
         while True:
             self.log('searching exit...')
-            open_deals = get_all_opened(self.strategy)
+            open_deals = get_all_active(self.strategy)
 
             self.log(f'will check {len(open_deals)} deals for exit')
 

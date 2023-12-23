@@ -59,21 +59,20 @@ def map_deal(deal: database.models.Deal):
 
 USER_ID = 1
 
-def is_asset(symbol: str):
-    deal = (database.models.Deal.select().where(
+def has_active_deal(symbol: str) -> bool:
+    deal = database.models.Deal.select().where(
         (database.models.Deal.symbol == symbol)
         & (database.models.Deal.exit_price.is_null(True))
-        & (database.models.Deal.user_id == USER_ID)))
-    
+        & (database.models.Deal.user_id == USER_ID)
+    )
     return bool(deal)
 
-def get_all_opened(strategy: str) -> List[Deal]:
+def get_all_active(strategy: str) -> List[Deal]:
     deals: List[database.models.Deal] = database.models.Deal.select().where(
        (database.models.Deal.exit_price.is_null(True))
         & (database.models.Deal.user_id == USER_ID)
         & (database.models.Deal.strategy == strategy)
     )
-    
     return list(map(map_deal, deals))
 
 
@@ -104,7 +103,6 @@ def exit(id: int, running_price: float, reason: str):
             (database.models.Deal.id == id) 
             & (database.models.Deal.user_id == USER_ID)
         )
-    
     query.execute()
     
 
@@ -114,5 +112,4 @@ def extend(id: int, running_price: float):
             (database.models.Deal.id == id)
             & (database.models.Deal.user_id == USER_ID)
         )
-    
     query.execute()
