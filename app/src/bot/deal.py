@@ -5,8 +5,6 @@ from typing import List
 
 EXPIRATION_PERIOD_HOURS = 48
 
-# TODO: rename file to deal.py
-
 class DealDirection(Enum):
     long = 'long'
     short = 'short'
