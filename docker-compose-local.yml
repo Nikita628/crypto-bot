@@ -38,6 +38,9 @@ services:
       POSTGRES_HOST: db
     volumes:
       - ./app:/app
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
       
   db:
     image: postgres:latest
