@@ -76,7 +76,7 @@ class Base(ABC):
                     exit_reason = self.determine_exit_reason(kline, deal)
 
                     if exit_reason:
-                        exit(deal.id, running_price)
+                        exit(deal.id, running_price, exit_reason)
                         self.log(f'exited {deal.symbol}, reason {exit_reason}')
                     else:
                         extend(deal.id, running_price)

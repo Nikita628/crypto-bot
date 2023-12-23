@@ -5,7 +5,12 @@ from bot.binance import BinanceInterval
 from typing import Optional
 
 # Dual momentum on lower timeframes
+
 # starting on 5 min
+# exiting too early because stochs already down, but trend continues,
+# too sensitive on 5 min.
+# to prevent early exit, updated condition, so that stochs AND rsi should signal exit,
+# instead of stochs OR rsi
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
@@ -79,7 +84,6 @@ class DualMomentumLowerTimeframe(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long),
                 kline.is_downward(KLine.Col.stoch_short),
-            ]) or all([
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
             ])
@@ -90,7 +94,6 @@ class DualMomentumLowerTimeframe(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long),
                 kline.is_upward(KLine.Col.stoch_short),
-            ]) or all([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
             ])
