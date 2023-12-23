@@ -1,12 +1,12 @@
 import threading
+from strategies.dual_momentum import DualMomentum
+from typing import List
 
 # TODO: incorporate latest changes from main branch:
 # trailing stop (needs modifications)
 # overbought, oversold
 
-# implement DualMomentum
 # add logging to file, one logger per strategy
-# run all strategies in threads
 
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min
@@ -14,17 +14,22 @@ import threading
 # error handling global
 # beware of delisting
 # beware of 'dangerous' coins
+
+strategies = [DualMomentum()]
+
 def start_bot():
-    print('starting bot...')
+    threads: List[threading.Thread] = []
 
-    buy_thread = threading.Thread(target=search_entry)
-    sell_thread = threading.Thread(target=search_exit)
+    for strategy in strategies:
+        buy_thread = threading.Thread(target=strategy.search_entry)
+        sell_thread = threading.Thread(target=strategy.search_exit)
+        threads.append(buy_thread)
+        threads.append(sell_thread)
+        buy_thread.start()
+        sell_thread.start()
 
-    buy_thread.start()
-    sell_thread.start()
-
-    buy_thread.join()
-    sell_thread.join()
+    for thread in threads:
+        thread.join()
 
 if __name__ == "__main__":
     start_bot()

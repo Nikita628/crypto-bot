@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 import datetime
 import time
 from ..binance import get_kline, get_all_usdt_symbols
-from ..technical_indicators import DataFrameDecorator
-from ..core import KLineShape
+from ..kline import KLine
 from ..deal import (
     DealDirection,
     Deal,
@@ -24,23 +23,23 @@ class Base(ABC):
                     if is_asset(symbol):
                         continue
 
-                    df = get_kline(symbol, self.interval, self.loockback)
+                    kline = get_kline(symbol, self.interval, self.loockback)
 
-                    if len(df.df) < self.loockback:
+                    if len(kline.df) < self.loockback:
                         continue
                 
-                    deal_direction = self.get_entry_direction(df)
+                    deal_direction = self.get_entry(kline)
 
                     if deal_direction:
                         deal = Deal(
                             base_asset=symbol.replace('USDT', ''),
                             quote_asset='USDT',
-                            entry_price=df.df['close'].iloc[-1],
+                            entry_price=kline.df['close'].iloc[-1],
                             entry_date=datetime.datetime.utcnow(),
                             direction=deal_direction,
                             exit_price=None,
                             exit_date=None,
-                            running_price=df.df['close'].iloc[-1],
+                            running_price=kline.df['close'].iloc[-1],
                             strategy=self.strategy,
                         )
                         enter(deal)
@@ -59,7 +58,7 @@ class Base(ABC):
             for deal in open_deals:
                 try:
                     df = get_kline(deal.symbol, self.interval, self.loockback)
-                    running_price = df.df[KLineShape.close].iloc[-1]
+                    running_price = df.df[KLine.Col.close].iloc[-1]
 
                     if self.is_exit(df, deal):
                         exit(deal.id, running_price)
@@ -73,9 +72,9 @@ class Base(ABC):
 
 
     @abstractmethod
-    def is_exit(self, df: DataFrameDecorator, deal: Deal) -> bool:
+    def is_exit(self, kline: KLine, deal: Deal) -> bool:
         pass
 
     @abstractmethod
-    def get_entry_direction(self, df: DataFrameDecorator) -> DealDirection or None:
+    def get_entry(self, kline: KLine) -> DealDirection or None:
         pass

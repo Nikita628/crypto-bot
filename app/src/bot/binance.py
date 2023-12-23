@@ -1,14 +1,14 @@
 import requests
 import pandas as pd
 from enum import Enum
-from technical_indicators import DataFrameDecorator
+from app.src.bot.kline import KLine
 from typing import List
 
 class BinanceInterval(Enum):
     day = '1d'
     min_5 = '5m'
 
-def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> DataFrameDecorator:
+def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     url = f'https://api.binance.com/api/v3/uiKlines'
     params = {
         'symbol': symbol,
@@ -27,7 +27,7 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> DataFram
     for col in ['open', 'high', 'low', 'close', 'volume', 'quote_asset_volume']:
         df[col] = df[col].astype(float)
 
-    return DataFrameDecorator(df)
+    return KLine(df)
 
 def get_all_usdt_symbols() -> List[str]:
     url = 'https://api.binance.com/api/v3/exchangeInfo'
