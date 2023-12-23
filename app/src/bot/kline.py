@@ -23,6 +23,9 @@ class KLine:
     def __init__(self, df: pd.DataFrame):
         self.df = df
 
+    def get_running_price(self) -> float:
+        return self.df[KLine.Col.close].iloc[-1]
+    
     def is_long_gmma_above_200ema(self): 
         return self.df[f'long_ema_{60}'].iloc[-1] > self.df[KLine.Col.ema_200].iloc[-1]
     

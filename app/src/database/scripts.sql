@@ -1,4 +1,4 @@
-select strategy, sum(profit_percentage) / count(*) as avg_profit_percentage
+select strategy, avg(profit_percentage) as avg_profit_percentage
 from deal
 where 
 	exit_price is null 

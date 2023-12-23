@@ -21,16 +21,16 @@ class Base(ABC):
 
     def search_entry(self):
         usdt_symbols = sorted(get_all_usdt_symbols())
-        print(f'{len(usdt_symbols)} total usdt symbols')
+        self.log(f'{len(usdt_symbols)} total usdt symbols')
 
         while True:      
-            print('searching entry...')
+            self.log('searching entry...')
             checked_symbols = 0
 
             for symbol in usdt_symbols:
                 checked_symbols += 1
                 if (checked_symbols % 10 == 0):
-                    print(f'total symbols checked: {checked_symbols}')
+                    self.log(f'total symbols checked: {checked_symbols}')
 
                 try:
                     if is_asset(symbol):
@@ -41,44 +41,44 @@ class Base(ABC):
                     if len(kline.df) < self.loockback:
                         continue
                 
-                    deal_direction = self.determine_trade_direction(kline)                 
+                    direction = self.determine_trade_direction(kline)                 
 
-                    if deal_direction:
+                    if direction:
                         deal = Deal(
                             base_asset=symbol.replace('USDT', ''),
                             quote_asset='USDT',
-                            entry_price=float(kline.df[KLine.Col.close].iloc[-1]),
-                            direction=deal_direction,
+                            entry_price=kline.get_running_price(),
+                            direction=direction,
                             strategy=self.strategy,
                         )
                         enter(deal)
-                        print(f'entered {symbol}')
+                        self.log(f'entered {symbol}')
                 except Exception as e:
-                    print(f"search_entry: Failed to process data for {symbol}: {e}")
+                    self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                         
-                time.sleep(5)
+                time.sleep(10)
                     
             time.sleep(300)
 
 
     def search_exit(self):
         while True:
-            print('searching exit...')
+            self.log('searching exit...')
             open_deals = get_all_opened()
 
             for deal in open_deals:
                 try:
-                    df = get_kline(deal.symbol, self.timeframe, self.loockback)
-                    running_price = df.df[KLine.Col.close].iloc[-1]
+                    kline = get_kline(deal.symbol, self.timeframe, self.loockback)
+                    running_price = kline.get_running_price()
 
-                    if self.is_exit(df, deal):
+                    if self.is_exit(kline, deal):
                         exit(deal.id, running_price)
-                        print(f'exited {deal.symbol}')
+                        self.log(f'exited {deal.symbol}')
                     else:
                         extend(deal.id, running_price)
 
                 except Exception as e:
-                    print(f"search_exit: Failed to process data for {deal.base_asset}: {e}")
+                    self.log(f"search_exit: Failed to process data for {deal.base_asset}: {e}")
 
             time.sleep(60)
 
@@ -90,3 +90,6 @@ class Base(ABC):
     @abstractmethod
     def determine_trade_direction(self, kline: KLine) -> TradeDirection or None:
         pass
+
+    def log(self, msg: str):
+        print(f'{self.strategy}: {msg}')
