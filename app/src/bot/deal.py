@@ -67,10 +67,12 @@ def is_asset(symbol: str):
     
     return bool(deal)
 
-def get_all_opened() -> List[Deal]:
+def get_all_opened(strategy: str) -> List[Deal]:
     deals: List[database.models.Deal] = database.models.Deal.select().where(
        (database.models.Deal.exit_price.is_null(True))
-        & (database.models.Deal.user_id == USER_ID))
+        & (database.models.Deal.user_id == USER_ID)
+        & (database.models.Deal.strategy == strategy)
+    )
     
     return list(map(map_deal, deals))
 
@@ -98,17 +100,19 @@ def enter(deal: Deal):
 def exit(id: int, running_price: float):
     query = database.models.Deal.update(
         exit_price = running_price,
-        exit_date =  datetime.datetime.utcnow()
-        ).where(
+        exit_date =  datetime.datetime.utcnow()).where(
             (database.models.Deal.id == id) 
-            & (database.models.Deal.user_id == USER_ID))
+            & (database.models.Deal.user_id == USER_ID)
+        )
+    
     query.execute()
     
 
 def extend(id: int, running_price: float):
     query = database.models.Deal.update(
-        running_price =  running_price
-        ).where(
+        running_price =  running_price).where(
             (database.models.Deal.id == id)
-            & (database.models.Deal.user_id == USER_ID))
+            & (database.models.Deal.user_id == USER_ID)
+        )
+    
     query.execute()

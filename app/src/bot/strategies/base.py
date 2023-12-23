@@ -21,7 +21,7 @@ class Base(ABC):
 
     def search_entry(self):
         usdt_symbols = sorted(get_all_usdt_symbols())
-        self.log(f'{len(usdt_symbols)} total usdt symbols')
+        self.log(f'will check {len(usdt_symbols)} usdt symbols for entry')
 
         while True:      
             self.log('searching entry...')
@@ -56,7 +56,7 @@ class Base(ABC):
                 except Exception as e:
                     self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                         
-                time.sleep(10)
+                time.sleep(5)
                     
             time.sleep(300)
 
@@ -64,7 +64,9 @@ class Base(ABC):
     def search_exit(self):
         while True:
             self.log('searching exit...')
-            open_deals = get_all_opened()
+            open_deals = get_all_opened(self.strategy)
+
+            self.log(f'will check {len(open_deals)} deals for exit')
 
             for deal in open_deals:
                 try:
