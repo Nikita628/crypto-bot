@@ -3,14 +3,14 @@ import time
 from typing import Optional
 from bot.kline import KLine
 from bot.binance import get_kline, get_all_usdt_symbols
-from bot.deal import (
+from bot.trade import (
     TradeDirection,
-    Deal,
+    Trade,
     enter,
     exit,
     extend,
     get_all_active,
-    has_active_deal,
+    is_already_trading,
 )
 from bot.binance import BinanceInterval
 
@@ -34,7 +34,7 @@ class Base(ABC):
                     self.log(f'total symbols checked for entry: {checked_symbols}')
 
                 try:
-                    if has_active_deal(symbol):
+                    if is_already_trading(symbol):
                         continue
 
                     kline = get_kline(symbol, self.timeframe, self.loockback)
@@ -45,7 +45,7 @@ class Base(ABC):
                     direction = self.determine_trade_direction(kline)                 
 
                     if direction:
-                        deal = Deal(
+                        deal = Trade(
                             base_asset=symbol.replace('USDT', ''),
                             quote_asset='USDT',
                             entry_price=kline.get_running_price(),
@@ -88,7 +88,7 @@ class Base(ABC):
 
 
     @abstractmethod
-    def determine_exit_reason(self, kline: KLine, deal: Deal) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, deal: Trade) -> Optional[str]:
         pass
 
     @abstractmethod

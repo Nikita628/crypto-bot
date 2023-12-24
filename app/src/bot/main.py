@@ -1,5 +1,6 @@
 import threading
 from strategies import (
+    Base,
     DualMomentum,
     DualMomentumLowerTimeframe,
 )
@@ -18,7 +19,7 @@ from typing import List
 # beware of delisting
 # beware of 'dangerous' coins
 
-strategies = [DualMomentum(), DualMomentumLowerTimeframe()]
+strategies: List[Base] = [DualMomentum(), DualMomentumLowerTimeframe()]
 
 def start_bot():
     threads: List[threading.Thread] = []

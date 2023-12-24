@@ -32,7 +32,7 @@ class Asset(Base):
         table_name = 'asset'
 
 
-class Deal(Base):
+class Trade(Base):
     id = AutoField(column_name='id', primary_key=True)
     symbol = TextField(column_name='symbol', null=True)
     base_asset = TextField(column_name='base_asset', null=False)
@@ -48,7 +48,7 @@ class Deal(Base):
     strategy = TextField(column_name='strategy', null=False)
 
     class Meta:
-        table_name = 'deal'
+        table_name = 'trade'
 
 
 class SuspendedSymbol(Base):

@@ -1,6 +1,6 @@
 from strategies.base import Base
 from bot.kline import KLine
-from bot.deal import Deal, TradeDirection
+from bot.trade import Trade, TradeDirection
 from bot.binance import BinanceInterval
 from typing import Optional
 
@@ -32,7 +32,7 @@ class DualMomentumLowerTimeframe(Base):
         
         return None
 
-    def determine_exit_reason(self, kline: KLine, deal: Deal) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, deal: Trade) -> Optional[str]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
         kline.add_rsi(KLine.Col.rsi)

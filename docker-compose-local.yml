@@ -1,21 +1,21 @@
 version: '3.8'
 services:
-  ui:
-    container_name: crypto-bot-ui
-    build:
-      context: ./ui
-      dockerfile: Dockerfile.local
-    ports:
-      - "5012:3000"
-      # - "5013:9229" # debug port
-    depends_on:
-      - server
-    environment:
-      REACT_APP_API_URL: http://localhost:5010
-      WATCHPACK_POLLING: true
-    volumes:
-      - ./ui:/app
-      - /app/node_modules
+  # ui:
+  #   container_name: crypto-bot-ui
+  #   build:
+  #     context: ./ui
+  #     dockerfile: Dockerfile.local
+  #   ports:
+  #     - "5012:3000"
+  #     # - "5013:9229" # debug port
+  #   depends_on:
+  #     - server
+  #   environment:
+  #     REACT_APP_API_URL: http://localhost:5010
+  #     WATCHPACK_POLLING: true
+  #   volumes:
+  #     - ./ui:/app
+  #     - /app/node_modules
 
   server:
     container_name: crypto-bot-server

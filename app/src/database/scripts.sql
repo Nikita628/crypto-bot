@@ -1,8 +1,8 @@
-select * from deal
+select * from trade
 order by id;
 
 select strategy, avg(profit_percentage) as avg_profit_percentage
-from deal
+from trade
 where 
 	exit_price is null 
 	and exit_date is null
