@@ -26,19 +26,19 @@ class KLine:
     def get_running_price(self) -> float:
         return self.df[KLine.Col.close].iloc[-1]
     
-    def is_rsi_overbought(self, overbought_limit = 85) -> bool: 
+    def is_rsi_overbought(self, overbought_limit = 80) -> bool: 
         return self.is_above(KLine.Col.rsi, overbought_limit)
     
-    def is_rsi_oversold(self, oversold_limit = 15) -> bool: 
+    def is_rsi_oversold(self, oversold_limit = 20) -> bool: 
         return self.is_below(KLine.Col.rsi, oversold_limit)
     
-    def is_stoch_overbought(self, overbought_limit = 85) -> bool:
+    def is_stoch_overbought(self, overbought_limit = 80) -> bool:
         return (
             self.is_above(KLine.Col.stoch_long, overbought_limit)
             or self.is_above(KLine.Col.stoch_short, overbought_limit)
         )
     
-    def is_stoch_oversold(self, oversold_limit = 15) -> bool:
+    def is_stoch_oversold(self, oversold_limit = 20) -> bool:
         return (
             self.is_below(KLine.Col.stoch_long, oversold_limit)
             or self.is_below(KLine.Col.stoch_short, oversold_limit)
@@ -118,7 +118,7 @@ class KLine:
         for ema in KLine.Col.long_emas:
             self.df[f'long_ema_{ema}'] = pandas_ta.ema(close=self.df[KLine.Col.close], length=ema)
 
-    def add_stoch(self, k, d, smooth, name, fillna=False):
+    def add_stoch(self, k, d, smooth, name='stoch', fillna=False):
         stoch = pandas_ta.stoch(
             self.df[KLine.Col.high], 
             self.df[KLine.Col.low], 
@@ -141,16 +141,16 @@ class KLine:
         # # %D Calculation using Smoothed %K
         # self.df['%D'] = self.df['%K_smoothed'].rolling(window=m).mean()
 
-    def add_rsi(self, name: str, window=7):
+    def add_rsi(self, name: str='rsi', window=7):
         self.df[name] = pandas_ta.rsi(close=self.df[KLine.Col.close], length=window)
 
-    def add_ema(self, name: str, length=7):
+    def add_ema(self, name: str='ema', length=7):
         self.df[name] = pandas_ta.ema(close=self.df[KLine.Col.close], length=length)
 
-    def add_pvt(self, name: str):
+    def add_pvt(self, name: str='pvt'):
         self.df[name] = pandas_ta.pvt(close=self.df[KLine.Col.close], volume=self.df[KLine.Col.volume])
 
-    def add_mfi(self, name: str, length=7):
+    def add_mfi(self, name: str='mfi', length=7):
         self.df[name] = pandas_ta.mfi(
             close=self.df[KLine.Col.close], 
             high=self.df[KLine.Col.high], 
@@ -158,7 +158,7 @@ class KLine:
             volume=self.df[KLine.Col.volume], length=length
         )
 
-    def add_sma(self, name: str, source_column: str, length=7):
+    def add_sma(self, name: str='sma', source_column: str='close', length=7):
         self.df[name] = self.df[source_column].rolling(window=length).mean()
 
         

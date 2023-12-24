@@ -1,10 +1,9 @@
 import threading
+from bot.binance import BinanceInterval
 from strategies import (
     Base,
     DualMomentum,
-    DualMomentumLowerTimeframe,
     TrailingStop,
-    TrailingStopLowerTimeframe,
 )
 from typing import List
 
@@ -23,9 +22,9 @@ from typing import List
 
 strategies: List[Base] = [
     DualMomentum(), 
-    DualMomentumLowerTimeframe(),
+    DualMomentum(timeframe=BinanceInterval.min_5, name='dual_momentum_5_min'),
     TrailingStop(),
-    TrailingStopLowerTimeframe(),
+    TrailingStop(timeframe=BinanceInterval.min_5, name='trailing_stop_5_min'),
 ]
 
 def start_bot():

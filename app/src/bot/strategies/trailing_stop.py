@@ -9,15 +9,15 @@ from typing import Optional
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 class TrailingStop(Base):
-    def __init__(self):
-        super().__init__(BinanceInterval.day, LOOCKBACK, 'trailing_stop')
+    def __init__(self, timeframe: BinanceInterval=BinanceInterval.day, name='trailing_stop'):
+        super().__init__(timeframe, LOOCKBACK, name)
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
         kline.add_gmma()
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
-        kline.add_rsi(KLine.Col.rsi)
+        kline.add_rsi()
 
         if self.is_long_entry(kline):
             return TradeDirection.long
@@ -30,7 +30,7 @@ class TrailingStop(Base):
     def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
-        kline.add_rsi(KLine.Col.rsi)
+        kline.add_rsi()
         
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
