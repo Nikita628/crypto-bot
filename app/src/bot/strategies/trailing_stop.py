@@ -1,22 +1,16 @@
 from strategies.base import Base
 from bot.kline import KLine
-from bot.trade import Trade, TradeDirection
+from bot.trade import Trade, TradeDirection, is_trailing_stop
 from bot.binance import BinanceInterval
 from typing import Optional
 
-# Dual momentum on lower timeframes
-
-# starting on 5 min
-# exiting too early because stochs already down, but trend continues,
-# too sensitive on 5 min.
-# to prevent early exit, updated condition, so that stochs AND rsi should signal exit,
-# instead of stochs OR rsi
+# Dual momentum + trailing stop
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
-class DualMomentumLowerTimeframe(Base):
+class TrailingStop(Base):
     def __init__(self):
-        super().__init__(BinanceInterval.min_5, LOOCKBACK, 'dual_momentum_5_min')
+        super().__init__(BinanceInterval.day, LOOCKBACK, 'trailing_stop')
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -32,6 +26,7 @@ class DualMomentumLowerTimeframe(Base):
         
         return None
 
+
     def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
@@ -42,8 +37,16 @@ class DualMomentumLowerTimeframe(Base):
             reason = 'long exit'
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
+        elif self.is_trailing_stop(kline, trade):
+            reason = 'trailing stop'
 
         return reason
+    
+
+    def is_trailing_stop(self, kline: KLine, trade: Trade) -> bool:
+        current_price = kline.get_running_price()
+        return is_trailing_stop(current_price, trade)
+
 
     def is_long_entry(self, kline: KLine):     
         return all([
@@ -65,6 +68,7 @@ class DualMomentumLowerTimeframe(Base):
             not kline.is_stoch_overbought(),
         ])
     
+
     def is_short_entry(self, kline: KLine):
         return all([
             kline.is_downward(KLine.Col.ema_200), 
@@ -85,6 +89,7 @@ class DualMomentumLowerTimeframe(Base):
             not kline.is_stoch_oversold(),
         ])
     
+
     def is_long_exit(self, kline: KLine):
         return (
             all([
@@ -94,6 +99,7 @@ class DualMomentumLowerTimeframe(Base):
                 kline.is_downward(KLine.Col.rsi),
             ])
         )
+
 
     def is_short_exit(self, kline: KLine):
         return (

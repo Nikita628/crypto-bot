@@ -26,15 +26,15 @@ class DualMomentum(Base):
         
         return None
 
-    def determine_exit_reason(self, kline: KLine, deal: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
         kline.add_rsi(KLine.Col.rsi)
 
         reason = None
-        if deal.direction == TradeDirection.long.value and self.is_long_exit(kline):
+        if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
             reason = 'long exit'
-        elif deal.direction == TradeDirection.short.value and self.is_short_exit(kline):
+        elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
 
         return reason

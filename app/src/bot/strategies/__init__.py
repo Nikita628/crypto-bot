@@ -1,3 +1,5 @@
 from .dual_momentum import DualMomentum
 from .dual_momentum_lower_timeframe import DualMomentumLowerTimeframe
 from .base import Base
+from .trailing_stop import TrailingStop
+from .trailing_stop_lower_timeframe import TrailingStopLowerTimeframe

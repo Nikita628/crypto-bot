@@ -26,6 +26,24 @@ class KLine:
     def get_running_price(self) -> float:
         return self.df[KLine.Col.close].iloc[-1]
     
+    def is_rsi_overbought(self, overbought_limit = 85) -> bool: 
+        return self.is_above(KLine.Col.rsi, overbought_limit)
+    
+    def is_rsi_oversold(self, oversold_limit = 15) -> bool: 
+        return self.is_below(KLine.Col.rsi, oversold_limit)
+    
+    def is_stoch_overbought(self, overbought_limit = 85) -> bool:
+        return (
+            self.is_above(KLine.Col.stoch_long, overbought_limit)
+            or self.is_above(KLine.Col.stoch_short, overbought_limit)
+        )
+    
+    def is_stoch_oversold(self, oversold_limit = 15) -> bool:
+        return (
+            self.is_below(KLine.Col.stoch_long, oversold_limit)
+            or self.is_below(KLine.Col.stoch_short, oversold_limit)
+        )
+    
     def is_long_gmma_above_200ema(self): 
         return self.df[f'long_ema_{60}'].iloc[-1] > self.df[KLine.Col.ema_200].iloc[-1]
     

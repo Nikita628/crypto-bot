@@ -15,7 +15,7 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
         'interval': interval.value,
         'limit': lookback
     }
-    response = requests.get(url, params=params)
+    response = requests.get(url, params=params, timeout=30)
     data = response.json()
 
     df = pd.DataFrame(data, columns=['open_time', 'open', 'high', 'low', 'close', 'volume', 'close_time', 
@@ -31,7 +31,7 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
 
 def get_all_usdt_symbols() -> List[str]:
     url = 'https://api.binance.com/api/v3/exchangeInfo'
-    response = requests.get(url)
+    response = requests.get(url, timeout=30)
     data = response.json()
 
     usdt_pairs = []

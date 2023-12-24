@@ -3,6 +3,8 @@ from strategies import (
     Base,
     DualMomentum,
     DualMomentumLowerTimeframe,
+    TrailingStop,
+    TrailingStopLowerTimeframe,
 )
 from typing import List
 
@@ -19,7 +21,12 @@ from typing import List
 # beware of delisting
 # beware of 'dangerous' coins
 
-strategies: List[Base] = [DualMomentum(), DualMomentumLowerTimeframe()]
+strategies: List[Base] = [
+    DualMomentum(), 
+    DualMomentumLowerTimeframe(),
+    TrailingStop(),
+    TrailingStopLowerTimeframe(),
+]
 
 def start_bot():
     threads: List[threading.Thread] = []
