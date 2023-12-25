@@ -22,9 +22,10 @@ from typing import List
 
 strategies: List[Base] = [
     DualMomentum(), 
-    DualMomentum(timeframe=BinanceInterval.min_5, name='dual_momentum_5_min'),
+    DualMomentum(timeframe=BinanceInterval.min5, name='dual_momentum_5_min'),
+    DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12_h'),
     TrailingStop(),
-    TrailingStop(timeframe=BinanceInterval.min_5, name='trailing_stop_5_min'),
+    TrailingStop(timeframe=BinanceInterval.min5, name='trailing_stop_5_min'),
 ]
 
 def start_bot():

@@ -5,8 +5,13 @@ from bot.kline import KLine
 from typing import List
 
 class BinanceInterval(Enum):
+    min1 = '1m'
+    min5 = '5m'
+    min15 = '15m'
+    h1 = '1h'
+    h4 = '4h'
+    h12 = '12h'
     day = '1d'
-    min_5 = '5m'
 
 def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     url = f'https://api.binance.com/api/v3/uiKlines'
