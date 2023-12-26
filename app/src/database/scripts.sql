@@ -3,8 +3,8 @@ order by id;
 
 select strategy, avg(profit_percentage) as avg_profit_percentage
 from trade
-where 
-	exit_price is null 
-	and exit_date is null
-	and strategy = 'dual_momentum'
 group by strategy;
+
+select * from trade
+where strategy = 'dual_momentum'
+order by entry_date

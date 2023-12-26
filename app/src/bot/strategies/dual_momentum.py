@@ -1,16 +1,21 @@
 from strategies.base import Base
 from bot.kline import KLine
-from bot.trade import Trade, TradeDirection
+from bot.trade import Trade, TradeDirection, is_trailing_stop
 from bot.binance import BinanceInterval
 from typing import Optional
 
-# Pure dual momentum as described by the book
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 class DualMomentum(Base):
-    def __init__(self, timeframe: BinanceInterval=BinanceInterval.day, name='dual_momentum'):
+    def __init__(
+            self, 
+            timeframe: BinanceInterval=BinanceInterval.day, 
+            name='dual_momentum',
+            is_trailing_stop_enabled=False,
+        ):
         super().__init__(timeframe, LOOCKBACK, name)
+        self.is_trailing_stop_enabled = is_trailing_stop_enabled
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -36,6 +41,10 @@ class DualMomentum(Base):
             reason = 'long exit'
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
+        elif self.is_trailing_stop_enabled:
+            current_price = kline.get_running_price()
+            if is_trailing_stop(current_price, trade):
+                reason = 'trailing stop'
 
         return reason
 

@@ -23,17 +23,9 @@ class Base(ABC):
     def search_entry(self):
         try:
             usdt_symbols = sorted(get_all_usdt_symbols())
-            self.log(f'will check {len(usdt_symbols)} usdt symbols for entry')
 
             while True:      
-                self.log('searching entry...')
-                checked_symbols = 0
-
                 for symbol in usdt_symbols:
-                    checked_symbols += 1
-                    if (checked_symbols % 10 == 0):
-                        self.log(f'total symbols checked for entry: {checked_symbols}')
-
                     try:
                         if is_already_trading(symbol):
                             continue
@@ -67,10 +59,7 @@ class Base(ABC):
     def search_exit(self):
         try:
             while True:
-                self.log('searching exit...')
                 open_deals = get_all_active(self.strategy)
-
-                self.log(f'will check {len(open_deals)} deals for exit')
 
                 for deal in open_deals:
                     try:

@@ -3,29 +3,20 @@ from bot.binance import BinanceInterval
 from strategies import (
     Base,
     DualMomentum,
-    TrailingStop,
 )
 from typing import List
-
-# TODO: incorporate latest changes from main branch:
-# trailing stop (needs modifications)
-# overbought, oversold
-
-# add logging to file, one logger per strategy
 
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min
 # logging
-# error handling global
 # beware of delisting
 # beware of 'dangerous' coins
 
 strategies: List[Base] = [
     DualMomentum(), 
-    DualMomentum(timeframe=BinanceInterval.min5, name='dual_momentum_5_min'),
     DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12_h'),
-    TrailingStop(),
-    TrailingStop(timeframe=BinanceInterval.min5, name='trailing_stop_5_min'),
+    DualMomentum(name='trailing_stop', is_trailing_stop_enabled=True),
+    DualMomentum(timeframe=BinanceInterval.h12, name='trailing_stop_12_h', is_trailing_stop_enabled=True),
 ]
 
 def start_bot():
