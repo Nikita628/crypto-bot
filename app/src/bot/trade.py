@@ -65,11 +65,12 @@ def map_trade(trade: database.models.Trade):
 
 USER_ID = 1
 
-def is_already_trading(symbol: str) -> bool:
+def is_already_trading(symbol: str, strategy: str) -> bool:
     deal = database.models.Trade.select().where(
         (database.models.Trade.symbol == symbol)
         & (database.models.Trade.exit_price.is_null(True))
         & (database.models.Trade.user_id == USER_ID)
+        & (database.models.Trade.strategy == strategy)
     )
     return bool(deal)
 
@@ -93,7 +94,7 @@ def is_trailing_stop(running_price: float, trade: Trade) -> bool:
         else (trade.entry_price - running_price) / trade.entry_price * 100
     )
 
-    return (
+    return current_profit_percentage < -2 or (
         current_profit_percentage > 1 
         and abs(current_profit_percentage - trade.highest_profit_percentage) > 1
     )

@@ -27,7 +27,7 @@ class Base(ABC):
             while True:      
                 for symbol in usdt_symbols:
                     try:
-                        if is_already_trading(symbol):
+                        if is_already_trading(symbol, self.strategy):
                             continue
 
                         kline = get_kline(symbol, self.timeframe, self.loockback)
