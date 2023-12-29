@@ -76,7 +76,7 @@ class DualMomentumCustomized(Base):
 
             not kline.is_rsi_overbought(),
             not kline.is_above(KLine.Col.stoch_long, 80),
-            not kline.is_above(KLine.Col.stoch_short, 60),
+            not kline.is_above(KLine.Col.stoch_short, 70),
 
             kline.is_upward(KLine.Col.volume_sma),
 
@@ -103,7 +103,7 @@ class DualMomentumCustomized(Base):
 
             not kline.is_rsi_oversold(),
             not kline.is_below(KLine.Col.stoch_long, 20),
-            not kline.is_below(KLine.Col.stoch_short, 40),
+            not kline.is_below(KLine.Col.stoch_short, 30),
 
             kline.is_upward(KLine.Col.volume_sma),
 
