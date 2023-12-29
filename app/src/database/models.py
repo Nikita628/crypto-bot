@@ -48,7 +48,7 @@ class Trade(Base):
     direction = TextField(column_name='direction', null=False)
     user_id = ForeignKeyField(User, related_name='id', null=False)
     strategy = TextField(column_name='strategy', null=False)
-
+    atr_percentage = FloatField(column_name='atr_percentage', null=False)
     class Meta:
         table_name = 'trade'
 

@@ -19,6 +19,7 @@ class KLine:
         mfi = 'mfi'
         stoch_long = 'stoch_long'
         stoch_short = 'stoch_short'
+        atr = 'atr'
 
     def __init__(self, df: pd.DataFrame):
         self.df = df
@@ -150,6 +151,14 @@ class KLine:
     def add_pvt(self, name: str='pvt'):
         self.df[name] = pandas_ta.pvt(close=self.df[KLine.Col.close], volume=self.df[KLine.Col.volume])
 
+    def add_atr(self, name: str='atr', length = 7):
+        self.df[name] = pandas_ta.atr(
+            high=self.df[KLine.Col.high],
+            low=self.df[KLine.Col.low],
+            close=self.df[KLine.Col.close],
+            length=length,
+        )
+
     def add_mfi(self, name: str='mfi', length=7):
         self.df[name] = pandas_ta.mfi(
             close=self.df[KLine.Col.close], 
@@ -162,14 +171,28 @@ class KLine:
         self.df[name] = self.df[source_column].rolling(window=length).mean()
 
         
-    def is_upward(self, source_column: str) -> bool:
-        return self.df[source_column].iloc[-1] > self.df[source_column].iloc[-2] 
+    def is_upward(self, source_column: str, lookback = 1) -> bool:
+        if (lookback < 1):
+            raise Exception('loockback must be >= 1')
+        
+        for i in range(0, lookback):
+            if self.df[source_column].iloc[-1 - i] <= self.df[source_column].iloc[-2 - i]:
+                return False
+            
+        return True
     
     def is_above(self, source_column: str, value: float) -> bool:
         return self.df[source_column].iloc[-1] > value
     
-    def is_downward(self, source_column: str) -> bool:
-        return self.df[source_column].iloc[-1] < self.df[source_column].iloc[-2] 
+    def is_downward(self, source_column: str, lookback = 1) -> bool:
+        if (lookback < 1):
+            raise Exception('loockback must be >= 1')
+        
+        for i in range(0, lookback):
+            if self.df[source_column].iloc[-1 - i] >= self.df[source_column].iloc[-2 - i]:
+                return False
+            
+        return True
     
     def is_below(self, source_column: str, value: float) -> bool:
         return self.df[source_column].iloc[-1] < value
