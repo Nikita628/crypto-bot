@@ -5,7 +5,7 @@ from typing import Optional
 from strategies.base import Base
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
-PVT_SURGE_PERCENTAGE = 10
+PVT_SURGE_PERCENTAGE = 5
 
 class VolumeSurge(Base):
     def __init__(
