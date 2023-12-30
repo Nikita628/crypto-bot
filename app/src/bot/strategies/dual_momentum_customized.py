@@ -1,19 +1,31 @@
-from strategies.base import Base
 from bot.kline import KLine
 from bot.trade import Trade, TradeDirection, is_trailing_stop
 from bot.binance import BinanceInterval
 from typing import Optional
-
+from strategies.base import Base
 
 LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
-class DualMomentum(Base):
+# customized dual momentum
+
+# additional check if rsi is overbought/oversold
+
+# additional check of volume sma
+
+# additional check of mfi
+
+# additional check on stochastics - they should both be going
+# in one direction, and not overbought/oversold
+
+class DualMomentumCustomized(Base):
     def __init__(
             self, 
             timeframe: BinanceInterval=BinanceInterval.day, 
-            name='dual_momentum',
+            name='dual_momentum_customized',
+            is_trailing_stop_enabled=False,
         ):
         super().__init__(timeframe, LOOCKBACK, name)
+        self.is_trailing_stop_enabled = is_trailing_stop_enabled
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -21,6 +33,8 @@ class DualMomentum(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
         kline.add_rsi()
+        kline.add_sma(KLine.Col.volume_sma, KLine.Col.volume)
+        kline.add_mfi()
 
         if self.is_long_entry(kline):
             return TradeDirection.long
@@ -39,7 +53,9 @@ class DualMomentum(Base):
             reason = 'long exit'
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
-
+        elif self.is_trailing_stop_enabled and is_trailing_stop(kline.get_running_price(), trade):
+            reason = 'trailing stop'
+            
         return reason
 
     def is_long_entry(self, kline: KLine):      
@@ -57,7 +73,17 @@ class DualMomentum(Base):
 
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
+
+            not kline.is_rsi_overbought(),
+            not kline.is_above(KLine.Col.stoch_long, 80),
+            not kline.is_above(KLine.Col.stoch_short, 70),
+
+            kline.is_upward(KLine.Col.volume_sma),
+
+            kline.is_upward(KLine.Col.mfi),
+            not kline.is_above(KLine.Col.mfi, 80),
         ])
+    
     
     def is_short_entry(self, kline: KLine):
         return all([
@@ -74,6 +100,15 @@ class DualMomentum(Base):
 
             kline.is_downward(KLine.Col.rsi),
             kline.is_below(KLine.Col.rsi, 50),
+
+            not kline.is_rsi_oversold(),
+            not kline.is_below(KLine.Col.stoch_long, 20),
+            not kline.is_below(KLine.Col.stoch_short, 30),
+
+            kline.is_upward(KLine.Col.volume_sma),
+
+            kline.is_downward(KLine.Col.mfi),
+            not kline.is_below(KLine.Col.mfi, 20),
         ])
     
     def is_long_exit(self, kline: KLine):

@@ -1,3 +1,4 @@
+-- up
 CREATE TYPE public.trade_direction AS ENUM ('long', 'short');
 
 CREATE TABLE public.user (
@@ -26,11 +27,12 @@ CREATE TABLE public.trade (
         WHEN direction = 'short' THEN (entry_price - running_price) / entry_price * 100
         ELSE 0
      END) STORED,
+    highest_profit_percentage real NOT NULL default 0,
     running_price real NOT NULL,
     direction public.trade_direction NOT NULL,
-    user_id integer NOT NULL references public.user(id),
 	strategy text NOT NULL,
-    highest_profit_percentage real NOT NULL default 0
+    atr_percentage real NOT NULL,
+    user_id integer NOT NULL references public.user(id)
 );
 
 CREATE OR REPLACE FUNCTION update_highest_profit_percentage()
@@ -76,3 +78,16 @@ CREATE TABLE public.asset (
     amount real NOT NULL,
     user_id integer NOT NULL references public.user(id)
 );
+
+
+-- down
+DROP TRIGGER IF EXISTS update_highest_profit_trigger ON public.trade;
+
+DROP FUNCTION IF EXISTS update_highest_profit_percentage();
+
+DROP TABLE IF EXISTS public.asset;
+DROP TABLE IF EXISTS public.history_data;
+DROP TABLE IF EXISTS public.trade;
+DROP TABLE IF EXISTS public.user;
+
+DROP TYPE IF EXISTS public.trade_direction;

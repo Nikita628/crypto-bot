@@ -27,6 +27,7 @@ class Trade:
             direction: TradeDirection = None,
             user_id: int = None,
             strategy: str = None,
+            atr_percentage: float = None,
         ):
         self.id = id
         self.symbol = symbol
@@ -43,6 +44,7 @@ class Trade:
         self.direction = direction
         self.user_id = user_id
         self.strategy = strategy
+        self.atr_percentage = atr_percentage
 
 def map_trade(trade: database.models.Trade):
     return Trade(
@@ -61,6 +63,7 @@ def map_trade(trade: database.models.Trade):
         direction = trade.direction,
         user_id = trade.user_id,
         strategy = trade.strategy,
+        atr_percentage = trade.atr_percentage,
     )
 
 USER_ID = 1
@@ -94,7 +97,7 @@ def is_trailing_stop(running_price: float, trade: Trade) -> bool:
         else (trade.entry_price - running_price) / trade.entry_price * 100
     )
 
-    return current_profit_percentage < -2 or (
+    return current_profit_percentage < -(trade.atr_percentage) or (
         current_profit_percentage > 1 
         and abs(current_profit_percentage - trade.highest_profit_percentage) > 1
     )
@@ -108,7 +111,8 @@ def enter(trade: Trade):
            running_price = trade.entry_price,
            direction = trade.direction.value, 
            user_id = USER_ID,
-           strategy = trade.strategy
+           strategy = trade.strategy,
+           atr_percentage = trade.atr_percentage,
         )
     
 

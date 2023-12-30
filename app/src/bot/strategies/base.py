@@ -35,7 +35,10 @@ class Base(ABC):
                         if len(kline.df) < self.loockback:
                             continue
                     
-                        direction = self.determine_trade_direction(kline)                 
+                        direction = self.determine_trade_direction(kline)  
+                        kline.add_atr()    
+                        current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
+                        current_price = kline.get_running_price()
 
                         if direction:
                             deal = Trade(
@@ -44,6 +47,7 @@ class Base(ABC):
                                 entry_price=kline.get_running_price(),
                                 direction=direction,
                                 strategy=self.strategy,
+                                atr_percentage=current_atr_value / current_price * 100
                             )
                             enter(deal)
                             self.log(f'entered {symbol}')

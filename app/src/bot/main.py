@@ -3,6 +3,7 @@ from bot.binance import BinanceInterval
 from strategies import (
     Base,
     DualMomentum,
+    DualMomentumCustomized,
 )
 from typing import List
 
@@ -15,8 +16,8 @@ from typing import List
 strategies: List[Base] = [
     DualMomentum(), 
     DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12_h'),
-    DualMomentum(name='trailing_stop', is_trailing_stop_enabled=True),
-    DualMomentum(timeframe=BinanceInterval.h12, name='trailing_stop_12_h', is_trailing_stop_enabled=True),
+    DualMomentumCustomized(name='trailing_stop', is_trailing_stop_enabled=True),
+    DualMomentumCustomized(timeframe=BinanceInterval.h12, name='trailing_stop_12_h', is_trailing_stop_enabled=True),
 ]
 
 def start_bot():
