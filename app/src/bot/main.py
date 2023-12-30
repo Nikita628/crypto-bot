@@ -4,6 +4,7 @@ from strategies import (
     Base,
     DualMomentum,
     DualMomentumCustomized,
+    VolumeSurge,
 )
 from typing import List
 
@@ -18,6 +19,7 @@ strategies: List[Base] = [
     DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12_h'),
     DualMomentumCustomized(name='trailing_stop', is_trailing_stop_enabled=True),
     DualMomentumCustomized(timeframe=BinanceInterval.h12, name='trailing_stop_12_h', is_trailing_stop_enabled=True),
+    VolumeSurge(),
 ]
 
 def start_bot():
