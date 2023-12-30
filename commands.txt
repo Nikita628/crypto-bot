@@ -1,0 +1,26 @@
+//delete folder
+rm -r /var/www/crypto-bot/
+
+//add folder
+mkdir /var/www/crypto-bot/
+
+//git clone repository
+cd /var/www/crypto-bot/
+git init
+git config --global user.name "junkysoul"
+git config --global user.email "dmitrystopkov@gmail.com"
+eval $(ssh-agent -s)
+ssh-add ~/github_ssh_keys/key
+git clone -b prod git@github.com:Nikita628/crypto-bot.git
+
+//bash
+//executable file
+chmod +x ~/bot_scripts/files_update
+
+//run
+~/bot_scripts/files_update
+
+//server
+cd /var/www/
+screen -dmS python-http-server python3 server.py
+screen -X -S 152489.pts-0.flat-connection quit
