@@ -203,6 +203,11 @@ class KLine:
         :param end: excluded
         """
         values = self.df[source_column].iloc[start:end]
-        pct_change = values.pct_change().abs()
-        return pct_change.max() * 100 <= range_percentage
+
+        for i in values:
+            for j in values:
+                if i != j and abs((i - j) / j * 100) > range_percentage:
+                    return False
+
+        return True
     

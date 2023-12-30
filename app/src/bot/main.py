@@ -20,6 +20,8 @@ strategies: List[Base] = [
     DualMomentumCustomized(name='trailing_stop', is_trailing_stop_enabled=True),
     DualMomentumCustomized(timeframe=BinanceInterval.h12, name='trailing_stop_12_h', is_trailing_stop_enabled=True),
     VolumeSurge(),
+    VolumeSurge(timeframe=BinanceInterval.h4, name='volume_surge_4_h'),
+    VolumeSurge(timeframe=BinanceInterval.h1, name='volume_surge_1_h'),
 ]
 
 def start_bot():
