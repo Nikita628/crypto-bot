@@ -1,0 +1,78 @@
+version: '3.8'
+services:
+  # ui:
+  #   container_name: crypto-bot-ui
+  #   build:
+  #     context: ./ui
+  #     dockerfile: Dockerfile.local
+  #   ports:
+  #     - "5012:3000"
+  #     # - "5013:9229" # debug port
+  #   depends_on:
+  #     - server
+  #   environment:
+  #     REACT_APP_API_URL: http://localhost:5010
+  #     WATCHPACK_POLLING: true
+  #   volumes:
+  #     - ./ui:/app
+  #     - /app/node_modules
+
+  server:
+    container_name: crypto-bot-server
+    build:
+      context: ./app
+      dockerfile: Dockerfile.local
+    ports:
+      - "5010:5000"
+      - "5011:5001" # debug port
+    depends_on:
+      - db
+    environment:
+      API_KEY: ""
+      API_SECRET: ""
+      UI_URL: http://localhost:5012
+      PYTHONPATH: /app/src
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: db
+    volumes:
+      - ./app:/app
+
+  db:
+    image: postgres:latest
+    container_name: crypto-bot-db
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST: db
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: crypto-bot-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+# pg-admin settings
+# host - db
+# port - 5432
+# password - postgres
+# user - postgres
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+# docker-compose -f docker-compose-prod.yml up --build -d

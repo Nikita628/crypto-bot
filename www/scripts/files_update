@@ -1,0 +1,50 @@
+#!/bin/bash
+
+#stop docker
+docker stop $(docker ps -a -q)
+#remove containers
+docker ps --filter status=exited -q | xargs docker rm
+
+#check
+if [ ! -d "/var/www/crypto-bot/" ]
+then
+  echo "/var/www/crypto-bot/ does not exist."
+  mkdir /var/www/crypto-bot/
+fi
+
+#delete folder
+if [ -d "/var/www/crypto-bot/bot/" ]
+then
+  echo "deleting /var/www/crypto-bot/bot."
+  rm -r /var/www/crypto-bot/bot/
+fi
+
+#add folder
+if [ ! -d "/var/www/crypto-bot/bot/" ]
+then
+  echo "adding /var/www/crypto-bot/bot/."
+  mkdir /var/www/crypto-bot/bot/
+fi
+
+#git clone repository
+cd /var/www/crypto-bot/bot/
+git init
+git config --global user.name "junkysoul"
+git config --global user.email "dmitrystopkov@gmail.com"
+eval $(ssh-agent -s)
+ssh-add /var/www/github_ssh_keys/key
+git clone -b prod git@github.com:Nikita628/crypto-bot.git
+
+#move files
+rm -r /var/www/crypto-bot/bot/.git/
+mv /var/www/crypto-bot/bot/crypto-bot/* /var/www/crypto-bot/bot/
+rm -r /var/www/crypto-bot/bot/crypto-bot/
+
+#run docker
+if [ -f "/var/www/crypto-bot/bot/docker-compose-local.yml" ]
+then
+  echo "running docker"
+  cd /var/www/crypto-bot/bot/
+  docker-compose -f docker-compose-local.yml up --build -d
+fi
+
