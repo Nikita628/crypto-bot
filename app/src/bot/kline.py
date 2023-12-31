@@ -197,7 +197,7 @@ class KLine:
     def is_below(self, source_column: str, value: float) -> bool:
         return self.df[source_column].iloc[-1] < value
     
-    def is_change_within_percentage(self, source_column: str, start: int, end: int = -1, range_percentage: float = 1):
+    def is_ranging_within_percentage(self, source_column: str, start: int, end: int = -1, range_percentage: float = 1):
         """
         :param start: included
         :param end: excluded

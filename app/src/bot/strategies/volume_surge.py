@@ -71,11 +71,12 @@ class VolumeSurge(Base):
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
-            kline.is_change_within_percentage(KLine.Col.pvt, -8, -1, 2),
+            kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 2),
 
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.mfi),
+            kline.is_below(KLine.Col.mfi, 80),
         ])
     
 

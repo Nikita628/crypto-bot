@@ -43,10 +43,10 @@ strategies: List[Base] = [
     VolumeSurge(name='volume_surge_trailing', trailing_stop_percentage=1),
     VolumeSurge(name='volume_surge_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
-    VolumeSurge(timeframe=BinanceInterval.h1, name='volume_surge_1h'), 
-    VolumeSurge(timeframe=BinanceInterval.h1, name='volume_surge_greedy_1h', greedy_profit_percentage=1), 
-    VolumeSurge(timeframe=BinanceInterval.h1, name='volume_surge_trailing_1h', trailing_stop_percentage=1),
-    VolumeSurge(timeframe=BinanceInterval.h1, name='volume_surge_trailing_greedy_1h', trailing_stop_percentage=1, greedy_profit_percentage=1),
+    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_12h'), 
+    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_greedy_12h', greedy_profit_percentage=1), 
+    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_12h', trailing_stop_percentage=1),
+    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 ]
 
 def start_bot():
