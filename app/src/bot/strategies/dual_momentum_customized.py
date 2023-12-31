@@ -1,5 +1,11 @@
 from bot.kline import KLine
-from bot.trade import Trade, TradeDirection, is_trailing_stop
+from bot.trade import (
+    Trade, 
+    TradeDirection, 
+    is_trailing_stop,
+    is_greedy_profit_reached,
+    is_atr_stop_loss,
+)
 from bot.binance import BinanceInterval
 from typing import Optional
 from strategies.base import Base
@@ -12,7 +18,7 @@ LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 # additional check of volume sma
 
-# additional check of mfi
+# additional check of mfi upward, overbought/oversold
 
 # additional check on stochastics - they should both be going
 # in one direction, and not overbought/oversold
@@ -20,12 +26,14 @@ LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 class DualMomentumCustomized(Base):
     def __init__(
             self, 
-            timeframe: BinanceInterval=BinanceInterval.day, 
-            name='dual_momentum_customized',
-            is_trailing_stop_enabled=False,
+            timeframe:BinanceInterval = BinanceInterval.day, 
+            name = 'dual_momentum_customized',
+            trailing_stop_percentage:Optional[float] = None,
+            greedy_profit_percentage:Optional[float] = None,
         ):
         super().__init__(timeframe, LOOCKBACK, name)
-        self.is_trailing_stop_enabled = is_trailing_stop_enabled
+        self.trailing_stop_percentage = trailing_stop_percentage
+        self.greedy_profit_percentage = greedy_profit_percentage
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -53,7 +61,19 @@ class DualMomentumCustomized(Base):
             reason = 'long exit'
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
-        elif self.is_trailing_stop_enabled and is_trailing_stop(kline.get_running_price(), trade):
+        elif is_atr_stop_loss(kline.get_running_price(), trade):
+            reason = 'ATR stop loss'
+        elif self.greedy_profit_percentage and is_greedy_profit_reached(
+            kline.get_running_price(), 
+            trade, 
+            greedy_percentage=self.greedy_profit_percentage
+        ):
+            reason = 'gready percentage'
+        elif self.trailing_stop_percentage and is_trailing_stop(
+            kline.get_running_price(), 
+            trade, 
+            self.trailing_stop_percentage
+        ):
             reason = 'trailing stop'
             
         return reason
@@ -74,6 +94,7 @@ class DualMomentumCustomized(Base):
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
 
+            # custom tech indicators additionally to dual momentum
             not kline.is_rsi_overbought(),
             not kline.is_above(KLine.Col.stoch_long, 80),
             not kline.is_above(KLine.Col.stoch_short, 80),
@@ -101,6 +122,7 @@ class DualMomentumCustomized(Base):
             kline.is_downward(KLine.Col.rsi),
             kline.is_below(KLine.Col.rsi, 50),
 
+            # custom tech indicators additionally to dual momentum
             not kline.is_rsi_oversold(),
             not kline.is_below(KLine.Col.stoch_long, 20),
             not kline.is_below(KLine.Col.stoch_short, 20),

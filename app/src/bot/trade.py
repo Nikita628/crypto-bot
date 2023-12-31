@@ -90,16 +90,30 @@ def is_expired(trade: Trade) -> bool:
     return trade and datetime.datetime.now() - trade.entry_date > EXPIRATION_PERIOD_HOURS*60*60
 
 
-def is_trailing_stop(running_price: float, trade: Trade) -> bool:
-    current_profit_percentage = (
+def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start = 0.0) -> bool:
+    current_profit_percentage = get_current_profit_percentage(running_price, trade)
+    return (
+        current_profit_percentage > trailing_start and
+        trade.highest_profit_percentage > current_profit_percentage and
+        (trade.highest_profit_percentage - current_profit_percentage) >= trailing_stop_percentage
+    )
+
+
+def is_atr_stop_loss(running_price: float, trade: Trade) -> bool:
+    current_profit_percentage = get_current_profit_percentage(running_price, trade)
+    return current_profit_percentage <= -trade.atr_percentage
+
+
+def is_greedy_profit_reached(running_price: float, trade: Trade, greedy_percentage = 1.0) -> bool:
+    current_profit_percentage = get_current_profit_percentage(running_price, trade)
+    return current_profit_percentage > greedy_percentage
+    
+
+def get_current_profit_percentage(running_price: float, trade: Trade) -> float:
+    return (
         (running_price - trade.entry_price) / trade.entry_price * 100
         if trade.direction == TradeDirection.long.value
         else (trade.entry_price - running_price) / trade.entry_price * 100
-    )
-
-    return current_profit_percentage < -(trade.atr_percentage) or (
-        current_profit_percentage > 1 
-        and abs(current_profit_percentage - trade.highest_profit_percentage) > 1
     )
 
 

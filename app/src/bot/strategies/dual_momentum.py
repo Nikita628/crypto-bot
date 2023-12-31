@@ -1,6 +1,12 @@
 from strategies.base import Base
 from bot.kline import KLine
-from bot.trade import Trade, TradeDirection, is_trailing_stop
+from bot.trade import (
+    Trade, 
+    TradeDirection, 
+    is_trailing_stop,
+    is_greedy_profit_reached,
+    is_atr_stop_loss,
+)
 from bot.binance import BinanceInterval
 from typing import Optional
 
@@ -12,8 +18,12 @@ class DualMomentum(Base):
             self, 
             timeframe: BinanceInterval=BinanceInterval.day, 
             name='dual_momentum',
+            trailing_stop_percentage:Optional[float] = None,
+            greedy_profit_percentage:Optional[float] = None,
         ):
         super().__init__(timeframe, LOOCKBACK, name)
+        self.trailing_stop_percentage = trailing_stop_percentage
+        self.greedy_profit_percentage = greedy_profit_percentage
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -39,6 +49,20 @@ class DualMomentum(Base):
             reason = 'long exit'
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = 'short exit'
+        elif is_atr_stop_loss(kline.get_running_price(), trade):
+            reason = 'ATR stop loss'
+        elif self.greedy_profit_percentage and is_greedy_profit_reached(
+            kline.get_running_price(), 
+            trade, 
+            greedy_percentage=self.greedy_profit_percentage
+        ):
+            reason = 'greedy percentage'
+        elif self.trailing_stop_percentage and is_trailing_stop(
+            kline.get_running_price(), 
+            trade, 
+            self.trailing_stop_percentage
+        ):
+            reason = 'trailing stop'
 
         return reason
 
