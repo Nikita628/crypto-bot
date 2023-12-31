@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import time
 from typing import Optional
 from bot.kline import KLine
-from bot.binance import get_kline, get_all_usdt_symbols
+from bot.binance import get_kline, get_all_usdt_symbols, RateLimitException
 from bot.trade import (
     TradeDirection,
     Trade,
@@ -51,38 +51,49 @@ class Base(ABC):
                             )
                             enter(deal)
                             self.log(f'entered {symbol}')
+                    except RateLimitException as e:
+                        raise e
                     except Exception as e:
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                             
                     time.sleep(5)
                         
                 time.sleep(300)
+        except RateLimitException as e:
+            self.log(f"search_entry: rate limit error {e}")
+            raise e
         except Exception as e:
-            self.log(f'search_entry global error {e}')
+            self.log(f'search_entry: global error {e}')
+            raise e
 
     def search_exit(self):
         try:
             while True:
-                open_deals = get_all_active(self.strategy)
+                open_trades = get_all_active(self.strategy)
 
-                for deal in open_deals:
+                for trade in open_trades:
                     try:
-                        kline = get_kline(deal.symbol, self.timeframe, self.loockback)
+                        kline = get_kline(trade.symbol, self.timeframe, self.loockback)
                         running_price = kline.get_running_price()
-                        exit_reason = self.determine_exit_reason(kline, deal)
+                        exit_reason = self.determine_exit_reason(kline, trade)
 
                         if exit_reason:
-                            exit(deal.id, running_price, exit_reason)
-                            self.log(f'exited {deal.symbol}, reason {exit_reason}')
+                            exit(trade.id, running_price, exit_reason)
+                            self.log(f'exited {trade.symbol}, reason {exit_reason}')
                         else:
-                            extend(deal.id, running_price)
-
+                            extend(trade.id, running_price)
+                    except RateLimitException as e:
+                        raise e
                     except Exception as e:
-                        self.log(f"search_exit: Failed to process data for {deal.base_asset}: {e}")
+                        self.log(f"search_exit: Failed to process data for {trade.base_asset}: {e}")
 
                 time.sleep(60)
+        except RateLimitException as e:
+            self.log(f"search_exit: rate limit error {e}")
+            raise e
         except Exception as e:
-            self.log(f'search_exit global error {e}')
+            self.log(f'search_exit: global error {e}')
+            raise e
 
 
     @abstractmethod

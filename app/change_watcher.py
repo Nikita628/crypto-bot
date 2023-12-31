@@ -3,6 +3,7 @@ import time
 import subprocess
 import signal
 import threading
+from typing import List
 from watchdog.observers.polling import PollingObserver as Observer
 from watchdog.events import FileSystemEventHandler
 
@@ -42,7 +43,7 @@ def start_process_in_thread(paths, process_name, start_command):
     return thread
 
 if __name__ == "__main__":
-    threads = []
+    threads: List[threading.Thread] = []
 
     # For the first process (e.g., a bot)
     monitored_paths_bot = ["src/bot", "src/database"]
@@ -57,8 +58,11 @@ if __name__ == "__main__":
     threads.append(start_process_in_thread(monitored_paths_flask, process_name_flask, start_command_flask))
 
     # Keep the main script running as long as the threads are alive
-    try:
-        while any(thread.is_alive() for thread in threads):
-            time.sleep(2)
-    except KeyboardInterrupt:
-        print("Stopping...")
+    for thread in threads:
+        thread.join()
+
+    # try:
+    #     while any(thread.is_alive() for thread in threads):
+    #         time.sleep(10)
+    # except KeyboardInterrupt:
+    #     print("Stopping...")
