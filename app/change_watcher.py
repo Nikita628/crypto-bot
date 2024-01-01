@@ -46,13 +46,13 @@ if __name__ == "__main__":
     threads: List[threading.Thread] = []
 
     # For the first process (e.g., a bot)
-    monitored_paths_bot = ["src/bot", "src/database"]
+    monitored_paths_bot = ["src/bot", "src/database", "src/integration"]
     process_name_bot = "bot"
     start_command_bot = 'python -u -m debugpy --listen "0.0.0.0:5001" src/bot/main.py'
     threads.append(start_process_in_thread(monitored_paths_bot, process_name_bot, start_command_bot))
 
     # For the Flask server
-    monitored_paths_flask = ["src/api", "src/database"]
+    monitored_paths_flask = ["src/api", "src/database", "src/integration"]
     process_name_flask = "flask_server"
     start_command_flask = 'python -u src/api/main.py'
     threads.append(start_process_in_thread(monitored_paths_flask, process_name_flask, start_command_flask))

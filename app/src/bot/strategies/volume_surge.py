@@ -29,6 +29,7 @@ class VolumeSurge(Base):
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_pvt()
         kline.add_mfi()
+        kline.add_rsi()
 
         if self.is_long_entry(kline):
             return TradeDirection.long
@@ -68,15 +69,18 @@ class VolumeSurge(Base):
         is_pvt_surged_upward = current_pvt > previous_pvt and (
             (current_pvt - previous_pvt) / previous_pvt * 100 > PVT_SURGE_PERCENTAGE
         )
+        overbought_limit = 85
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
             kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 2),
-
             is_pvt_surged_upward,
 
+            kline.is_upward(KLine.Col.rsi),
+            kline.is_below(KLine.Col.rsi, overbought_limit),
+
             kline.is_upward(KLine.Col.mfi),
-            kline.is_below(KLine.Col.mfi, 80),
+            kline.is_below(KLine.Col.mfi, overbought_limit),
         ])
     
 

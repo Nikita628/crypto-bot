@@ -5,3 +5,5 @@ peewee
 requests
 pandas_ta
 flask-cors
+python-telegram-bot
+asyncio

@@ -7,6 +7,8 @@ from strategies import (
     VolumeSurge,
 )
 from typing import List
+from integration.telegram import consume_signals_queue
+import os
 
 ############### TODO: ######################################################
 # API rate limits - 3000 req per min
@@ -59,7 +61,12 @@ def start_bot():
         threads.append(sell_thread)
         buy_thread.start()
         sell_thread.start()
-
+    
+    if os.environ.get('NEED_TO_POST_SIGNALS_IN_TG') == 'true':
+        tg_bot_signals_consumer = threading.Thread(target=consume_signals_queue)
+        threads.append(tg_bot_signals_consumer)
+        tg_bot_signals_consumer.start()
+        
     for thread in threads:
         thread.join()
 
