@@ -69,7 +69,7 @@ class VolumeSurge(Base):
         is_pvt_surged_upward = current_pvt > previous_pvt and (
             (current_pvt - previous_pvt) / previous_pvt * 100 > PVT_SURGE_PERCENTAGE
         )
-        overbought_limit = 85
+        overbought_limit = 80
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)

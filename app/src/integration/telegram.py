@@ -43,12 +43,18 @@ class TradeSignal:
         date = f'\ndate: {datetime.datetime.utcnow().strftime("%b %d, %Y %H:%M")}'
         exit_reason = f'\nexit_reason: {self.exit_reason}' if not self.is_entry else ''
         result = f"signal: {'entry' if self.is_entry else 'exit'}\nstrategy: {self.strategy}\nsymbol: {self.symbol}"
+        url = f'\nhttps://www.binance.com/en/trade/{self.symbol.replace("USDT", "")}_USDT'
+
         if direction:
             result += direction
+
         if exit_reason:
             result += exit_reason
+
         result += date
+        result += url
         return result
+
 
 async def _post_signal_async(signal: TradeSignal):
     # trying to send a message several times with retries,

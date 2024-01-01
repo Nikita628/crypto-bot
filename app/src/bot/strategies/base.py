@@ -52,12 +52,15 @@ class Base(ABC):
                             )
                             enter(deal)
                             self.log(f'entered {symbol}')
-                            post_signal(TradeSignal(
-                                strategy=self.strategy,
-                                symbol=symbol,
-                                is_entry=True,
-                                is_long=direction.value == TradeDirection.long.value,
-                            ))
+
+                            # TODO: only volume surge for chart analysis for now, later all strategies
+                            if self.strategy.startswith('volume_surge'):
+                                post_signal(TradeSignal(
+                                    strategy=self.strategy,
+                                    symbol=symbol,
+                                    is_entry=True,
+                                    is_long=direction.value == TradeDirection.long.value,
+                                ))
                     except RateLimitException as e:
                         raise e
                     except Exception as e:
@@ -87,11 +90,14 @@ class Base(ABC):
                         if exit_reason:
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
-                            post_signal(TradeSignal(
-                                    strategy=self.strategy, 
-                                    symbol=trade.symbol, 
-                                    exit_reason=exit_reason
-                                ))
+
+                            # TODO: only volume surge for chart analysis for now, later all strategies
+                            if self.strategy.startswith('volume_surge'):
+                                post_signal(TradeSignal(
+                                        strategy=self.strategy, 
+                                        symbol=trade.symbol, 
+                                        exit_reason=exit_reason
+                                    ))
                         else:
                             extend(trade.id, running_price)
                     except RateLimitException as e:
