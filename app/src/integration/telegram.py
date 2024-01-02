@@ -30,6 +30,7 @@ class TradeSignal:
             symbol: str,
             is_entry: bool = False,
             is_long: bool = False,
+            running_price: float = 0,
             exit_reason: str = None,
         ):
         self.strategy = strategy
@@ -37,20 +38,20 @@ class TradeSignal:
         self.is_long = is_long
         self.is_entry = is_entry
         self.exit_reason = exit_reason
+        self.date = datetime.datetime.utcnow()
+        self.running_price = running_price
 
     def __str__(self):
-        direction = '\ndirection: long' if self.is_long else 'direction: short' if self.is_entry else ''
-        date = f'\ndate: {datetime.datetime.utcnow().strftime("%b %d, %Y %H:%M")}'
+        direction = '\nlong' if self.is_long else 'short' if self.is_entry else ''
+        date = f'\n{self.date.strftime("%b %d, %Y %H:%M")}'
         exit_reason = f'\nexit_reason: {self.exit_reason}' if not self.is_entry else ''
-        result = f"signal: {'entry' if self.is_entry else 'exit'}\nstrategy: {self.strategy}\nsymbol: {self.symbol}"
+        result = f"{self.strategy}\n{self.symbol} {'entry' if self.is_entry else 'exit'} {direction}"
         url = f'\nhttps://www.binance.com/en/trade/{self.symbol.replace("USDT", "")}_USDT'
-
-        if direction:
-            result += direction
 
         if exit_reason:
             result += exit_reason
 
+        result += f'\n{self.running_price} USDT'
         result += date
         result += url
         return result
