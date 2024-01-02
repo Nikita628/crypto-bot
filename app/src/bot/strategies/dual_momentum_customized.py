@@ -10,7 +10,7 @@ from bot.binance import BinanceInterval
 from typing import Optional
 from strategies.base import Base
 
-LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 # customized dual momentum
 
@@ -31,7 +31,7 @@ class DualMomentumCustomized(Base):
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
         ):
-        super().__init__(timeframe, LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
 
@@ -95,6 +95,9 @@ class DualMomentumCustomized(Base):
             kline.is_above(KLine.Col.rsi, 50),
 
             # custom tech indicators additionally to dual momentum
+            kline.is_min_slope_diff(KLine.Col.stoch_long, 1),
+            kline.is_min_slope_diff(KLine.Col.stoch_short, 1),
+
             not kline.is_rsi_overbought(),
             not kline.is_above(KLine.Col.stoch_long, 80),
             not kline.is_above(KLine.Col.stoch_short, 80),
@@ -123,6 +126,9 @@ class DualMomentumCustomized(Base):
             kline.is_below(KLine.Col.rsi, 50),
 
             # custom tech indicators additionally to dual momentum
+            kline.is_min_slope_diff(KLine.Col.stoch_long, 1),
+            kline.is_min_slope_diff(KLine.Col.stoch_short, 1),
+
             not kline.is_rsi_oversold(),
             not kline.is_below(KLine.Col.stoch_long, 20),
             not kline.is_below(KLine.Col.stoch_short, 20),

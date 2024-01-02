@@ -56,7 +56,7 @@ class TradeSignal:
         return result
 
 
-async def _post_signal_async(signal: TradeSignal):
+async def _post_async(signal: TradeSignal):
     # trying to send a message several times with retries,
     # in case of a network error
     max_attempts = 30
@@ -79,7 +79,7 @@ def consume_signals_queue():
         while True:
             signal = _SIGNALS_QUEUE.get()
             try:
-                await loop.create_task(_post_signal_async(signal))
+                await loop.create_task(_post_async(signal))
                 _SIGNALS_QUEUE.task_done()
             except Exception as e:
                 print(f"Failed to consume signal: {signal}, error: {e}")
@@ -88,5 +88,5 @@ def consume_signals_queue():
     loop.run_until_complete(consume())
 
 
-def post_signal(signal: TradeSignal):  
+def post(signal: TradeSignal):  
     _SIGNALS_QUEUE.put(signal)

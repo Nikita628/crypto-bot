@@ -211,3 +211,10 @@ class KLine:
 
         return True
     
+    def is_min_slope_diff(self, source_column: str, min_diff: float = 0, lookback = 1) -> bool:
+        for i in range(0, lookback):
+            if abs(self.df[source_column].iloc[-1 - i] - self.df[source_column].iloc[-2 - i]) < min_diff:
+                return False
+            
+        return True
+    

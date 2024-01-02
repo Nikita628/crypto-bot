@@ -15,22 +15,22 @@ class BinanceInterval(Enum):
     h12 = '12h'
     day = '1d'
 
-RATE_LIMIT_CODE = 429
+_RATE_LIMIT_CODE = 429
 class RateLimitException(Exception):
     def __init__(self, message="rate limit is broken"):
         self.message = message
         super().__init__(self.message)
 
-RETRY_COUNT = 40
-BACKOFF_FACTOR = 2
-STATUS_FORCELIST = [500, 502, 503, 504]
-REQUEST_TIMEOUT = 240
+_RETRY_COUNT = 80
+_BACKOFF_FACTOR = 2
+_STATUS_FORCELIST = [500, 502, 503, 504]
+_REQUEST_TIMEOUT = 300
 
 def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     url = 'https://api.binance.com/api/v3/klines'
     
     # Setup retry strategy
-    retries = Retry(total=RETRY_COUNT, backoff_factor=BACKOFF_FACTOR, status_forcelist=STATUS_FORCELIST)
+    retries = Retry(total=_RETRY_COUNT, backoff_factor=_BACKOFF_FACTOR, status_forcelist=_STATUS_FORCELIST)
     adapter = HTTPAdapter(max_retries=retries)
     http = requests.Session()
     http.mount("https://", adapter)
@@ -44,12 +44,12 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     
     response = None
     try:
-        response = http.get(url, params=params, timeout=REQUEST_TIMEOUT)
+        response = http.get(url, params=params, timeout=_REQUEST_TIMEOUT)
     except Exception as e:
         print(f'error during request to binance API: {response}, {e}')
         raise e
 
-    if response.status_code == RATE_LIMIT_CODE:
+    if response.status_code == _RATE_LIMIT_CODE:
         raise RateLimitException()
 
     data = response.json()
@@ -70,15 +70,20 @@ def get_all_usdt_symbols() -> List[str]:
     url = 'https://api.binance.com/api/v3/exchangeInfo'
 
     # Setup retry strategy
-    retries = Retry(total=RETRY_COUNT, backoff_factor=BACKOFF_FACTOR, status_forcelist=STATUS_FORCELIST)
+    retries = Retry(total=_RETRY_COUNT, backoff_factor=_BACKOFF_FACTOR, status_forcelist=_STATUS_FORCELIST)
     adapter = HTTPAdapter(max_retries=retries)
     http = requests.Session()
     http.mount("https://", adapter)
     http.mount("http://", adapter)
 
-    response = http.get(url, timeout=REQUEST_TIMEOUT)
-
-    if response.status_code == RATE_LIMIT_CODE:
+    response = None
+    try:
+        response = http.get(url, timeout=_REQUEST_TIMEOUT)
+    except Exception as e:
+        print(f'error during request to binance API: {response}, {e}')
+        raise e
+    
+    if response.status_code == _RATE_LIMIT_CODE:
         raise RateLimitException()
     
     data = response.json()

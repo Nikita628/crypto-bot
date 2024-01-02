@@ -39,6 +39,8 @@ strategies: List[Base] = [
     DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_12h', trailing_stop_percentage=1),
     DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
+    DualMomentumCustomized(timeframe=BinanceInterval.h1, name='dual_momentum_customized_trailing_greedy_1h', trailing_stop_percentage=1, greedy_profit_percentage=1),
+
     # volume surge
     VolumeSurge(), 
     VolumeSurge(name='volume_surge_greedy', greedy_profit_percentage=1), 

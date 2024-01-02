@@ -13,7 +13,7 @@ from bot.trade import (
     is_already_trading,
 )
 from bot.binance import BinanceInterval
-from integration.telegram import post_signal, TradeSignal
+from integration.telegram import post, TradeSignal
 
 class Base(ABC):
     def __init__(self, timeframe: BinanceInterval, loockback: int, strategy: str) -> None:
@@ -54,8 +54,8 @@ class Base(ABC):
                             self.log(f'entered {symbol}')
 
                             # TODO: only volume surge for chart analysis for now, later all strategies
-                            if self.strategy.startswith('volume_surge'):
-                                post_signal(TradeSignal(
+                            if self.strategy.startswith('volume_surge') or self.strategy.endswith('1h'):
+                                post(TradeSignal(
                                     strategy=self.strategy,
                                     symbol=symbol,
                                     is_entry=True,
@@ -74,7 +74,7 @@ class Base(ABC):
             raise e
         except Exception as e:
             self.log(f'search_entry: global error {e}')
-            raise e
+
 
     def search_exit(self):
         try:
@@ -92,8 +92,8 @@ class Base(ABC):
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
 
                             # TODO: only volume surge for chart analysis for now, later all strategies
-                            if self.strategy.startswith('volume_surge'):
-                                post_signal(TradeSignal(
+                            if self.strategy.startswith('volume_surge') or self.strategy.endswith('1h'):
+                                post(TradeSignal(
                                         strategy=self.strategy, 
                                         symbol=trade.symbol, 
                                         exit_reason=exit_reason
@@ -111,7 +111,6 @@ class Base(ABC):
             raise e
         except Exception as e:
             self.log(f'search_exit: global error {e}')
-            raise e
 
 
     @abstractmethod

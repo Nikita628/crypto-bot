@@ -3,7 +3,7 @@ import database.models
 from enum import Enum
 from typing import List
 
-EXPIRATION_PERIOD_HOURS = 48
+_EXPIRATION_PERIOD_HOURS = 48
 
 class TradeDirection(Enum):
     long = 'long'
@@ -46,7 +46,7 @@ class Trade:
         self.strategy = strategy
         self.atr_percentage = atr_percentage
 
-def map_trade(trade: database.models.Trade):
+def _map_trade(trade: database.models.Trade):
     return Trade(
         id = trade.id,
         symbol = trade.symbol,
@@ -66,13 +66,13 @@ def map_trade(trade: database.models.Trade):
         atr_percentage = trade.atr_percentage,
     )
 
-USER_ID = 1
+_USER_ID = 1
 
 def is_already_trading(symbol: str, strategy: str) -> bool:
     deal = database.models.Trade.select().where(
         (database.models.Trade.symbol == symbol)
         & (database.models.Trade.exit_price.is_null(True))
-        & (database.models.Trade.user_id == USER_ID)
+        & (database.models.Trade.user_id == _USER_ID)
         & (database.models.Trade.strategy == strategy)
     )
     return bool(deal)
@@ -80,14 +80,14 @@ def is_already_trading(symbol: str, strategy: str) -> bool:
 def get_all_active(strategy: str) -> List[Trade]:
     trades: List[database.models.Trade] = database.models.Trade.select().where(
        (database.models.Trade.exit_price.is_null(True))
-        & (database.models.Trade.user_id == USER_ID)
+        & (database.models.Trade.user_id == _USER_ID)
         & (database.models.Trade.strategy == strategy)
     )
-    return list(map(map_trade, trades))
+    return list(map(_map_trade, trades))
 
 
 def is_expired(trade: Trade) -> bool:
-    return trade and datetime.datetime.now() - trade.entry_date > EXPIRATION_PERIOD_HOURS*60*60
+    return trade and datetime.datetime.now() - trade.entry_date > _EXPIRATION_PERIOD_HOURS*60*60
 
 
 def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start = 0.0) -> bool:
@@ -124,7 +124,7 @@ def enter(trade: Trade):
            entry_price = trade.entry_price,
            running_price = trade.entry_price,
            direction = trade.direction.value, 
-           user_id = USER_ID,
+           user_id = _USER_ID,
            strategy = trade.strategy,
            atr_percentage = trade.atr_percentage,
         )
@@ -138,7 +138,7 @@ def exit(id: int, running_price: float, reason: str):
             running_price = running_price
         ).where(
             (database.models.Trade.id == id) 
-            & (database.models.Trade.user_id == USER_ID)
+            & (database.models.Trade.user_id == _USER_ID)
         )
     query.execute()
     
@@ -148,6 +148,6 @@ def extend(id: int, running_price: float):
             running_price =  running_price
         ).where(
             (database.models.Trade.id == id)
-            & (database.models.Trade.user_id == USER_ID)
+            & (database.models.Trade.user_id == _USER_ID)
         )
     query.execute()

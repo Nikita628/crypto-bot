@@ -11,7 +11,7 @@ from bot.binance import BinanceInterval
 from typing import Optional
 
 
-LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 class DualMomentum(Base):
     def __init__(
@@ -21,7 +21,7 @@ class DualMomentum(Base):
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
         ):
-        super().__init__(timeframe, LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
 

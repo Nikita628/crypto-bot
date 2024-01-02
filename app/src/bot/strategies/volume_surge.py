@@ -10,8 +10,8 @@ from bot.binance import BinanceInterval
 from typing import Optional
 from strategies.base import Base
 
-LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
-PVT_SURGE_PERCENTAGE = 4
+_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_PVT_SURGE_PERCENTAGE = 4
 
 class VolumeSurge(Base):
     def __init__(
@@ -21,7 +21,7 @@ class VolumeSurge(Base):
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
         ):
-        super().__init__(timeframe, LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
 
@@ -67,7 +67,7 @@ class VolumeSurge(Base):
         current_pvt = kline.df[KLine.Col.pvt].iloc[-1]
         previous_pvt = kline.df[KLine.Col.pvt].iloc[-2]
         is_pvt_surged_upward = current_pvt > previous_pvt and (
-            (current_pvt - previous_pvt) / previous_pvt * 100 > PVT_SURGE_PERCENTAGE
+            (current_pvt - previous_pvt) / previous_pvt * 100 > _PVT_SURGE_PERCENTAGE
         )
         overbought_limit = 80
 
