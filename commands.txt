@@ -1,3 +1,6 @@
+//bash error
+sed -i -e 's/\r$//' migration
+
 //delete folder
 rm -r /var/www/crypto-bot/
 
@@ -19,8 +22,27 @@ chmod +x ~/bot_scripts/files_update
 
 //run
 /var/www/scripts/files_update
+/var/www/scripts/pg_admin_add_server
 
 //server
 cd /var/www/
 screen -dmS python-http-server python3 server.py
 screen -X -S 152489.pts-0.flat-connection quit
+
+
+//container id
+docker ps -aqf "name=crypto-bot-server"
+
+//path to file
+<containerId>:/path/to/file
+
+ca9b98b82203:/src/database/migrations/1.sql
+
+cat ca9b98b82203:/src/database/migrations/1.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+
+//migration
+cat /var/www/1.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+docker exec -it crypto-bot-server bash
+src/database/migrations/1.sql
+docker exec -it crypto-bot-db bash
+docker exec -it crypto-bot-db psql -U postgres -d postgres -f /var/www/1.sql
