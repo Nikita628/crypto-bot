@@ -26,8 +26,15 @@ chmod +x ~/bot_scripts/files_update
 
 //server
 cd /var/www/
-screen -dmS python-http-server python3 server.py
+screen -dmS python-http-server python3 server.py &
 screen -X -S 152489.pts-0.flat-connection quit
+
+//daemon
+python3 server.py &
+
+//kill server process
+ps -fA | grep python
+kill 294697
 
 
 //container id
@@ -37,7 +44,6 @@ docker ps -aqf "name=crypto-bot-server"
 <containerId>:/path/to/file
 
 ca9b98b82203:/src/database/migrations/1.sql
-
 cat ca9b98b82203:/src/database/migrations/1.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
 
 //migration
