@@ -4,7 +4,7 @@ services:
   #   container_name: crypto-bot-ui
   #   build:
   #     context: ./ui
-  #     dockerfile: Dockerfile.local
+  #     dockerfile: Dockerfile.prod
   #   ports:
   #     - "5012:3000"
   #     # - "5013:9229" # debug port
@@ -21,7 +21,7 @@ services:
     container_name: crypto-bot-server
     build:
       context: ./app
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile.prod
     ports:
       - "5010:5000"
       - "5011:5001" # debug port
@@ -36,6 +36,9 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_HOST: db
+      #NEED_TO_POST_SIGNALS_IN_TG: true
+      #DUAL_MOMENTUM_CRYPTO_BOT_TOKEN: ${DUAL_MOMENTUM_CRYPTO_BOT_TOKEN}
+      #CRYPTO_BOT_SIGNALS_CHANNEL_ID: ${CRYPTO_BOT_SIGNALS_CHANNEL_ID}
     volumes:
       - ./app:/app
 
@@ -52,19 +55,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: crypto-bot-pgadmin
-    environment:
-      PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
-      PGADMIN_DEFAULT_PASSWORD: "root"
-    ports:
-      - "5050:80"
-    depends_on:
-      - db
-    volumes:
-      - pgadmin_data:/var/lib/pgadmin
-
 # pg-admin settings
 # host - db
 # port - 5432
@@ -73,6 +63,5 @@ services:
 
 volumes:
   postgres_data:
-  pgadmin_data:
 
-# docker-compose -f docker-compose-prod.yml up --build -d
+# docker-compose -f docker-compose-local.yml up --build -d
