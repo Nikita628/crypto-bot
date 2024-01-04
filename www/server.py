@@ -9,8 +9,6 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 hostName = "193.233.133.115"
 serverPort = 8000
 
-
-
 class DeploymentServer(BaseHTTPRequestHandler):
     def do_POST(self):
         self.send_response(200)
