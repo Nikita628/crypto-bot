@@ -4,7 +4,7 @@ services:
   #   container_name: crypto-bot-ui
   #   build:
   #     context: ./ui
-  #     dockerfile: Dockerfile.local
+  #     dockerfile: Dockerfile.prod
   #   ports:
   #     - "5012:3000"
   #     # - "5013:9229" # debug port
@@ -21,7 +21,7 @@ services:
     container_name: crypto-bot-server
     build:
       context: ./app
-      dockerfile: Dockerfile.local
+      dockerfile: Dockerfile.prod
     ports:
       - "5010:5000"
       - "5011:5001" # debug port
