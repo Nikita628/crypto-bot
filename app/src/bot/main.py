@@ -63,10 +63,10 @@ strategies: List[Base] = [
     DualMomentum(name='dual_momentum_trailing', trailing_stop_percentage=1),
     DualMomentum(name='dual_momentum_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
-    DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12h'), 
-    DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_greedy_12h', greedy_profit_percentage=1), 
-    DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_12h', trailing_stop_percentage=1),
-    DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
+    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12h'), 
+    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_greedy_12h', greedy_profit_percentage=1), 
+    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_12h', trailing_stop_percentage=1),
+    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
     # dual momentum customized
     DualMomentumCustomized(), 
@@ -74,12 +74,10 @@ strategies: List[Base] = [
     DualMomentumCustomized(name='dual_momentum_customized_trailing', trailing_stop_percentage=1),
     DualMomentumCustomized(name='dual_momentum_customized_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
-    DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_12h'), 
-    DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_greedy_12h', greedy_profit_percentage=1), 
-    DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_12h', trailing_stop_percentage=1),
-    DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
-
-    DualMomentumCustomized(timeframe=BinanceInterval.h1, name='dual_momentum_customized_trailing_greedy_1h', trailing_stop_percentage=1, greedy_profit_percentage=1),
+    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_12h'), 
+    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_greedy_12h', greedy_profit_percentage=1), 
+    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_12h', trailing_stop_percentage=1),
+    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
     # volume surge
     VolumeSurge(), 
@@ -87,10 +85,10 @@ strategies: List[Base] = [
     VolumeSurge(name='volume_surge_trailing', trailing_stop_percentage=1),
     VolumeSurge(name='volume_surge_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
-    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_12h'), 
-    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_greedy_12h', greedy_profit_percentage=1), 
-    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_12h', trailing_stop_percentage=1),
-    VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
+    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_12h'), 
+    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_greedy_12h', greedy_profit_percentage=1), 
+    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_12h', trailing_stop_percentage=1),
+    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 ]
 
 def start_bot():

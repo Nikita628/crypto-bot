@@ -5,6 +5,7 @@ from bot.kline import KLine
 from typing import List
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
+import time
 
 class BinanceInterval(Enum):
     min1 = '1m'
@@ -21,34 +22,32 @@ class RateLimitException(Exception):
         self.message = message
         super().__init__(self.message)
 
-_RETRY_COUNT = 80
-_BACKOFF_FACTOR = 2
-_STATUS_FORCELIST = [500, 502, 503, 504]
-_REQUEST_TIMEOUT = 300
+_RETRY_COUNT = 30
+_BACKOFF_FACTOR = 1
+_REQUEST_TIMEOUT = 30
 
 def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     url = 'https://api.binance.com/api/v3/klines'
-    
-    # Setup retry strategy
-    retries = Retry(total=_RETRY_COUNT, backoff_factor=_BACKOFF_FACTOR, status_forcelist=_STATUS_FORCELIST)
-    adapter = HTTPAdapter(max_retries=retries)
-    http = requests.Session()
-    http.mount("https://", adapter)
-    http.mount("http://", adapter)
-
     params = {
         'symbol': symbol,
         'interval': interval.value,
         'limit': lookback
     }
-    
-    response = None
-    try:
-        response = http.get(url, params=params, timeout=_REQUEST_TIMEOUT)
-    except Exception as e:
-        print(f'error during request to binance API: {response}, {e}')
-        raise e
 
+    response = None
+    for attempt in range(_RETRY_COUNT):
+        try:
+            response = requests.get(url, params=params, timeout=_REQUEST_TIMEOUT)
+            break
+        except Exception as e:
+            print('kline', symbol, attempt)
+            if (attempt < _RETRY_COUNT - 1):
+                delay_between_attempts = _BACKOFF_FACTOR * attempt
+                time.sleep(delay_between_attempts)
+
+    if not response:
+        raise Exception('failed to get response')
+    
     if response.status_code == _RATE_LIMIT_CODE:
         raise RateLimitException()
 
@@ -69,19 +68,19 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
 def get_all_usdt_symbols() -> List[str]:
     url = 'https://api.binance.com/api/v3/exchangeInfo'
 
-    # Setup retry strategy
-    retries = Retry(total=_RETRY_COUNT, backoff_factor=_BACKOFF_FACTOR, status_forcelist=_STATUS_FORCELIST)
-    adapter = HTTPAdapter(max_retries=retries)
-    http = requests.Session()
-    http.mount("https://", adapter)
-    http.mount("http://", adapter)
-
     response = None
-    try:
-        response = http.get(url, timeout=_REQUEST_TIMEOUT)
-    except Exception as e:
-        print(f'error during request to binance API: {response}, {e}')
-        raise e
+    for attempt in range(_RETRY_COUNT):
+        try:
+            response = requests.get(url, timeout=_REQUEST_TIMEOUT)
+            break
+        except Exception as e:
+            print('allusdt', attempt)
+            if (attempt < _RETRY_COUNT - 1):
+                delay_between_attempts = _BACKOFF_FACTOR * attempt
+                time.sleep(delay_between_attempts)
+    
+    if not response:
+        raise Exception('failed to get response')
     
     if response.status_code == _RATE_LIMIT_CODE:
         raise RateLimitException()

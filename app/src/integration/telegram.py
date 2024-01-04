@@ -60,16 +60,17 @@ class TradeSignal:
 async def _post_async(signal: TradeSignal):
     # trying to send a message several times with retries,
     # in case of a network error
-    max_attempts = 30
-    base_delay_between_attempts = 2
+    max_attempts = 10
+    base_delay_between_attempts = 1
 
     for attempt in range(max_attempts):
         try:
             await _DUAL_MOMENTUM_TG_BOT.send_message(chat_id=_CRYPTO_BOT_SIGNALS_CHANNEL_ID, text=str(signal))
             break
         except Exception as e:
-            delay_between_attempts = base_delay_between_attempts * attempt
-            time.sleep(delay_between_attempts)
+            if attempt < max_attempts - 1:
+                delay_between_attempts = base_delay_between_attempts * attempt
+                time.sleep(delay_between_attempts)
 
 
 def consume_signals_queue():
