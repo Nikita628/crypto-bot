@@ -20,7 +20,7 @@ class webHookServer(BaseHTTPRequestHandler):
             try:
                 call("./scripts/files_update", shell=True)
 
-                TOKEN = '6874810972:AAG6QTkvcU21ift9Ddpfe3IQNEgj5DxAqOw'
+                """ TOKEN = '6874810972:AAG6QTkvcU21ift9Ddpfe3IQNEgj5DxAqOw'
                 CHAT_ID = '-1002072371752'
                 SEND_URL = f'https://api.telegram.org/bot{TOKEN}/sendMessage'
                 message = f'<b>Crypto-bot message</b>\n'
@@ -31,7 +31,7 @@ class webHookServer(BaseHTTPRequestHandler):
                 if response:
                     print('result is sent to telegram')
                 else:
-                    print('error sending to telegram')
+                    print('error sending to telegram') """
 
             except:
                 print('update error')
