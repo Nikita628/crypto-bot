@@ -63,7 +63,7 @@ then
   cd /var/www/crypto-bot/bot/
   docker-compose -f docker-compose-db-prod.yml up --build -d
 else
-  echo "no docker compose file docker-compose-prod.yml"
+  echo "no docker compose file docker-compose-db-prod.yml"
   printf "$dt no docker compose file docker-compose-db-prod.yml\n" >> $deploying_log_file
 fi
 
@@ -77,7 +77,7 @@ then
   cd /var/www/crypto-bot/bot/
   docker-compose -f docker-compose-server-and-ui-prod.yml up --build -d
 else
-  echo "no docker compose file docker-compose-prod.yml"
+  echo "no docker compose file docker-compose-server-and-ui-prod.yml"
   printf "$dt no docker compose file docker-compose-server-and-ui-prod.yml\n" >> $deploying_log_file
 fi
 
