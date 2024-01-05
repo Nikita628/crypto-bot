@@ -20,7 +20,7 @@ class DeploymentServer(BaseHTTPRequestHandler):
         data = json.loads(data_unicode)
         if data.get('ref') == 'refs/heads/migrations_and_python_server':
             try:
-                call("./scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
+                call("/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
 
                 load_dotenv()
                 CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
