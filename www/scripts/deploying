@@ -7,7 +7,7 @@ dt=`date '+%d/%m/%Y %H:%M:%S'`
 #check log files
 if [ ! -f $deploying_log_file ]
 then
-  echo "creating deploying log file"
+  echo "creating /var/www/logs/deploying.log"
   touch $deploying_log_file
 fi
 
@@ -59,7 +59,7 @@ rm -r /var/www/crypto-bot/bot/www/
 if [ -f "/var/www/crypto-bot/bot/docker-compose-db-prod.yml" ]
 then
   echo "running db docker"
-  printf "$dt running docker\n" >> $deploying_log_file
+  printf "$dt running db docker\n" >> $deploying_log_file
   cd /var/www/crypto-bot/bot/
   docker-compose -f docker-compose-db-prod.yml up --build -d
 else
@@ -73,7 +73,7 @@ cd /var/www/dbmate/ ; dbmate up
 if [ -f "/var/www/crypto-bot/bot/docker-compose-server-and-ui-prod.yml" ]
 then
   echo "running server and ui docker"
-  printf "$dt running docker\n" >> $deploying_log_file
+  printf "$dt running server and ui docker\n" >> $deploying_log_file
   cd /var/www/crypto-bot/bot/
   docker-compose -f docker-compose-server-and-ui-prod.yml up --build -d
 else

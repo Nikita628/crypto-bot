@@ -44,4 +44,7 @@ services:
     volumes:
       - ./app:/app
 
+volumes:
+  postgres_data:
+
 # docker-compose -f docker-compose-server-and-ui-prod.yml up --build -d
