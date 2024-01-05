@@ -1,0 +1,92 @@
+#!/bin/bash
+
+#variables
+deploying_log_file='/var/www/logs/deploying.log'
+dt=`date '+%d/%m/%Y %H:%M:%S'`
+
+#check log files
+if [ ! -f $deploying_log_file ]
+then
+  echo "creating deploying log file"
+  touch $deploying_log_file
+fi
+
+#stop docker
+docker stop $(docker ps -a -q)
+#remove containers
+docker ps --filter status=exited -q | xargs docker rm
+
+#check
+if [ ! -d "/var/www/crypto-bot/" ]
+then
+  echo "/var/www/crypto-bot/ does not exist"
+  printf "$dt /var/www/crypto-bot/ does not exist\n" >> $deploying_log_file
+  mkdir /var/www/crypto-bot/
+fi
+
+#delete folder
+if [ -d "/var/www/crypto-bot/bot/" ]
+then
+  echo "deleting /var/www/crypto-bot/bot"
+  printf "$dt deleting /var/www/crypto-bot/bot\n" >> $deploying_log_file
+  rm -r /var/www/crypto-bot/bot/
+fi
+
+#add folder
+if [ ! -d "/var/www/crypto-bot/bot/" ]
+then
+  echo "adding /var/www/crypto-bot/bot/"
+  printf "$dt adding /var/www/crypto-bot/bot/\n" >> $deploying_log_file
+  mkdir /var/www/crypto-bot/bot/
+fi
+
+#git clone repository
+cd /var/www/crypto-bot/bot/
+git init
+git config --global user.name "junkysoul"
+git config --global user.email "dmitrystopkov@gmail.com"
+eval $(ssh-agent -s)
+ssh-add /var/www/github_ssh_keys/key
+git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
+
+#move files
+rm -r /var/www/crypto-bot/bot/.git/
+mv /var/www/crypto-bot/bot/crypto-bot/* /var/www/crypto-bot/bot/
+rm -r /var/www/crypto-bot/bot/crypto-bot/
+rm -r /var/www/crypto-bot/bot/www/
+
+#run docker
+if [ -f "/var/www/crypto-bot/bot/docker-compose-db-prod.yml" ]
+then
+  echo "running db docker"
+  printf "$dt running docker\n" >> $deploying_log_file
+  cd /var/www/crypto-bot/bot/
+  docker-compose -f docker-compose-db-prod.yml up --build -d
+else
+  echo "no docker compose file docker-compose-prod.yml"
+  printf "$dt no docker compose file docker-compose-db-prod.yml\n" >> $deploying_log_file
+fi
+
+#run migrations
+cd /var/www/dbmate/ ; dbmate up
+
+if [ -f "/var/www/crypto-bot/bot/docker-compose-server-and-ui-prod.yml" ]
+then
+  echo "running server and ui docker"
+  printf "$dt running docker\n" >> $deploying_log_file
+  cd /var/www/crypto-bot/bot/
+  docker-compose -f docker-compose-server-and-ui-prod.yml up --build -d
+else
+  echo "no docker compose file docker-compose-prod.yml"
+  printf "$dt no docker compose file docker-compose-server-and-ui-prod.yml\n" >> $deploying_log_file
+fi
+
+echo 'restarting deployment server...'
+printf "$dt restarting deployment server\n" >> $deploying_log_file
+pkill -f deployment_server.py
+if [ -f "/var/www/deployment_server/deployment_server.py" ]
+then
+  cd /var/www/deployment_server/
+  screen -dmS python-http-server python3 deployment_server.py &
+fi
+

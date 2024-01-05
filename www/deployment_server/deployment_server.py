@@ -20,17 +20,17 @@ class DeploymentServer(BaseHTTPRequestHandler):
         data = json.loads(data_unicode)
         if data.get('ref') == 'refs/heads/migrations_and_python_server':
             try:
-                call("./scripts/files_update", shell=True)
+                call("./scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
 
                 load_dotenv()
-                TG_STATUS_GROUP_CHAT_ID = os.getenv('TG_STATUS_GROUP_CHAT_ID')
-                TG_BOT_TOKEN = os.getenv('TG_BOT_TOKEN')
-                SEND_URL = f'https://api.telegram.org/bot{TG_BOT_TOKEN}/sendMessage'
+                CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
+                CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
+                SEND_URL = f'https://api.telegram.org/bot{CRYPTO_BOT_TOKEN}/sendMessage'
                 message = f'<b>Crypto-bot message</b>\n'
                 message += f'<b>Action:</b> update files\n'
                 message += f'<b>Result:</b> success\n'
                 message += f'<b>DateTime:</b> ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                response = requests.post(SEND_URL, json={'chat_id': TG_STATUS_GROUP_CHAT_ID, 'parse_mode': 'html', 'text': message})
+                response = requests.post(SEND_URL, json={'chat_id': CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
                 if response:
                     print('result is sent to telegram')
                 else:

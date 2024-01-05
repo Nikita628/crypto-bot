@@ -6,10 +6,10 @@ import queue
 import time
 import datetime
 
-_DUAL_MOMENTUM_CRYPTO_BOT_TOKEN = os.environ.get('DUAL_MOMENTUM_CRYPTO_BOT_TOKEN')
-_CRYPTO_BOT_SIGNALS_CHANNEL_ID = os.environ.get('CRYPTO_BOT_SIGNALS_CHANNEL_ID')
+_CRYPTO_BOT_TOKEN = os.environ.get('CRYPTO_BOT_TOKEN')
+_CRYPTO_BOT_SIGNALS_CHAT_ID = os.environ.get('CRYPTO_BOT_SIGNALS_CHAT_ID')
 
-if not _DUAL_MOMENTUM_CRYPTO_BOT_TOKEN or not _CRYPTO_BOT_SIGNALS_CHANNEL_ID:
+if not _CRYPTO_BOT_TOKEN or not _CRYPTO_BOT_SIGNALS_CHAT_ID:
     raise ValueError('telegram bot env variables are not set')
 
 _REQUEST = HTTPXRequest(
@@ -21,7 +21,7 @@ _REQUEST = HTTPXRequest(
 )
 _SIGNALS_QUEUE = queue.Queue()
 # dual_momentum_crypto_bot
-_DUAL_MOMENTUM_TG_BOT = Bot(token=_DUAL_MOMENTUM_CRYPTO_BOT_TOKEN, request=_REQUEST)
+_TG_BOT = Bot(token=_CRYPTO_BOT_TOKEN, request=_REQUEST)
 
 class TradeSignal:
     def __init__(
@@ -65,7 +65,7 @@ async def _post_async(signal: TradeSignal):
 
     for attempt in range(max_attempts):
         try:
-            await _DUAL_MOMENTUM_TG_BOT.send_message(chat_id=_CRYPTO_BOT_SIGNALS_CHANNEL_ID, text=str(signal))
+            await _TG_BOT.send_message(chat_id=_CRYPTO_BOT_SIGNALS_CHAT_ID, text=str(signal))
             break
         except Exception as e:
             if attempt < max_attempts - 1:
