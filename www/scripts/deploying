@@ -1,5 +1,14 @@
 #!/bin/bash
 
+echo 'restarting deployment server...'
+printf "$dt restarting deployment server\n" >> $deploying_log_file
+pkill -f deployment_server.py
+if [ -f "/var/www/deployment_server/deployment_server.py" ]
+then
+  cd /var/www/deployment_server/
+  screen -dmS python-http-server python3 deployment_server.py &
+fi
+
 #variables
 deploying_log_file='/var/www/logs/deploying.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
@@ -79,14 +88,5 @@ then
 else
   echo "no docker compose file docker-compose-server-and-ui-prod.yml"
   printf "$dt no docker compose file docker-compose-server-and-ui-prod.yml\n" >> $deploying_log_file
-fi
-
-echo 'restarting deployment server...'
-printf "$dt restarting deployment server\n" >> $deploying_log_file
-pkill -f deployment_server.py
-if [ -f "/var/www/deployment_server/deployment_server.py" ]
-then
-  cd /var/www/deployment_server/
-  screen -dmS python-http-server python3 deployment_server.py &
 fi
 
