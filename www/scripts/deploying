@@ -11,15 +11,6 @@ then
   touch $deploying_log_file
 fi
 
-echo 'restarting deployment server...'
-printf "$dt restarting deployment server\n" >> $deploying_log_file
-pkill -f deployment_server.py
-if [ -f "/var/www/deployment_server/deployment_server.py" ]
-then
-  cd /var/www/deployment_server/
-  screen -dmS python-http-server python3 deployment_server.py &
-fi
-
 #stop docker
 docker stop $(docker ps -a -q)
 #remove containers
