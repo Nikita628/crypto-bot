@@ -16,7 +16,7 @@ CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 def do_post():
     if request.method == 'POST':
         post_data = json.loads(request.data)
-        if post_data.get('ref') == 'refs/heads/migrations_and_python_server':
+        if post_data.get('ref') == 'refs/heads/prod':
             try:
                 call("/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
                 SEND_URL = f'https://api.telegram.org/bot{CRYPTO_BOT_TOKEN}/sendMessage'
