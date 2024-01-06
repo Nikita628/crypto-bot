@@ -19,6 +19,12 @@ def do_post():
         if post_data.get('ref') == 'refs/heads/migrations_and_python_server':
             try:
                 call("/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
+                SEND_URL = f'https://api.telegram.org/bot{CRYPTO_BOT_TOKEN}/sendMessage'
+                message = f'<b>Crypto-bot message</b>\n'
+                message += f'<b>Action:</b> update files\n'
+                message += f'<b>Result:</b> success\n'
+                message += f'<b>DateTime:</b> ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+                response = requests.post(SEND_URL, json={'chat_id': CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
             except:
                 return 'Update error. Calling bash script is crashed'
             return 'prod branch action'
