@@ -52,11 +52,14 @@ git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.gi
 #move files
 rm -r /var/www/crypto-bot/bot/.git/
 mv /var/www/crypto-bot/bot/crypto-bot/* /var/www/crypto-bot/bot/
-rm -r /var/www/crypto-bot/bot/crypto-bot/
 
 #move www folder content
-mv /var/www/crypto-bot/bot/www/* /var/www/
+mv /var/www/crypto-bot/bot/www/dbmate/db/migrations/* /var/www/dbmate/db/migrations/
+mv /var/www/crypto-bot/bot/www/deployment_server/* /var/www/deployment_server/
+
+#remove
 rm -r /var/www/crypto-bot/bot/www/
+rm -r /var/www/crypto-bot/bot/crypto-bot/
 
 #run docker db
 echo "running db docker"
@@ -73,3 +76,4 @@ printf "$dt running server and ui docker\n" >> $deploying_log_file
 cd /var/www/crypto-bot/bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
 
+systemctl restart bot_deployment_server
