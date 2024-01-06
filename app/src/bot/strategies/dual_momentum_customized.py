@@ -78,7 +78,9 @@ class DualMomentumCustomized(Base):
             
         return reason
 
-    def is_long_entry(self, kline: KLine):      
+    def is_long_entry(self, kline: KLine):    
+        overbought_limit = 80
+        min_slope_diff = 0.5  
         return all([
             kline.is_upward(KLine.Col.ema_200), 
 
@@ -95,21 +97,25 @@ class DualMomentumCustomized(Base):
             kline.is_above(KLine.Col.rsi, 50),
 
             # custom tech indicators additionally to dual momentum
-            kline.is_min_slope_diff(KLine.Col.stoch_long, 1),
-            kline.is_min_slope_diff(KLine.Col.stoch_short, 1),
+            kline.is_min_slope_diff(KLine.Col.stoch_long, min_slope_diff),
+            kline.is_min_slope_diff(KLine.Col.stoch_short, min_slope_diff),
+            not kline.is_above(KLine.Col.stoch_long, overbought_limit),
+            not kline.is_above(KLine.Col.stoch_short, overbought_limit),
 
             not kline.is_rsi_overbought(),
-            not kline.is_above(KLine.Col.stoch_long, 80),
-            not kline.is_above(KLine.Col.stoch_short, 70),
+            kline.is_min_slope_diff(KLine.Col.rsi, min_slope_diff),
 
             kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_upward(KLine.Col.mfi),
-            not kline.is_above(KLine.Col.mfi, 80),
+            not kline.is_above(KLine.Col.mfi, overbought_limit),
+            kline.is_min_slope_diff(KLine.Col.mfi, min_slope_diff),
         ])
     
     
     def is_short_entry(self, kline: KLine):
+        oversold_limit = 20
+        min_slope_diff = 0.5  
         return all([
             kline.is_downward(KLine.Col.ema_200), 
 
@@ -126,17 +132,19 @@ class DualMomentumCustomized(Base):
             kline.is_below(KLine.Col.rsi, 50),
 
             # custom tech indicators additionally to dual momentum
-            kline.is_min_slope_diff(KLine.Col.stoch_long, 1),
-            kline.is_min_slope_diff(KLine.Col.stoch_short, 1),
+            kline.is_min_slope_diff(KLine.Col.stoch_long, min_slope_diff),
+            kline.is_min_slope_diff(KLine.Col.stoch_short, min_slope_diff),
+            not kline.is_below(KLine.Col.stoch_long, oversold_limit),
+            not kline.is_below(KLine.Col.stoch_short, oversold_limit),
 
             not kline.is_rsi_oversold(),
-            not kline.is_below(KLine.Col.stoch_long, 20),
-            not kline.is_below(KLine.Col.stoch_short, 30),
+            kline.is_min_slope_diff(KLine.Col.rsi, min_slope_diff),
 
             kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_downward(KLine.Col.mfi),
-            not kline.is_below(KLine.Col.mfi, 20),
+            not kline.is_below(KLine.Col.mfi, oversold_limit),
+            kline.is_min_slope_diff(KLine.Col.mfi, min_slope_diff),
         ])
     
     def is_long_exit(self, kline: KLine):

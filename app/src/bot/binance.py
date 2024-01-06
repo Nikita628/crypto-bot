@@ -40,7 +40,6 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
             response = requests.get(url, params=params, timeout=_REQUEST_TIMEOUT)
             break
         except Exception as e:
-            print('kline', symbol, attempt)
             if (attempt < _RETRY_COUNT - 1):
                 delay_between_attempts = _BACKOFF_FACTOR * attempt
                 time.sleep(delay_between_attempts)
@@ -74,7 +73,6 @@ def get_all_usdt_symbols() -> List[str]:
             response = requests.get(url, timeout=_REQUEST_TIMEOUT)
             break
         except Exception as e:
-            print('allusdt', attempt)
             if (attempt < _RETRY_COUNT - 1):
                 delay_between_attempts = _BACKOFF_FACTOR * attempt
                 time.sleep(delay_between_attempts)
