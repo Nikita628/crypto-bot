@@ -9,6 +9,13 @@ app = Flask(__name__)
 @app.route('/')
 def do_post():
     if request.method == 'POST':
+        if(request.args.get('ref')):
+            with open('output.txt', 'a') as f:
+                f.write(request.args.get('ref'))
+        else:
+            with open('output.txt', 'a') as f:
+                f.write('end')
+
         request.args.get('ref') == 'refs/heads/migrations_and_python_server':
             try:
                 call("/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
