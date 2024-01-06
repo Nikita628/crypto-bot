@@ -15,4 +15,3 @@ COMMENT ON DATABASE postgres
 
 -- migrate:down
 DROP DATABASE IF EXISTS postgres
-
