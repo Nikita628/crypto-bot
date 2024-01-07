@@ -9,27 +9,38 @@ import json
 app = Flask(__name__)
 
 load_dotenv()
-CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
-CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
+_CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
+_CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
+SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['POST'])
 def do_post():
-    if request.method == 'POST':
-        post_data = json.loads(request.data)
-        if post_data.get('ref') == 'refs/heads/prod':
-            try:
-                call("/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log", shell=True)
-                SEND_URL = f'https://api.telegram.org/bot{CRYPTO_BOT_TOKEN}/sendMessage'
-                message = f'<b>Crypto-bot message</b>\n'
-                message += f'<b>Action:</b> update files\n'
-                message += f'<b>Result:</b> success\n'
-                message += f'<b>DateTime:</b> ' + datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
-                response = requests.post(SEND_URL, json={'chat_id': CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
-            except:
-                return 'Update error. Calling bash script is crashed'
-            return 'prod branch action'
-        else:
-            return 'other branch action'
+    git_event = json.loads(request.data)
+    if git_event.get('ref') == 'refs/heads/prod':
+        update_result = 'success'
+
+        try:
+            call("/var/www/scripts/deployment 2> /var/www/logs/deployment_err.log", shell=True)
+        except:
+            update_result = 'error'
+
+        message = f'''<b>Crypto-bot message</b>
+        <b>Action:</b> update files
+        <b>Result:</b> {update_result}
+        <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
+        response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+
+        # retry if failed
+        if not response:
+            count = 1
+            while (not response and count <= 5):
+                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+                count += 1
+
+        return 'prod branch action'
+    else:
+        return 'other branch action'
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,26 +1,21 @@
 #!/bin/bash
 
 #variables
-deploying_log_file='/var/www/logs/deploying.log'
+deployment_log_file='/var/www/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
 
 #check log files
-if [ ! -f $deploying_log_file ]
+if [ ! -f $deployment_log_file ]
 then
-  echo "creating /var/www/logs/deploying.log"
-  touch $deploying_log_file
+  echo "creating /var/www/logs/deployment.log"
+  touch $deployment_log_file
 fi
-
-#stop docker
-docker stop $(docker ps -a -q)
-#remove containers
-docker ps --filter status=exited -q | xargs docker rm
 
 #check
 if [ ! -d "/var/www/crypto-bot/" ]
 then
   echo "/var/www/crypto-bot/ does not exist"
-  printf "$dt /var/www/crypto-bot/ does not exist\n" >> $deploying_log_file
+  printf "$dt /var/www/crypto-bot/ does not exist\n" >> $deployment_log_file
   mkdir /var/www/crypto-bot/
 fi
 
@@ -28,7 +23,7 @@ fi
 if [ -d "/var/www/crypto-bot/bot/" ]
 then
   echo "deleting /var/www/crypto-bot/bot"
-  printf "$dt deleting /var/www/crypto-bot/bot\n" >> $deploying_log_file
+  printf "$dt deleting /var/www/crypto-bot/bot\n" >> $deployment_log_file
   rm -r /var/www/crypto-bot/bot/
 fi
 
@@ -36,7 +31,7 @@ fi
 if [ ! -d "/var/www/crypto-bot/bot/" ]
 then
   echo "adding /var/www/crypto-bot/bot/"
-  printf "$dt adding /var/www/crypto-bot/bot/\n" >> $deploying_log_file
+  printf "$dt adding /var/www/crypto-bot/bot/\n" >> $deployment_log_file
   mkdir /var/www/crypto-bot/bot/
 fi
 
@@ -63,7 +58,7 @@ rm -r /var/www/crypto-bot/bot/crypto-bot/
 
 #run docker db
 echo "running db docker"
-printf "$dt running db docker\n" >> $deploying_log_file
+printf "$dt running db docker\n" >> $deployment_log_file
 cd /var/www/crypto-bot/bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
@@ -72,7 +67,7 @@ cd /var/www/dbmate/ ; dbmate up
 
 #run docker server
 echo "running server and ui docker"
-printf "$dt running server and ui docker\n" >> $deploying_log_file
+printf "$dt running server and ui docker\n" >> $deployment_log_file
 cd /var/www/crypto-bot/bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
 

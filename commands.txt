@@ -56,6 +56,11 @@ docker exec -it crypto-bot-server bash
 src/database/migrations/1.sql
 docker exec -it crypto-bot-db bash
 docker exec -it crypto-bot-db psql -U postgres -d postgres -f /var/www/1.sql
+//stop docker
+docker stop $(docker ps -a -q)
+//remove docker containers
+docker ps --filter status=exited -q | xargs docker rm
+
 
 //copy out from docker
 containerID=`docker ps -aqf "name=crypto-bot-server"`
