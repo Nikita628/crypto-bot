@@ -81,6 +81,12 @@ class DualMomentum(Base):
 
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
+
+            (kline.is_below(KLine.Col.stoch_long, 80)
+             and kline.is_above(KLine.Col.stoch_long, 20)),
+
+            (kline.is_below(KLine.Col.stoch_short, 80)
+            and kline.is_above(KLine.Col.stoch_short, 20)),
         ])
     
     def is_short_entry(self, kline: KLine):
@@ -98,6 +104,12 @@ class DualMomentum(Base):
 
             kline.is_downward(KLine.Col.rsi),
             kline.is_below(KLine.Col.rsi, 50),
+
+            (kline.is_above(KLine.Col.stoch_long, 20)
+             and kline.is_below(KLine.Col.stoch_long, 80)),
+
+            (kline.is_above(KLine.Col.stoch_short, 20)
+             and kline.is_below(KLine.Col.stoch_short, 80)),
         ])
     
     def is_long_exit(self, kline: KLine):
