@@ -12,6 +12,7 @@ load_dotenv()
 CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 
+
 @app.route('/', methods=['GET', 'POST'])
 def do_post():
     if request.method == 'POST':
