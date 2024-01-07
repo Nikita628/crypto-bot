@@ -57,38 +57,31 @@ import os
 # beware of 'dangerous' coins
 
 strategies: List[Base] = [
-    # dual momentum
+    # dual momentum ############################
     DualMomentum(), 
     DualMomentum(name='dual_momentum_greedy', greedy_profit_percentage=1), 
     DualMomentum(name='dual_momentum_trailing', trailing_stop_percentage=1),
     DualMomentum(name='dual_momentum_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
 
-    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_12h'), 
-    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_greedy_12h', greedy_profit_percentage=1), 
-    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_12h', trailing_stop_percentage=1),
-    # DualMomentum(timeframe=BinanceInterval.h12, name='dual_momentum_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
-
-    # dual momentum customized
+    # dual momentum customized ####################
     DualMomentumCustomized(), 
+
+    DualMomentumCustomized(name='dual_momentume_customized_overprice_exit', is_over_price_exit=True), 
+
     DualMomentumCustomized(name='dual_momentum_customized_greedy', greedy_profit_percentage=1), 
+    DualMomentumCustomized(name='dual_momentum_customized_greedy_hard_stop', greedy_profit_percentage=1, hard_stop_loss_percentage=-3), 
+
     DualMomentumCustomized(name='dual_momentum_customized_trailing', trailing_stop_percentage=1),
+    DualMomentumCustomized(name='dual_momentum_customized_trailing_hard_stop', trailing_stop_percentage=1, hard_stop_loss_percentage=-3),
+
     DualMomentumCustomized(name='dual_momentum_customized_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
-
-    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_12h'), 
-    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_greedy_12h', greedy_profit_percentage=1), 
-    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_12h', trailing_stop_percentage=1),
-    # DualMomentumCustomized(timeframe=BinanceInterval.h12, name='dual_momentum_customized_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
-
-    # volume surge
+    DualMomentumCustomized(name='dual_momentum_customized_trailing_greedy_hard_stop', trailing_stop_percentage=1, greedy_profit_percentage=1, hard_stop_loss_percentage=-3),
+    
+    # volume surge ##############################
     VolumeSurge(), 
     VolumeSurge(name='volume_surge_greedy', greedy_profit_percentage=1), 
     VolumeSurge(name='volume_surge_trailing', trailing_stop_percentage=1),
     VolumeSurge(name='volume_surge_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
-
-    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_12h'), 
-    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_greedy_12h', greedy_profit_percentage=1), 
-    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_12h', trailing_stop_percentage=1),
-    # VolumeSurge(timeframe=BinanceInterval.h12, name='volume_surge_trailing_greedy_12h', trailing_stop_percentage=1, greedy_profit_percentage=1),
 ]
 
 def start_bot():

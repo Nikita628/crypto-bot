@@ -105,9 +105,10 @@ class DualMomentum(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long),
                 kline.is_downward(KLine.Col.stoch_short),
+            ]) or ([
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
-            ]) 
+            ])
         )
 
     def is_short_exit(self, kline: KLine):
@@ -115,7 +116,8 @@ class DualMomentum(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long),
                 kline.is_upward(KLine.Col.stoch_short),
+            ]) or all ([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
-            ]) 
+            ])
         )

@@ -5,6 +5,7 @@ from bot.trade import (
     is_trailing_stop,
     is_greedy_profit_reached,
     is_atr_stop_loss,
+    get_current_profit_percentage,
 )
 from bot.binance import BinanceInterval
 from typing import Optional
@@ -30,10 +31,14 @@ class DualMomentumCustomized(Base):
             name = 'dual_momentum_customized',
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
+            hard_stop_loss_percentage:Optional[float] = None,
+            is_over_price_exit:bool = False,
         ):
         super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
+        self.hard_stop_loss_percentage = hard_stop_loss_percentage
+        self.is_over_price_exit = is_over_price_exit
 
     def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -55,6 +60,7 @@ class DualMomentumCustomized(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long)
         kline.add_rsi()
+        kline.add_mfi()
 
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
@@ -75,12 +81,41 @@ class DualMomentumCustomized(Base):
             self.trailing_stop_percentage
         ):
             reason = 'trailing stop'
+        elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
+            reason = 'hard stop loss'
+        elif self.is_over_price_exit and self.is_over_price(kline, trade.direction):
+            reason = 'overprice exit'
             
         return reason
+    
+
+    def is_over_price(self, kline: KLine, direction: TradeDirection):
+        prev_stoch_short = kline.df[KLine.Col.stoch_short].iloc[-2]
+        prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
+        prev_mfi = kline.df[KLine.Col.mfi].iloc[-2]
+        overbought_limit = 80
+        oversold_limit = 20
+
+        if direction == TradeDirection.long.value:
+            return (
+                any([
+                    (prev_stoch_short > overbought_limit and kline.is_below(KLine.Col.stoch_short, overbought_limit)),
+                    (prev_rsi > overbought_limit and kline.is_below(KLine.Col.rsi, overbought_limit)),
+                    (prev_mfi > overbought_limit and kline.is_below(KLine.Col.mfi, overbought_limit)),
+                ])
+            )
+        else:
+            return (
+                any([
+                    (prev_stoch_short < oversold_limit and kline.is_above(KLine.Col.stoch_short, oversold_limit)),
+                    (prev_rsi < oversold_limit and kline.is_above(KLine.Col.rsi, oversold_limit)),
+                    (prev_mfi < oversold_limit and kline.is_above(KLine.Col.mfi, oversold_limit)),
+                ])
+            )
+
 
     def is_long_entry(self, kline: KLine):    
         overbought_limit = 80
-        min_slope_diff = 0.5  
         return all([
             kline.is_upward(KLine.Col.ema_200), 
 
@@ -96,26 +131,25 @@ class DualMomentumCustomized(Base):
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
 
-            # custom tech indicators additionally to dual momentum
-            kline.is_min_slope_diff(KLine.Col.stoch_long, min_slope_diff),
-            kline.is_min_slope_diff(KLine.Col.stoch_short, min_slope_diff),
-            not kline.is_above(KLine.Col.stoch_long, overbought_limit),
-            not kline.is_above(KLine.Col.stoch_short, overbought_limit),
+            # custom tech indicators additionally to dual momentum 
+            (kline.is_below(KLine.Col.stoch_long, overbought_limit)
+             and kline.is_above(KLine.Col.stoch_long, 20)),
 
-            not kline.is_rsi_overbought(),
-            kline.is_min_slope_diff(KLine.Col.rsi, min_slope_diff),
+            # means cycle goes up
+            (kline.is_below(KLine.Col.stoch_short, 70)
+            and kline.is_above(KLine.Col.stoch_short, 20)),
+
+            kline.is_below(KLine.Col.rsi, overbought_limit),
 
             kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_upward(KLine.Col.mfi),
-            not kline.is_above(KLine.Col.mfi, overbought_limit),
-            kline.is_min_slope_diff(KLine.Col.mfi, min_slope_diff),
+            kline.is_below(KLine.Col.mfi, overbought_limit),
         ])
     
-    
+
     def is_short_entry(self, kline: KLine):
         oversold_limit = 20
-        min_slope_diff = 0.5  
         return all([
             kline.is_downward(KLine.Col.ema_200), 
 
@@ -132,19 +166,19 @@ class DualMomentumCustomized(Base):
             kline.is_below(KLine.Col.rsi, 50),
 
             # custom tech indicators additionally to dual momentum
-            kline.is_min_slope_diff(KLine.Col.stoch_long, min_slope_diff),
-            kline.is_min_slope_diff(KLine.Col.stoch_short, min_slope_diff),
-            not kline.is_below(KLine.Col.stoch_long, oversold_limit),
-            not kline.is_below(KLine.Col.stoch_short, oversold_limit),
+            (kline.is_above(KLine.Col.stoch_long, oversold_limit)
+             and kline.is_below(KLine.Col.stoch_long, 80)),
 
-            not kline.is_rsi_oversold(),
-            kline.is_min_slope_diff(KLine.Col.rsi, min_slope_diff),
+            # means cycle goes down
+            (kline.is_above(KLine.Col.stoch_short, 30)
+             and kline.is_below(KLine.Col.stoch_short, 80)),
+
+            kline.is_above(KLine.Col.rsi, oversold_limit),
 
             kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_downward(KLine.Col.mfi),
-            not kline.is_below(KLine.Col.mfi, oversold_limit),
-            kline.is_min_slope_diff(KLine.Col.mfi, min_slope_diff),
+            kline.is_above(KLine.Col.mfi, oversold_limit),
         ])
     
     def is_long_exit(self, kline: KLine):
@@ -152,9 +186,10 @@ class DualMomentumCustomized(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long),
                 kline.is_downward(KLine.Col.stoch_short),
+            ]) or all({
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
-            ]) 
+            })
         )
 
     def is_short_exit(self, kline: KLine):
@@ -162,7 +197,8 @@ class DualMomentumCustomized(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long),
                 kline.is_upward(KLine.Col.stoch_short),
+            ]) or all ([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
-            ]) 
+            ])
         )
