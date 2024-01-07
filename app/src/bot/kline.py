@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_ta
+from bot.trade import TradeDirection
 
 class KLine:
     class Col:
@@ -217,4 +218,20 @@ class KLine:
                 return False
             
         return True
+    
+    def is_price_action_not_mixing_with_gmma(self, direction: TradeDirection) -> bool:
+        current_low = self.df[KLine.Col.low].iloc[-1]
+        current_high = self.df[KLine.Col.high].iloc[-1]
+        current_open = self.df[KLine.Col.open].iloc[-1]
+        current_close = self.df[KLine.Col.close].iloc[-1]
+        current_gmma_30 = self.df[f'long_ema_{30}'].iloc[-1]
+
+        if direction.value == TradeDirection.long.value:
+            return (current_open > current_gmma_30 
+                    and current_low > current_gmma_30
+                    and current_close > current_gmma_30)
+        else:
+            return (current_high < current_gmma_30
+                    and current_open < current_gmma_30
+                    and current_close < current_gmma_30)
     
