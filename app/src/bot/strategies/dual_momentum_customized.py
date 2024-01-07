@@ -91,6 +91,7 @@ class DualMomentumCustomized(Base):
 
     def is_over_price(self, kline: KLine, direction: TradeDirection):
         prev_stoch_short = kline.df[KLine.Col.stoch_short_d].iloc[-2]
+        prev_stoch_long = kline.df[KLine.Col.stoch_long_d].iloc[-2]
         prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
         prev_mfi = kline.df[KLine.Col.mfi].iloc[-2]
         overbought_limit = 80
@@ -100,6 +101,7 @@ class DualMomentumCustomized(Base):
             return (
                 any([
                     (prev_stoch_short > overbought_limit and kline.is_below(KLine.Col.stoch_short_d, overbought_limit)),
+                    (prev_stoch_long > overbought_limit and kline.is_below(KLine.Col.stoch_long_d, overbought_limit)),
                     (prev_rsi > overbought_limit and kline.is_below(KLine.Col.rsi, overbought_limit)),
                     (prev_mfi > overbought_limit and kline.is_below(KLine.Col.mfi, overbought_limit)),
                 ])
@@ -108,6 +110,7 @@ class DualMomentumCustomized(Base):
             return (
                 any([
                     (prev_stoch_short < oversold_limit and kline.is_above(KLine.Col.stoch_short_d, oversold_limit)),
+                    (prev_stoch_long < oversold_limit and kline.is_above(KLine.Col.stoch_long_d, oversold_limit)),
                     (prev_rsi < oversold_limit and kline.is_above(KLine.Col.rsi, oversold_limit)),
                     (prev_mfi < oversold_limit and kline.is_above(KLine.Col.mfi, oversold_limit)),
                 ])
