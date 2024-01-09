@@ -59,13 +59,12 @@ class DualMomentum(Base):
         lower_kline.add_rsi()
         lower_kline.add_mfi()
 
-        if direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline):
-            return True
-        
-        if direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline):
-            return True
-
-        return False
+        return (
+            (direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline))
+            or
+            (direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline))
+        )
+            
 
 
     def is_lower_timeframe_long_entry(self, kline: KLine):    
@@ -122,6 +121,8 @@ class DualMomentum(Base):
         ]) 
     
     def is_over_price(self, kline: KLine, direction: TradeDirection):
+        # an asset was overbought/oversold, and now it is exiting that zone,
+        # meaning it is time to exit, because of trend reversal
         prev_stoch_short = kline.df[KLine.Col.stoch_short_d].iloc[-2]
         prev_stoch_long = kline.df[KLine.Col.stoch_long_d].iloc[-2]
         prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
