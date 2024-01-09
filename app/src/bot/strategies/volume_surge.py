@@ -11,7 +11,7 @@ from typing import Optional
 from strategies.base import Base
 
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
-_PVT_SURGE_PERCENTAGE = 15
+_PVT_SURGE_PERCENTAGE = 5
 
 class VolumeSurge(Base):
     def __init__(
@@ -26,7 +26,7 @@ class VolumeSurge(Base):
         self.greedy_profit_percentage = greedy_profit_percentage
 
 
-    def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
+    def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_pvt()
         kline.add_mfi()
         kline.add_rsi()
@@ -73,7 +73,7 @@ class VolumeSurge(Base):
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
-            kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 10),
+            kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 3),
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.rsi),

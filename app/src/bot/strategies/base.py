@@ -36,7 +36,7 @@ class Base(ABC):
                         if len(kline.df) < self.loockback:
                             continue
                     
-                        direction = self.determine_trade_direction(kline)  
+                        direction = self.determine_trade_direction(kline, symbol)  
                         kline.add_atr()    
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
@@ -115,7 +115,7 @@ class Base(ABC):
         pass
 
     @abstractmethod
-    def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
+    def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         pass
 
     def log(self, msg: str):
