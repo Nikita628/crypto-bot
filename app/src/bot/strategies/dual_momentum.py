@@ -83,12 +83,10 @@ class DualMomentum(Base):
             kline.is_upward(KLine.Col.stoch_long_d),
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_above(KLine.Col.rsi, 50),
+            kline.is_between(KLine.Col.rsi, 50, overbought_limit),
 
             kline.is_between(KLine.Col.stoch_long_d, 20, overbought_limit),
             kline.is_between(KLine.Col.stoch_short_d, 20, overbought_limit),
-
-            kline.is_below(KLine.Col.rsi, overbought_limit),
 
             kline.is_upward(KLine.Col.mfi),
             kline.is_below(KLine.Col.mfi, overbought_limit),
@@ -112,12 +110,10 @@ class DualMomentum(Base):
             kline.is_downward(KLine.Col.stoch_long_d),
 
             kline.is_downward(KLine.Col.rsi),
-            kline.is_below(KLine.Col.rsi, 50),
+            kline.is_between(KLine.Col.rsi, oversold_limit, 50),
 
             kline.is_between(KLine.Col.stoch_long_d, oversold_limit, 80),
             kline.is_between(KLine.Col.stoch_short_d, oversold_limit, 80),
-
-            kline.is_above(KLine.Col.rsi, oversold_limit),
 
             kline.is_downward(KLine.Col.mfi),
             kline.is_above(KLine.Col.mfi, oversold_limit),
@@ -156,6 +152,7 @@ class DualMomentum(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()
+        kline.add_mfi()
 
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
@@ -197,11 +194,10 @@ class DualMomentum(Base):
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
 
-            (kline.is_below(KLine.Col.stoch_long_d, 80)
-             and kline.is_above(KLine.Col.stoch_long_d, 20)),
+            kline.is_between(KLine.Col.stoch_long_d, 20, 80),
+            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
 
-            (kline.is_below(KLine.Col.stoch_short_d, 80)
-            and kline.is_above(KLine.Col.stoch_short_d, 20)),
+            kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
         ])
     
     def is_short_entry(self, kline: KLine):
@@ -220,11 +216,10 @@ class DualMomentum(Base):
             kline.is_downward(KLine.Col.rsi),
             kline.is_below(KLine.Col.rsi, 50),
 
-            (kline.is_above(KLine.Col.stoch_long_d, 20)
-             and kline.is_below(KLine.Col.stoch_long_d, 80)),
+            kline.is_between(KLine.Col.stoch_long_d, 20, 80),
+            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
 
-            (kline.is_above(KLine.Col.stoch_short_d, 20)
-             and kline.is_below(KLine.Col.stoch_short_d, 80)),
+            kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
         ])
     
     def is_long_exit(self, kline: KLine):

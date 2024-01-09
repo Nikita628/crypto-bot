@@ -201,7 +201,7 @@ class KLine:
 
         for i in values:
             for j in values:
-                if i != j and abs((i - j) / i * 100) > range_percentage:
+                if i != j and abs((i - j) / abs(i) * 100) > range_percentage:
                     return False
 
         return True
