@@ -45,4 +45,5 @@ printf "$dt running server and ui docker\n" >> $deployment_log_file
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
 
+systemctl daemon-reload
 systemctl restart bot_deployment_server
