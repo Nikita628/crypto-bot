@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#variables
+deployment_logs_directory='/var/bot-app/logs/'
+deployment_logs_file='/var/bot-app/logs/deployment.log'
+dt=`date '+%d/%m/%Y %H:%M:%S'`
+
+#add folder
+if [ ! -d "/var/bot-app/" ]
+then
+  echo "adding /var/bot-app/"
+  printf "$dt adding /var/bot-app/\n" >> $deployment_logs_file
+  mkdir /var/bot-app/
+fi
+
+#check log directory
+if [ ! -d deployment_logs_directory ]
+then
+  echo "creating $deployment_logs_directory"
+  mkdir $deployment_logs_directory
+fi
+
+#check log files
+if [ ! -f $deployment_logs_file ]
+then
+  echo "creating $deployment_logs_file"
+  touch $deployment_logs_file
+fi
+
+#git clone repository
+cd /var/bot-app/
+git init
+git config --global user.name "junkysoul"
+git config --global user.email "dmitrystopkov@gmail.com"
+eval $(ssh-agent -s)
+ssh-add /root/github_ssh_keys/key
+git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
+
+systemctl stop bot_deployment_server
+systemctl start bot_deployment_server

@@ -1,4 +1,5 @@
 __pycache__
 transactions.csv
 ui/node_modules/
+utils/logs/
 .env

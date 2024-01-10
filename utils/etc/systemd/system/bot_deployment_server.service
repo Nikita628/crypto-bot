@@ -5,7 +5,7 @@ After=network.target
 [Service]
 User=root
 Group=root
-WorkingDirectory=/var/www/deployment_server
+WorkingDirectory=/var/bot-app/crypto-bot/utils/deployment_server
 ExecStart=/usr/local/bin/gunicorn -w 4 -b 0.0.0.0:8000 app:app
 
 [Install]
