@@ -62,6 +62,13 @@ strategies: List[Base] = [
     DualMomentum(name='dual_momentum_greedy', greedy_profit_percentage=1), 
     DualMomentum(name='dual_momentum_trailing', trailing_stop_percentage=1),
     DualMomentum(name='dual_momentum_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
+    DualMomentum(
+        name='dual_momentum_trailing_greedy_overprice_exit_confirmation',
+        trailing_stop_percentage=1, 
+        greedy_profit_percentage=1,
+        is_lower_timeframe_confirmation=True,
+        is_over_price_exit=True,
+    ),
 
     # dual momentum customized ####################
     DualMomentumCustomized(), 
@@ -76,6 +83,15 @@ strategies: List[Base] = [
 
     DualMomentumCustomized(name='dual_momentum_customized_trailing_greedy', trailing_stop_percentage=1, greedy_profit_percentage=1),
     DualMomentumCustomized(name='dual_momentum_customized_trailing_greedy_hard_stop', trailing_stop_percentage=1, greedy_profit_percentage=1, hard_stop_loss_percentage=-3),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_greedy_hard_stop_overprice_exit_confirmation', 
+        trailing_stop_percentage=1, 
+        greedy_profit_percentage=1, 
+        hard_stop_loss_percentage=-3,
+        is_over_price_exit=True,
+        is_lower_timeframe_confirmation=True,
+    ),
     
     # volume surge ##############################
     VolumeSurge(), 
