@@ -29,7 +29,7 @@ def do_post():
             update_result = 'error'
 
         message = f'''
-<b>Crypto-bot message</b>
+<b>Crypto-botiiii message</b>
 <b>Action:</b> update files
 <b>Result:</b> {update_result}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
