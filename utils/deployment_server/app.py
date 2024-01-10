@@ -9,7 +9,6 @@ import json
 
 app = Flask(__name__)
 
-
 load_dotenv()
 _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
