@@ -14,8 +14,13 @@ SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
 update_result = 'success'
 
+try:
+    call('/root/scripts/start_infrastructure 2> /var/bot-app/logs/deployment_err.log', shell=True)
+except:
+    update_result = 'error'
+
 message = f'''
-<b>Crypto-bot message</b>
+<b>Crypto-bottt message</b>
 <b>Action:</b> update files
 <b>Result:</b> {update_result}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
