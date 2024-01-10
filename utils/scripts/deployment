@@ -25,7 +25,7 @@ git config --global user.name "junkysoul"
 git config --global user.email "dmitrystopkov@gmail.com"
 eval $(ssh-agent -s)
 ssh-add /root/github_ssh_keys/key
-git pull origin migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
+git pull git@github.com:Nikita628/crypto-bot.git migrations_and_python_server
 
 #run docker db
 echo "running db docker"
