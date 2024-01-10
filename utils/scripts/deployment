@@ -6,7 +6,7 @@ deployment_logs_file='/var/bot-app/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
 
 #check log directory
-if [ ! -d $deployment_logs_file ]
+if [ ! -d deployment_logs_directory ]
 then
   echo "creating $deployment_logs_directory"
   mkdir $deployment_logs_directory
@@ -29,7 +29,7 @@ git pull git@github.com:Nikita628/crypto-bot.git migrations_and_python_server
 
 #run docker db
 echo "running db docker"
-printf "$dt running db docker\n" >> $deployment_log_file
+printf "$dt running db docker\n" >> deployment_logs_file
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
@@ -40,7 +40,7 @@ echo 'migrations running are ended'
 
 #run docker server
 echo "running server and ui docker"
-printf "$dt running server and ui docker\n" >> $deployment_log_file
+printf "$dt running server and ui docker\n" >> deployment_logs_file
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
 

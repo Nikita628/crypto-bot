@@ -12,12 +12,12 @@ rm -r /var/bot-app/
 if [ ! -d "/var/bot-app/" ]
 then
   echo "adding /var/bot-app/"
-  printf "$dt adding /var/bot-app/\n" >> $deployment_logs_file
+  printf "$dt adding /var/bot-app/\n" >> deployment_logs_file
   mkdir /var/bot-app/
 fi
 
 #check log directory
-if [ ! -d deployment_logs_directory ]
+if [ ! -d $deployment_logs_directory ]
 then
   echo "creating $deployment_logs_directory"
   mkdir $deployment_logs_directory
@@ -49,13 +49,13 @@ cp /root/bot_env/docker/.env /var/bot-app/crypto-bot/
 
 #run docker db
 echo "running db docker"
-printf "$dt running db docker\n" >> $deployment_log_file
+printf "$dt running db docker\n" >> deployment_logs_file
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
 #run docker server
 echo "running server and ui docker"
-printf "$dt running server and ui docker\n" >> $deployment_log_file
+printf "$dt running server and ui docker\n" >> deployment_logs_file
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
 
