@@ -32,6 +32,7 @@ fi
 
 docker stop $(docker ps -a -q)
 docker ps --filter status=exited -q | xargs docker rm
+docker rmi $(docker images -q)
 
 #git clone repository
 cd /var/bot-app/
