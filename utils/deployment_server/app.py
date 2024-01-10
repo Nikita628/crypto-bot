@@ -20,7 +20,7 @@ SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 def do_post():
     git_event = json.loads(request.data)
     if git_event.get('ref') == 'refs/heads/migrations_and_python_server':
-        update_result = 'success'
+        update_result = 'successssss'
 
         try:
             call('/var/bot-app/crypto-bot/utils/scripts/deployment 2> /var/bot-app/logs/deployment_err.log', shell=True)
