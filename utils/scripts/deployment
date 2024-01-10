@@ -21,7 +21,6 @@ fi
 
 #git clone repository
 cd /var/bot-app/
-git init
 git config --global user.name "junkysoul"
 git config --global user.email "dmitrystopkov@gmail.com"
 eval $(ssh-agent -s)
