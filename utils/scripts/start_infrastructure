@@ -5,6 +5,9 @@ deployment_logs_directory='/var/bot-app/logs/'
 deployment_logs_file='/var/bot-app/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
 
+#delete
+rm -r /var/bot-app/
+
 #add folder
 if [ ! -d "/var/bot-app/" ]
 then
@@ -27,6 +30,9 @@ then
   touch $deployment_logs_file
 fi
 
+docker stop $(docker ps -a -q)
+docker ps --filter status=exited -q | xargs docker rm
+
 #git clone repository
 cd /var/bot-app/
 git init
@@ -36,5 +42,28 @@ eval $(ssh-agent -s)
 ssh-add /root/github_ssh_keys/key
 git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
 
+#copy .env
+cp /root/bot_env/dbmate/.env /var/bot-app/crypto-bot/utils/dbmate/
+cp /root/bot_env/deployment_server/.env /var/bot-app/crypto-bot/utils/deployment_server/
+cp /root/bot_env/docker/.env /var/bot-app/crypto-bot/
+
+#run docker db
+echo "running db docker"
+printf "$dt running db docker\n" >> $deployment_log_file
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d db
+
+#run docker server
+echo "running server and ui docker"
+printf "$dt running server and ui docker\n" >> $deployment_log_file
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d server
+
+#run migrations
+echo 'migrations are running'
+cd /var/bot-app/crypto-bot/utils/dbmate/ ; dbmate up
+echo 'migrations running are ended'
+
+systemctl daemon-reload
 systemctl stop bot_deployment_server
 systemctl start bot_deployment_server

@@ -22,7 +22,7 @@ def do_post():
         update_result = 'success'
 
         try:
-            call('/var/www/scripts/deployment 2> /var/www/logs/deployment_err.log', shell=True)
+            call('/var/bot-app/crypto-bot/utils/scripts/deployment 2> /var/bot-app/logs/deployment_err.log', shell=True)
         except:
             update_result = 'error'
 
