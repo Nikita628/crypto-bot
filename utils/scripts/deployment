@@ -19,8 +19,8 @@ then
   touch $deployment_logs_file
 fi
 
-#git clone repository
-cd /var/bot-app/
+#git pull repository
+cd /var/bot-app/crypto-bot/
 git config --global user.name "junkysoul"
 git config --global user.email "dmitrystopkov@gmail.com"
 eval $(ssh-agent -s)
