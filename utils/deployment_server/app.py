@@ -26,7 +26,11 @@ def do_post():
         except:
             update_result = 'error'
 
-        message = f'''<b>Crypto-bottttt message</b><b>Action:</b> update files<b>Result:</b> {update_result}<b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
+        message = f'''
+        <b>Crypto-bot message</b>
+        <b>Action:</b> update files
+        <b>Result:</b> {update_result}
+        <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
 
         # retry if failed
@@ -34,7 +38,7 @@ def do_post():
             count = 1
             while (not response and count <= 5):
                 time.sleep(5)
-                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
                 count += 1
 
         return 'prod branch action'
