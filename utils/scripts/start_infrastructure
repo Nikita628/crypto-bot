@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#variables yyyyyyyy
+#variables
 deployment_logs_directory='/var/bot-app/logs/'
 deployment_logs_file='/var/bot-app/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
