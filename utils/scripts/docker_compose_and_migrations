@@ -6,17 +6,17 @@ deployment_logs_file='/var/bot-app/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
 
 #check log directory
-if [ ! -d $deployment_logs_directory ]
+if [ ! -d ${deployment_logs_directory} ]
 then
   echo "creating $deployment_logs_directory"
-  mkdir $deployment_logs_directory
+  mkdir ${deployment_logs_file}
 fi
 
 #check log files
-if [ ! -f $deployment_logs_file ]
+if [ ! -f ${deployment_logs_file} ]
 then
   echo "creating $deployment_logs_file"
-  touch $deployment_logs_file
+  touch ${deployment_logs_file}
 fi
 
 #run docker db
