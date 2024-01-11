@@ -17,7 +17,7 @@ SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 @app.route('/', methods=['POST'])
 def do_post():
     git_event = json.loads(request.data)
-    if git_event.get('ref') == 'refs/heads/prod':
+    if git_event.get('ref') == 'refs/heads/migrations_and_python_server':
         update_result = 'success'
 
         try:
