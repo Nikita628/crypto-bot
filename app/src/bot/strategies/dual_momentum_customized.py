@@ -99,7 +99,7 @@ class DualMomentumCustomized(Base):
         return reason
     
     def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
-        lower_kline = get_kline(symbol, BinanceInterval.min5, _LOOCKBACK)
+        lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
         lower_kline.add_ema(KLine.Col.ema_200, 200)
         lower_kline.add_gmma()
         lower_kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
@@ -107,13 +107,11 @@ class DualMomentumCustomized(Base):
         lower_kline.add_rsi()
         lower_kline.add_mfi()
 
-        if direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline):
-            return True
-        
-        if direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline):
-            return True
-
-        return False
+        return (
+            (direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline))
+            or
+            (direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline))
+        )
 
 
     def is_lower_timeframe_long_entry(self, kline: KLine):    
@@ -223,11 +221,11 @@ class DualMomentumCustomized(Base):
             kline.is_between(KLine.Col.stoch_long_d, 20, overbought_limit),
 
             # means cycle goes up
-            kline.is_between(KLine.Col.stoch_short_d, 20, 70),
+            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
 
             kline.is_below(KLine.Col.rsi, overbought_limit),
 
-            kline.is_upward(KLine.Col.volume_sma),
+            # kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_upward(KLine.Col.mfi),
             kline.is_below(KLine.Col.mfi, overbought_limit),
@@ -257,11 +255,11 @@ class DualMomentumCustomized(Base):
             kline.is_between(KLine.Col.stoch_long_d, oversold_limit, 80),
 
             # means cycle goes down
-            kline.is_between(KLine.Col.stoch_short_d, 30, 80),
+            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
 
             kline.is_above(KLine.Col.rsi, oversold_limit),
 
-            kline.is_upward(KLine.Col.volume_sma),
+            # kline.is_upward(KLine.Col.volume_sma),
 
             kline.is_downward(KLine.Col.mfi),
             kline.is_above(KLine.Col.mfi, oversold_limit),

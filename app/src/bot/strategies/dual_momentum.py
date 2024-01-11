@@ -51,7 +51,7 @@ class DualMomentum(Base):
         return direction
     
     def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
-        lower_kline = get_kline(symbol, BinanceInterval.min5, _LOOCKBACK)
+        lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
         lower_kline.add_ema(KLine.Col.ema_200, 200)
         lower_kline.add_gmma()
         lower_kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
