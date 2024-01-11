@@ -43,13 +43,18 @@ eval $(ssh-agent -s)
 ssh-add /root/github_ssh_keys/key
 git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
 
-chmod +x /var/bot-app/crypto-bot/utils/scripts/deployment
 chmod +x /var/bot-app/crypto-bot/utils/scripts/start_infrastructure
+chmod +x /var/bot-app/crypto-bot/utils/scripts/git_pull
+chmod +x /var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations
 
 #copy .env
 cp /root/bot_env/dbmate/.env /var/bot-app/crypto-bot/utils/dbmate/
 cp /root/bot_env/deployment_server/.env /var/bot-app/crypto-bot/utils/deployment_server/
 cp /root/bot_env/docker/.env /var/bot-app/crypto-bot/
+
+chmod +x /root/scripts/start_deployment
+chmod +x /root/scripts/git_pull
+chmod +x /root/scripts/docker_compose_and_migrations
 
 #run docker db
 echo "running db docker"

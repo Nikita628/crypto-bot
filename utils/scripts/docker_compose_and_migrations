@@ -6,7 +6,7 @@ deployment_logs_file='/var/bot-app/logs/deployment.log'
 dt=`date '+%d/%m/%Y %H:%M:%S'`
 
 #check log directory
-if [ ! -d deployment_logs_directory ]
+if [ ! -d $deployment_logs_directory ]
 then
   echo "creating $deployment_logs_directory"
   mkdir $deployment_logs_directory
@@ -18,14 +18,6 @@ then
   echo "creating $deployment_logs_file"
   touch $deployment_logs_file
 fi
-
-#git pull repository
-cd /var/bot-app/crypto-bot/
-git config --global user.name "junkysoul"
-git config --global user.email "dmitrystopkov@gmail.com"
-eval $(ssh-agent -s)
-ssh-add /root/github_ssh_keys/key
-git pull git@github.com:Nikita628/crypto-bot.git migrations_and_python_server
 
 #run docker db
 echo "running db docker"
@@ -46,3 +38,4 @@ docker-compose -f docker-compose-prod.yml up --build -d server
 
 systemctl daemon-reload
 systemctl restart bot_deployment_server
+echo $?
