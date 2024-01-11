@@ -43,6 +43,9 @@ eval $(ssh-agent -s)
 ssh-add /root/github_ssh_keys/key
 git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.git
 
+chmod +x /var/bot-app/crypto-bot/utils/scripts/deployment
+chmod +x /var/bot-app/crypto-bot/utils/scripts/start_infrastructure
+
 #copy .env
 cp /root/bot_env/dbmate/.env /var/bot-app/crypto-bot/utils/dbmate/
 cp /root/bot_env/deployment_server/.env /var/bot-app/crypto-bot/utils/deployment_server/
