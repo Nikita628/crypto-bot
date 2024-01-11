@@ -22,7 +22,10 @@ def do_post():
         update_result = 'success'
 
         try:
-            call('/var/bot-app/crypto-bot/utils/scripts/deployment 2> /var/bot-app/logs/deployment_err.log', shell=True)
+            pull = call('/var/bot-app/crypto-bot/utils/scripts/git_pull 2> /var/bot-app/logs/deployment_err.log', shell=True)
+            compose = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations 2> /var/bot-app/logs/deployment_err.log', shell=True)
+            if (pull != 0 or compose != 0):
+                update_result = 'error'
         except:
             update_result = 'error'
 
