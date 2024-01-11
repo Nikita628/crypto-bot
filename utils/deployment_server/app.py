@@ -20,26 +20,24 @@ SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 def do_post():
     git_event = json.loads(request.data)
     if git_event.get('ref') == 'refs/heads/migrations_and_python_server':
-        update_result = 'success'
+        result = 'success'
 
         try:
-            pull = call('/var/bot-app/crypto-bot/utils/scripts/git_pull 2> /var/bot-app/logs/deployment_err.log', shell=True)
-            compose = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations 2> /var/bot-app/logs/deployment_err.log', shell=True)
-            if pull != 0:
-                update_result = 'git pull error'
-            elif compose != 0:
-                update_result = 'compose or migrations error'
+            result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull 2> /var/bot-app/logs/deployment_err.log', shell=True)
+            if result != 'success':
+                result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations 2> /var/bot-app/logs/deployment_err.log', shell=True)
+
         except:
             update_result = 'error'
 
         error_message = ''
-        if update_result != 'success':
+        if result != 'success':
             error_message = '<b>ERROR</b> '
 
         message = f'''
 <b>{error_message}Crypto-bot message</b>
 <b>Action:</b> auto deployment
-<b>Result:</b> {update_result}
+<b>Result:</b> {result}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
 
