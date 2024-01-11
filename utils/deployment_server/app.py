@@ -23,10 +23,10 @@ def do_post():
 
         try:
             result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
-            if result == 1:
+            if result != 1:
                 result_message = 'git pull error'
                 result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
-                if result == 1:
+                if result != 1:
                     result_message = 'compose or migrations error'
         except:
             result_message = 'error'
