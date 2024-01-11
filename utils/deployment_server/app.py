@@ -32,7 +32,7 @@ def do_post():
             result_message = 'error'
 
         error_label = ''
-        if result != 'success':
+        if result_message != 'success':
             error_label = '<b>ERROR</b> '
 
         message = f'''
