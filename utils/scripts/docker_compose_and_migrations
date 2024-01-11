@@ -38,4 +38,6 @@ docker-compose -f docker-compose-prod.yml up --build -d server
 
 systemctl daemon-reload
 systemctl restart bot_deployment_server
-echo $?
+if [[ $? -ne 0 ]]; then
+  exit 1
+fi

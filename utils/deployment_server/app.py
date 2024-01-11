@@ -15,6 +15,7 @@ _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
+
 @app.route('/', methods=['POST'])
 def do_post():
     git_event = json.loads(request.data)
@@ -24,13 +25,19 @@ def do_post():
         try:
             pull = call('/var/bot-app/crypto-bot/utils/scripts/git_pull 2> /var/bot-app/logs/deployment_err.log', shell=True)
             compose = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations 2> /var/bot-app/logs/deployment_err.log', shell=True)
-            if (pull != 0 or compose != 0):
-                update_result = 'error'
+            if pull != 0:
+                update_result = 'git pull error'
+            elif compose != 0:
+                update_result = 'compose or migrations error'
         except:
             update_result = 'error'
 
+        error_message = ''
+        if update_result != 'success':
+            error_message = '<b>ERROR</b> '
+
         message = f'''
-<b>Crypto-bot message</b>
+<b>{error_message}Crypto-bot message</b>
 <b>Action:</b> update files
 <b>Result:</b> {update_result}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
