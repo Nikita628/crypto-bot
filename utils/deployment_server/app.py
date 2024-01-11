@@ -37,7 +37,7 @@ def do_post():
 
         message = f'''
 <b>{error_message}Crypto-bot message</b>
-<b>Action:</b> update files
+<b>Action:</b> auto deployment
 <b>Result:</b> {update_result}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
