@@ -18,7 +18,5 @@ docker-compose -f docker-compose-prod.yml up --build -d server
 systemctl daemon-reload
 systemctl restart bot_deployment_server
 if [[ $? -ne 0 ]]; then
-  exit 'compose or migrations error'
-else
-  exit 'success'
+  exit 1
 fi
