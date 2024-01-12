@@ -133,19 +133,35 @@ class DualMomentum(Base):
         if direction == TradeDirection.long.value:
             return (
                 any([
-                    (prev_stoch_short > overbought_limit and kline.is_below(KLine.Col.stoch_short_d, overbought_limit)),
-                    (prev_stoch_long > overbought_limit and kline.is_below(KLine.Col.stoch_long_d, overbought_limit)),
-                    (prev_rsi > overbought_limit and kline.is_below(KLine.Col.rsi, overbought_limit)),
-                    (prev_mfi > overbought_limit and kline.is_below(KLine.Col.mfi, overbought_limit)),
+                    (prev_stoch_short > overbought_limit 
+                     and kline.is_below(KLine.Col.stoch_short_d, overbought_limit)
+                     and kline.is_downward(KLine.Col.stoch_short_d)),
+                    (prev_stoch_long > overbought_limit 
+                     and kline.is_below(KLine.Col.stoch_long_d, overbought_limit)
+                     and kline.is_downward(KLine.Col.stoch_long_d)),
+                    (prev_rsi > overbought_limit 
+                     and kline.is_below(KLine.Col.rsi, overbought_limit)
+                     and kline.is_downward(KLine.Col.rsi)),
+                    (prev_mfi > overbought_limit 
+                     and kline.is_below(KLine.Col.mfi, overbought_limit)
+                     and kline.is_downward(KLine.Col.mfi)),
                 ])
             )
         else:
             return (
                 any([
-                    (prev_stoch_short < oversold_limit and kline.is_above(KLine.Col.stoch_short_d, oversold_limit)),
-                    (prev_stoch_long < oversold_limit and kline.is_above(KLine.Col.stoch_long_d, oversold_limit)),
-                    (prev_rsi < oversold_limit and kline.is_above(KLine.Col.rsi, oversold_limit)),
-                    (prev_mfi < oversold_limit and kline.is_above(KLine.Col.mfi, oversold_limit)),
+                    (prev_stoch_short < oversold_limit 
+                     and kline.is_above(KLine.Col.stoch_short_d, oversold_limit)
+                     and kline.is_upward(KLine.Col.stoch_short_d)),
+                    (prev_stoch_long < oversold_limit 
+                     and kline.is_above(KLine.Col.stoch_long_d, oversold_limit)
+                     and kline.is_upward(KLine.Col.stoch_long_d)),
+                    (prev_rsi < oversold_limit 
+                     and kline.is_above(KLine.Col.rsi, oversold_limit)
+                     and kline.is_upward(KLine.Col.rsi)),
+                    (prev_mfi < oversold_limit 
+                     and kline.is_above(KLine.Col.mfi, oversold_limit)
+                     and kline.is_upward(KLine.Col.mfi)),
                 ])
             )
 
