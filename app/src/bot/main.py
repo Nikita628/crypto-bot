@@ -1,5 +1,5 @@
 import threading
-from bot.binance import BinanceInterval
+from bot.binance import BinanceInterval, fill_in_usdt_symbols
 from strategies import (
     Base,
     DualMomentum,
@@ -59,15 +59,19 @@ import os
 strategies: List[Base] = [
     # dual momentum ############################
     DualMomentum(
-        name='dual_momentum_1',
-        trailing_stop_percentage=1, 
+        name='dual_momentum_greedy',
         greedy_profit_percentage=1,
         is_over_price_exit=True,
     ),
 
     DualMomentum(
-        name='dual_momentum_lower_time',
-        trailing_stop_percentage=1, 
+        name='dual_momentum_trailing',
+        trailing_stop_percentage=1,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_lower_greedy',
         greedy_profit_percentage=1,
         is_lower_timeframe_confirmation=True,
         is_over_price_exit=True,
@@ -75,32 +79,42 @@ strategies: List[Base] = [
 
     # dual momentum customized ####################
     DualMomentumCustomized(
-        name='dual_momentum_customized_lower_time', 
-        trailing_stop_percentage=1, 
+        name='dual_momentum_customized_greedy', 
+        greedy_profit_percentage=1, 
+        hard_stop_loss_percentage=-3,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing', 
+        is_over_price_exit=True,
+        trailing_stop_percentage=1,
+        hard_stop_loss_percentage=-3,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_lower_greedy', 
         greedy_profit_percentage=1, 
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
         is_lower_timeframe_confirmation=True,
     ),
 
-    DualMomentumCustomized(
-        name='dual_momentum_customized_2', 
-        is_over_price_exit=True,
-        trailing_stop_percentage=1, 
-        greedy_profit_percentage=0.5, 
-        hard_stop_loss_percentage=-3,
-    ),
-    
     # volume surge ##############################
     VolumeSurge(), 
     VolumeSurge(
-        name='volume_surge_1', 
-        trailing_stop_percentage=1, 
-        greedy_profit_percentage=1
+        name='volume_surge_greedy',
+        greedy_profit_percentage=1,
+    ),
+    VolumeSurge(
+        name='volume_surge_trailing',
+        trailing_stop_percentage=1,
     ),
 ]
 
 def start_bot():
+    fill_in_usdt_symbols()
+    
     threads: List[threading.Thread] = []
 
     for strategy in strategies:

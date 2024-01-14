@@ -52,10 +52,10 @@ class DualMomentum(Base):
     
     def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
         lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
-        lower_kline.add_ema(KLine.Col.ema_200, 200)
-        lower_kline.add_gmma()
-        lower_kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
-        lower_kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
+        # lower_kline.add_ema(KLine.Col.ema_200, 200)
+        # lower_kline.add_gmma()
+        # lower_kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
+        # lower_kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         lower_kline.add_rsi()
         lower_kline.add_mfi()
 
@@ -70,54 +70,56 @@ class DualMomentum(Base):
     def is_lower_timeframe_long_entry(self, kline: KLine):    
         overbought_limit = 80
         return all([
-            kline.is_upward(KLine.Col.ema_200), 
+            # kline.is_upward(KLine.Col.ema_200), 
 
-            kline.is_long_gmma_above_200ema(), 
-            kline.is_long_gmma_upward(),
+            # kline.is_long_gmma_above_200ema(), 
+            # kline.is_long_gmma_upward(),
 
-            kline.is_short_term_GMMA_above_long_term_GMMA(),
-            kline.is_short_gmma_upward(),
+            # kline.is_short_term_GMMA_above_long_term_GMMA(),
+            # kline.is_short_gmma_upward(),
 
-            kline.is_upward(KLine.Col.stoch_short_d),
-            kline.is_upward(KLine.Col.stoch_long_d),
+            # kline.is_upward(KLine.Col.stoch_short_d),
+            # kline.is_upward(KLine.Col.stoch_long_d),
+            # kline.is_between(KLine.Col.stoch_long_d, 20, overbought_limit),
+            # kline.is_between(KLine.Col.stoch_short_d, 20, overbought_limit),
+
+            # kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
 
             kline.is_upward(KLine.Col.rsi),
+            kline.is_min_slope_diff(KLine.Col.rsi, 5),
             kline.is_between(KLine.Col.rsi, 50, overbought_limit),
 
-            kline.is_between(KLine.Col.stoch_long_d, 20, overbought_limit),
-            kline.is_between(KLine.Col.stoch_short_d, 20, overbought_limit),
-
             kline.is_upward(KLine.Col.mfi),
-            kline.is_below(KLine.Col.mfi, overbought_limit),
-
-            kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
+            kline.is_min_slope_diff(KLine.Col.mfi, 5),
+            kline.is_between(KLine.Col.mfi, 20, overbought_limit),
         ])
     
 
     def is_lower_timeframe_short_entry(self, kline: KLine):
         oversold_limit = 20
         return all([
-            kline.is_downward(KLine.Col.ema_200), 
+            # kline.is_downward(KLine.Col.ema_200), 
 
-            kline.is_long_gmma_below_200ema(), 
-            kline.is_long_gmma_downward(),
+            # kline.is_long_gmma_below_200ema(), 
+            # kline.is_long_gmma_downward(),
 
-            kline.is_short_term_GMMA_below_long_term_GMMA(),
-            kline.is_short_gmma_downward(),
+            # kline.is_short_term_GMMA_below_long_term_GMMA(),
+            # kline.is_short_gmma_downward(),
 
-            kline.is_downward(KLine.Col.stoch_short_d),
-            kline.is_downward(KLine.Col.stoch_long_d),
+            # kline.is_downward(KLine.Col.stoch_short_d),
+            # kline.is_downward(KLine.Col.stoch_long_d),
+            # kline.is_between(KLine.Col.stoch_long_d, oversold_limit, 80),
+            # kline.is_between(KLine.Col.stoch_short_d, oversold_limit, 80),
+
+            # kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
 
             kline.is_downward(KLine.Col.rsi),
+            kline.is_min_slope_diff(KLine.Col.rsi, 5),
             kline.is_between(KLine.Col.rsi, oversold_limit, 50),
 
-            kline.is_between(KLine.Col.stoch_long_d, oversold_limit, 80),
-            kline.is_between(KLine.Col.stoch_short_d, oversold_limit, 80),
-
             kline.is_downward(KLine.Col.mfi),
-            kline.is_above(KLine.Col.mfi, oversold_limit),
-
-            kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
+            kline.is_min_slope_diff(KLine.Col.mfi, 5),
+            kline.is_between(KLine.Col.mfi, oversold_limit, 80),
         ]) 
     
     def is_over_price(self, kline: KLine, direction: TradeDirection):

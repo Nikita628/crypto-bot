@@ -6,6 +6,8 @@ from typing import List
 from requests.adapters import HTTPAdapter
 from urllib3.util import Retry
 import time
+import json
+import os
 
 class BinanceInterval(Enum):
     min1 = '1m'
@@ -25,6 +27,8 @@ class RateLimitException(Exception):
 _RETRY_COUNT = 30
 _BACKOFF_FACTOR = 1
 _REQUEST_TIMEOUT = 30
+
+USDT_SYMBOLS: List[str] = []
 
 def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     url = 'https://api.binance.com/api/v3/klines'
@@ -65,6 +69,9 @@ def get_kline(symbol: str, interval: BinanceInterval, lookback: int) -> KLine:
     return KLine(df)
 
 def get_all_usdt_symbols() -> List[str]:
+    if len(USDT_SYMBOLS):
+        return USDT_SYMBOLS
+    
     url = 'https://api.binance.com/api/v3/exchangeInfo'
 
     response = None
@@ -91,3 +98,51 @@ def get_all_usdt_symbols() -> List[str]:
             usdt_pairs.append(pair['symbol'])
     
     return usdt_pairs
+
+def fill_in_usdt_symbols():
+    global USDT_SYMBOLS
+    file_path = 'tradable_symbols.json'
+    if os.path.exists(file_path) and os.path.getsize(file_path) > 0:
+        with open(file_path, 'r') as file:
+            USDT_SYMBOLS = json.load(file)
+    else:
+        symbols = filter_out_volatile_symbols(get_all_usdt_symbols())
+        USDT_SYMBOLS = symbols
+        with open(file_path, 'w') as file:
+            json.dump(symbols, file)
+
+
+def filter_out_volatile_symbols(all_usdt_symbols: List[str]) -> List[str]:
+    filtered_symbols: List[str] = []
+
+    for symbol in all_usdt_symbols:
+        tags = get_symbol_tags(symbol)
+        if 'Monitoring' not in tags and 'Seed' not in tags:
+            filtered_symbols.append(symbol)
+        time.sleep(2)
+
+    return filtered_symbols
+
+
+def get_symbol_tags(symbol: str) -> List[str]:
+    url = f'https://www.binance.com/bapi/asset/v2/public/asset-service/product/get-product-by-symbol?symbol={symbol}'
+
+    response = None
+    for attempt in range(_RETRY_COUNT):
+        try:
+            response = requests.get(url, timeout=_REQUEST_TIMEOUT)
+            break
+        except Exception as e:
+            if (attempt < _RETRY_COUNT - 1):
+                delay_between_attempts = _BACKOFF_FACTOR * attempt
+                time.sleep(delay_between_attempts)
+    
+    if not response:
+        raise Exception('failed to get response')
+    
+    if response.status_code == _RATE_LIMIT_CODE:
+        raise RateLimitException()
+    
+    data = response.json()
+
+    return data['data']['tags']
