@@ -1,5 +1,6 @@
 import threading
-from bot.binance import BinanceInterval, fill_in_usdt_symbols
+import time
+from bot.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
 from strategies import (
     Base,
     DualMomentum,
@@ -9,6 +10,7 @@ from strategies import (
 from typing import List
 from integration.telegram import consume_signals_queue
 import os
+import json
 
 # TODO: future websockets and async migration
 # fetch 500 previous candlesticks over HTTP first,
@@ -93,6 +95,14 @@ strategies: List[Base] = [
     ),
 
     DualMomentumCustomized(
+        name='dual_momentum_customized_atr_limit', 
+        is_over_price_exit=True,
+        trailing_stop_percentage=1,
+        hard_stop_loss_percentage=-3,
+        atr_limit=8,
+    ),
+
+    DualMomentumCustomized(
         name='dual_momentum_customized_lower_greedy', 
         greedy_profit_percentage=1, 
         hard_stop_loss_percentage=-3,
@@ -112,8 +122,26 @@ strategies: List[Base] = [
     ),
 ]
 
+def run_test():
+    usdt_symbols = get_all_usdt_symbols()
+    not_volatile_symbols = []
+    for symbol in usdt_symbols:
+        kline = get_kline(symbol, BinanceInterval.day, 501)
+        kline.add_atr()
+        current_atr = kline.df['atr'].iloc[-1]
+        current_close = kline.df['close'].iloc[-1]
+        atr_percentage = current_atr / current_close * 100
+        if atr_percentage < 8:
+            not_volatile_symbols.append(symbol)
+        time.sleep(1)
+    return not_volatile_symbols
+
 def start_bot():
     fill_in_usdt_symbols()
+
+    # symbols = run_test()
+    # with open('low_atr_symbols.json', 'w') as file:
+    #     json.dump(symbols, file) 
     
     threads: List[threading.Thread] = []
 
