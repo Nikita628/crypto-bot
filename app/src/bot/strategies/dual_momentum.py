@@ -12,6 +12,9 @@ from typing import Optional
 
 
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_OVERBOUGHT = 80
+_OVERSOLD = 20
+_MIN_SLOPE = 3
 
 class DualMomentum(Base):
     def __init__(
@@ -68,7 +71,6 @@ class DualMomentum(Base):
 
 
     def is_lower_timeframe_long_entry(self, kline: KLine):    
-        overbought_limit = 80
         return all([
             # kline.is_upward(KLine.Col.ema_200), 
 
@@ -86,17 +88,16 @@ class DualMomentum(Base):
             # kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_min_slope_diff(KLine.Col.rsi, 5),
-            kline.is_between(KLine.Col.rsi, 50, overbought_limit),
+            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
+            kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT),
 
             kline.is_upward(KLine.Col.mfi),
-            kline.is_min_slope_diff(KLine.Col.mfi, 5),
-            kline.is_between(KLine.Col.mfi, 20, overbought_limit),
+            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
+            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
         ])
     
 
     def is_lower_timeframe_short_entry(self, kline: KLine):
-        oversold_limit = 20
         return all([
             # kline.is_downward(KLine.Col.ema_200), 
 
@@ -114,12 +115,12 @@ class DualMomentum(Base):
             # kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
 
             kline.is_downward(KLine.Col.rsi),
-            kline.is_min_slope_diff(KLine.Col.rsi, 5),
-            kline.is_between(KLine.Col.rsi, oversold_limit, 50),
+            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
+            kline.is_between(KLine.Col.rsi, _OVERSOLD, 50),
 
             kline.is_downward(KLine.Col.mfi),
-            kline.is_min_slope_diff(KLine.Col.mfi, 5),
-            kline.is_between(KLine.Col.mfi, oversold_limit, 80),
+            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
+            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
         ]) 
     
     def is_over_price(self, kline: KLine, direction: TradeDirection):
@@ -129,40 +130,38 @@ class DualMomentum(Base):
         prev_stoch_long = kline.df[KLine.Col.stoch_long_d].iloc[-2]
         prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
         prev_mfi = kline.df[KLine.Col.mfi].iloc[-2]
-        overbought_limit = 80
-        oversold_limit = 20
 
         if direction == TradeDirection.long.value:
             return (
                 any([
-                    (prev_stoch_short > overbought_limit 
-                     and kline.is_below(KLine.Col.stoch_short_d, overbought_limit)
+                    (prev_stoch_short > _OVERBOUGHT 
+                     and kline.is_below(KLine.Col.stoch_short_d, _OVERBOUGHT)
                      and kline.is_downward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long > overbought_limit 
-                     and kline.is_below(KLine.Col.stoch_long_d, overbought_limit)
+                    (prev_stoch_long > _OVERBOUGHT 
+                     and kline.is_below(KLine.Col.stoch_long_d, _OVERBOUGHT)
                      and kline.is_downward(KLine.Col.stoch_long_d)),
-                    (prev_rsi > overbought_limit 
-                     and kline.is_below(KLine.Col.rsi, overbought_limit)
+                    (prev_rsi > _OVERBOUGHT 
+                     and kline.is_below(KLine.Col.rsi, _OVERBOUGHT)
                      and kline.is_downward(KLine.Col.rsi)),
-                    (prev_mfi > overbought_limit 
-                     and kline.is_below(KLine.Col.mfi, overbought_limit)
+                    (prev_mfi > _OVERBOUGHT 
+                     and kline.is_below(KLine.Col.mfi, _OVERBOUGHT)
                      and kline.is_downward(KLine.Col.mfi)),
                 ])
             )
         else:
             return (
                 any([
-                    (prev_stoch_short < oversold_limit 
-                     and kline.is_above(KLine.Col.stoch_short_d, oversold_limit)
+                    (prev_stoch_short < _OVERSOLD 
+                     and kline.is_above(KLine.Col.stoch_short_d, _OVERSOLD)
                      and kline.is_upward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long < oversold_limit 
-                     and kline.is_above(KLine.Col.stoch_long_d, oversold_limit)
+                    (prev_stoch_long < _OVERSOLD 
+                     and kline.is_above(KLine.Col.stoch_long_d, _OVERSOLD)
                      and kline.is_upward(KLine.Col.stoch_long_d)),
-                    (prev_rsi < oversold_limit 
-                     and kline.is_above(KLine.Col.rsi, oversold_limit)
+                    (prev_rsi < _OVERSOLD 
+                     and kline.is_above(KLine.Col.rsi, _OVERSOLD)
                      and kline.is_upward(KLine.Col.rsi)),
-                    (prev_mfi < oversold_limit 
-                     and kline.is_above(KLine.Col.mfi, oversold_limit)
+                    (prev_mfi < _OVERSOLD 
+                     and kline.is_above(KLine.Col.mfi, _OVERSOLD)
                      and kline.is_upward(KLine.Col.mfi)),
                 ])
             )
@@ -213,8 +212,8 @@ class DualMomentum(Base):
             kline.is_upward(KLine.Col.rsi),
             kline.is_above(KLine.Col.rsi, 50),
 
-            kline.is_between(KLine.Col.stoch_long_d, 20, 80),
-            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
+            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, _OVERBOUGHT),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
         ])
@@ -235,8 +234,8 @@ class DualMomentum(Base):
             kline.is_downward(KLine.Col.rsi),
             kline.is_below(KLine.Col.rsi, 50),
 
-            kline.is_between(KLine.Col.stoch_long_d, 20, 80),
-            kline.is_between(KLine.Col.stoch_short_d, 20, 80),
+            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, _OVERBOUGHT),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
         ])
