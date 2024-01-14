@@ -14,7 +14,7 @@ from typing import Optional
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 _OVERBOUGHT = 80
 _OVERSOLD = 20
-_MIN_SLOPE = 3
+_MIN_SLOPE = 5
 
 class DualMomentum(Base):
     def __init__(
@@ -213,7 +213,7 @@ class DualMomentum(Base):
             kline.is_above(KLine.Col.rsi, 50),
 
             kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
-            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
         ])
@@ -235,7 +235,7 @@ class DualMomentum(Base):
             kline.is_below(KLine.Col.rsi, 50),
 
             kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
-            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
         ])
@@ -245,7 +245,6 @@ class DualMomentum(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long_d),
                 kline.is_downward(KLine.Col.stoch_short_d),
-            ]) or all ([
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
             ])
@@ -256,7 +255,6 @@ class DualMomentum(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long_d),
                 kline.is_upward(KLine.Col.stoch_short_d),
-            ]) or all ([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
             ])
