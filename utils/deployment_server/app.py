@@ -44,14 +44,14 @@ def do_post():
 <b>Action:</b> auto deployment
 <b>Result:</b> {result_message}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
-        response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+        response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
 
         # retry if failed
         if not response:
             count = 1
             while (not response and count <= 5):
                 time.sleep(5)
-                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
                 count += 1
 
         return 'prod branch action'
