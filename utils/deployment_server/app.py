@@ -53,6 +53,8 @@ def do_post():
                 response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_SIGNALS_CHAT_ID, 'parse_mode': 'html', 'text': message})
                 count += 1
 
+        call('/var/bot-app/crypto-bot/utils/scripts/restart_server', shell=True)
+
         return 'prod branch action'
     else:
         return 'other branch action'
