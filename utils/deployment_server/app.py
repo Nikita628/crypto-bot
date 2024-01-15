@@ -35,7 +35,7 @@ def do_post():
 
         error_label = ''
         if result_message != 'success':
-            error_label = '<b>ERROR</b> '
+            error_label = '<b style=\"color:#fc5252;\">ERROR</b> '
 
         message = f'''
 <b>{error_label}Crypto-bot message</b>
