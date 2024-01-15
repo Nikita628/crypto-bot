@@ -26,6 +26,7 @@ git clone -b migrations_and_python_server git@github.com:Nikita628/crypto-bot.gi
 chmod +x /var/bot-app/crypto-bot/utils/scripts/start_infrastructure
 chmod +x /var/bot-app/crypto-bot/utils/scripts/git_pull
 chmod +x /var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations
+chmod +x /var/bot-app/crypto-bot/utils/scripts/restart_server
 
 #copy .env
 cp /root/bot_env/dbmate/.env /var/bot-app/crypto-bot/utils/dbmate/
