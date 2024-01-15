@@ -39,6 +39,9 @@ class DualMomentumCustomized(Base):
             is_over_price_exit:bool = False,
             is_lower_timeframe_confirmation:bool = False,
             atr_limit:Optional[float] = None,
+            # reference values:
+            # x > 10 - high, x < 5 - low
+            volatility_limit:Optional[float] = None,
         ):
         super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
@@ -47,6 +50,7 @@ class DualMomentumCustomized(Base):
         self.is_over_price_exit = is_over_price_exit
         self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
         self.atr_limit = atr_limit
+        self.volatility_limit = volatility_limit
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -64,6 +68,10 @@ class DualMomentumCustomized(Base):
             price = kline.df[KLine.Col.close].iloc[-1]
             atr_percentage = atr / price * 100
             if atr_percentage > self.atr_limit:
+                return None
+            
+        if self.volatility_limit and self.volatility_limit > 0:
+            if kline.calc_volatility(30) > self.volatility_limit:
                 return None
             
         if self.is_long_entry(kline):

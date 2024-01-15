@@ -103,6 +103,14 @@ strategies: List[Base] = [
     ),
 
     DualMomentumCustomized(
+        name='dual_momentum_customized_volatility_limit', 
+        is_over_price_exit=True,
+        trailing_stop_percentage=1,
+        hard_stop_loss_percentage=-3,
+        volatility_limit=6,
+    ),
+
+    DualMomentumCustomized(
         name='dual_momentum_customized_lower_greedy', 
         greedy_profit_percentage=1, 
         hard_stop_loss_percentage=-3,

@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_ta
+import numpy as np
 from bot.trade import TradeDirection
 
 class KLine:
@@ -233,3 +234,9 @@ class KLine:
 
     def add_slope(self, source_column: str):
         self.df[f'slope_{source_column}'] = self.df[source_column].diff()
+
+    def calc_volatility(self, loockback: int = 1) -> float:
+        period = self.df.tail(loockback).copy()
+        period.loc[:, 'log_return'] = np.log(period[KLine.Col.close] / period[KLine.Col.close].shift(1))
+        std = period['log_return'].std()
+        return round(std * 100, 2)

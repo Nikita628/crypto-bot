@@ -113,6 +113,10 @@ def fill_in_usdt_symbols():
 
 
 def filter_out_volatile_symbols(all_usdt_symbols: List[str]) -> List[str]:
+    # in this context 'volatile' means having tags 'Monitoring' or 'Seed'
+    # when these tags are assigned by Binance, and when these tags are present
+    # it means that price of the currency is highly volatile, or
+    # it can be delisted soon etc.
     filtered_symbols: List[str] = []
 
     for symbol in all_usdt_symbols:
