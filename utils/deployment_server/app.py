@@ -28,8 +28,7 @@ def do_post():
             else:
                 result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                 with open('/root/lll', 'a') as f:
-                    f.write(datetime.now().strftime("%m/%d/%Y, %H:%M:%S") + '  ---  ' + str(result))
-                    f.write('exit')
+                    f.write(datetime.now().strftime("%m/%d/%Y, %H:%M:%S") + '  ---  ' + str(result) + "\n")
                 if result != 0:
                     result_message = 'compose or migrations error'
 
