@@ -15,8 +15,6 @@ _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
-
-
 @app.route('/', methods=['POST'])
 def do_post():
     git_event = json.loads(request.data)
@@ -30,14 +28,14 @@ def do_post():
             else:
                 result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                 if result != 0:
-                    result_message = 'compose or migrations error'
+                    result_message = 'compose or migrations errortt'
 
         except:
             result_message = 'error'
 
         error_label = ''
         if result_message != 'success':
-            error_label = '<b style=\"color:#fc5252;\">ERROR</b> '
+            error_label = '<b>ERROR</b> '
 
         message = f'''
 <b>{error_label}Crypto-bot message</b>
