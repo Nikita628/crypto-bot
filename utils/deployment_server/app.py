@@ -20,15 +20,17 @@ SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 def do_post():
     git_event = json.loads(request.data)
     if git_event.get('ref') == 'refs/heads/migrations_and_python_server':
-        result_message = 'successyyyy'
+        result_message = 'success'
 
         try:
             result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
             if result != 0:
                 result_message = 'git pull error'
+            else:
                 result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                 if result != 0:
-                    result_message = 'compose or migrations error'
+                result_message = 'compose or migrations error'
+
         except:
             result_message = 'error'
 
