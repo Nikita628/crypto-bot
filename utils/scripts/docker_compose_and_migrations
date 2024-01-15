@@ -14,7 +14,8 @@ echo 'migrations running are ended'
 echo "running server and ui docker"
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
-
+systemctl daemon-reload
+systemctl restart bot_deployment_server
 if [[ $? -ne 0 ]]; then
   exit 1
 fi
