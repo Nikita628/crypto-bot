@@ -13,6 +13,7 @@ from bot.trade import (
     is_already_trading,
 )
 from bot.binance import BinanceInterval
+from integration.telegram import post, TradeSignal
 
 class Base(ABC):
     def __init__(self, timeframe: BinanceInterval, loockback: int, strategy: str) -> None:
@@ -35,22 +36,30 @@ class Base(ABC):
                         if len(kline.df) < self.loockback:
                             continue
                     
-                        direction = self.determine_trade_direction(kline)  
                         kline.add_atr()    
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
-
+                        direction = self.determine_trade_direction(kline, symbol)  
+                        
                         if direction:
                             deal = Trade(
                                 base_asset=symbol.replace('USDT', ''),
                                 quote_asset='USDT',
-                                entry_price=kline.get_running_price(),
+                                entry_price=current_price,
                                 direction=direction,
                                 strategy=self.strategy,
                                 atr_percentage=current_atr_value / current_price * 100
                             )
                             enter(deal)
                             self.log(f'entered {symbol}')
+                            if self.strategy.startswith('dual_momentum_customized'):
+                                post(TradeSignal(
+                                    strategy=self.strategy,
+                                    symbol=symbol,
+                                    is_entry=True,
+                                    is_long=direction.value == TradeDirection.long.value,
+                                    running_price=current_price,
+                                ))
                     except RateLimitException as e:
                         raise e
                     except Exception as e:
@@ -64,7 +73,7 @@ class Base(ABC):
             raise e
         except Exception as e:
             self.log(f'search_entry: global error {e}')
-            raise e
+
 
     def search_exit(self):
         try:
@@ -80,6 +89,12 @@ class Base(ABC):
                         if exit_reason:
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
+                            # post(TradeSignal(
+                            #     strategy=self.strategy, 
+                            #     symbol=trade.symbol, 
+                            #     exit_reason=exit_reason,
+                            #     running_price=running_price,
+                            # ))
                         else:
                             extend(trade.id, running_price)
                     except RateLimitException as e:
@@ -93,7 +108,6 @@ class Base(ABC):
             raise e
         except Exception as e:
             self.log(f'search_exit: global error {e}')
-            raise e
 
 
     @abstractmethod
@@ -101,7 +115,7 @@ class Base(ABC):
         pass
 
     @abstractmethod
-    def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
+    def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         pass
 
     def log(self, msg: str):

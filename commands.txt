@@ -1,3 +1,6 @@
+//bash error
+sed -i -e 's/\r$//' restart_server
+
 //delete folder
 rm -r /var/www/crypto-bot/
 
@@ -18,9 +21,68 @@ git clone -b prod git@github.com:Nikita628/crypto-bot.git
 chmod +x ~/bot_scripts/files_update
 
 //run
-/var/www/scripts/files_update
+/var/www/scripts/deploying
+
+//set log file
+/var/www/scripts/deploying 2> /var/www/logs/deploying_err.log
+/var/www/scripts/deploying -f -z -y > /var/www/logs/deploying.log 2> /var/www/logs/deploying_err.log
 
 //server
 cd /var/www/
-screen -dmS python-http-server python3 server.py
+screen -dmS python-http-server python3 server.py &
 screen -X -S 152489.pts-0.flat-connection quit
+
+//daemon
+python3 server.py &
+
+//kill server process
+ps -mfA | grep python
+kill 294697
+
+
+//container id
+docker ps -aqf "name=crypto-bot-server"
+
+//path to file
+<containerId>:/path/to/file
+cat ca9b98b82203:/src/database/migrations/1.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+
+//remove docker images
+docker rmi $(docker images -q)
+
+//docker commands
+cat /var/www/1.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+docker exec -it crypto-bot-server bash
+src/database/migrations/1.sql
+docker exec -it crypto-bot-db bash
+docker exec -it crypto-bot-db psql -U postgres -d postgres -f /var/www/1.sql
+//stop docker
+docker stop $(docker ps -a -q)
+//remove docker containers
+docker ps --filter status=exited -q | xargs docker rm
+
+
+//copy out from docker
+containerID=`docker ps -aqf "name=crypto-bot-server"`
+docker cp -a $containerID:/app/src/database/migrations/. /var/www/db/migrations/
+
+//server logs
+docker logs crypto-bot-server
+
+//dbmate
+//create migration
+cd /var/www/dbmate/ ; dbmate new <migration_name> //migrations folder /var/www/dbmate/db/migrations/
+//run migrations
+cd /var/www/dbmate/ ; dbmate up
+//help
+dbmate -help
+
+//apache2
+systemctl reload apache2
+a2ensite deployment_server.conf
+a2dissite 000-default.conf
+
+//flask server
+pip install gunicorn
+systemctl daemon-reload ; systemctl start bot_deployment_server ; systemctl enable bot_deployment_server
+systemctl restart bot_deployment_server

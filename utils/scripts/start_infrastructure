@@ -1,0 +1,55 @@
+#!/bin/bash
+
+#delete
+rm -r /var/bot-app/
+
+#add folder
+if [ ! -d "/var/bot-app/" ]
+then
+  echo "adding /var/bot-app/"
+  mkdir /var/bot-app/
+fi
+
+docker stop $(docker ps -a -q)
+docker ps --filter status=exited -q | xargs docker rm
+docker rmi $(docker images -q)
+
+#git clone repository
+cd /var/bot-app/
+git init
+git config --global user.name "junkysoul"
+git config --global user.email "dmitrystopkov@gmail.com"
+eval $(ssh-agent -s)
+ssh-add /root/github_ssh_keys/key
+git clone -b prod git@github.com:Nikita628/crypto-bot.git
+
+chmod +x /var/bot-app/crypto-bot/utils/scripts/start_infrastructure
+chmod +x /var/bot-app/crypto-bot/utils/scripts/git_pull
+chmod +x /var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations
+#chmod +x /var/bot-app/crypto-bot/utils/scripts/restart_server
+
+#copy .env
+cp /root/bot_env/dbmate/.env /var/bot-app/crypto-bot/utils/dbmate/
+cp /root/bot_env/deployment_server/.env /var/bot-app/crypto-bot/utils/deployment_server/
+cp /root/bot_env/docker/.env /var/bot-app/crypto-bot/
+
+#run docker db
+echo "running db docker"
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d db
+
+#run docker server
+echo "running server and ui docker"
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d server
+
+#run migrations
+echo 'migrations are running'
+cd /var/bot-app/crypto-bot/utils/dbmate/
+dbmate rollback
+dbmate up
+echo 'migrations running are ended'
+
+systemctl daemon-reload
+systemctl stop bot_deployment_server
+systemctl start bot_deployment_server

@@ -10,8 +10,8 @@ from bot.binance import BinanceInterval
 from typing import Optional
 from strategies.base import Base
 
-LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
-PVT_SURGE_PERCENTAGE = 4
+_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_PVT_SURGE_PERCENTAGE = 5
 
 class VolumeSurge(Base):
     def __init__(
@@ -21,14 +21,15 @@ class VolumeSurge(Base):
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
         ):
-        super().__init__(timeframe, LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
 
 
-    def determine_trade_direction(self, kline: KLine) -> Optional[TradeDirection]:
+    def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_pvt()
         kline.add_mfi()
+        kline.add_rsi()
 
         if self.is_long_entry(kline):
             return TradeDirection.long
@@ -66,16 +67,20 @@ class VolumeSurge(Base):
         current_pvt = kline.df[KLine.Col.pvt].iloc[-1]
         previous_pvt = kline.df[KLine.Col.pvt].iloc[-2]
         is_pvt_surged_upward = current_pvt > previous_pvt and (
-            (current_pvt - previous_pvt) / previous_pvt * 100 > PVT_SURGE_PERCENTAGE
+            (current_pvt - previous_pvt) / previous_pvt * 100 > _PVT_SURGE_PERCENTAGE
         )
+        overbought_limit = 85
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
-            kline.is_change_within_percentage(KLine.Col.pvt, -8, -1, 2),
-
+            kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 3),
             is_pvt_surged_upward,
 
+            kline.is_upward(KLine.Col.rsi),
+            kline.is_below(KLine.Col.rsi, overbought_limit),
+
             kline.is_upward(KLine.Col.mfi),
+            kline.is_below(KLine.Col.mfi, overbought_limit),
         ])
     
 
