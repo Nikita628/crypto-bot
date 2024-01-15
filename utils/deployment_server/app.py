@@ -30,7 +30,7 @@ def do_post():
             else:
                 result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                 if result != 0:
-                result_message = 'compose or migrations error'
+                    result_message = 'compose or migrations error'
 
         except:
             result_message = 'error'
