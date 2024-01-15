@@ -13,7 +13,7 @@ docker-compose -f docker-compose-prod.yml up --build -d db
 #run docker server
 echo "running server and ui docker"
 cd /var/bot-app/crypto-bot/
-docker-compose -f docker-compose-prod2.yml up --build -d server
+docker-compose -f docker-compose-prod.yml up --build -d server
 systemctl daemon-reload
 systemctl restart bot_deployment_server
 echo $?
