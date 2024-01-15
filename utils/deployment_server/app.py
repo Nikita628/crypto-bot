@@ -15,8 +15,6 @@ _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
-
-
 @app.route('/', methods=['POST'])
 def do_post():
     git_event = json.loads(request.data)
