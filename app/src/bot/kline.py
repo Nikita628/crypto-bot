@@ -1,5 +1,6 @@
 import pandas as pd
 import pandas_ta
+import numpy as np
 from bot.trade import TradeDirection
 
 class KLine:
@@ -213,6 +214,7 @@ class KLine:
             
         return True
     
+    
     def is_price_action_not_mixing_with_gmma(self, direction: TradeDirection) -> bool:
         current_low = self.df[KLine.Col.low].iloc[-1]
         current_high = self.df[KLine.Col.high].iloc[-1]
@@ -228,4 +230,13 @@ class KLine:
             return (current_high < current_gmma_30
                     and current_open < current_gmma_30
                     and current_close < current_gmma_30)
-    
+        
+
+    def add_slope(self, source_column: str):
+        self.df[f'slope_{source_column}'] = self.df[source_column].diff()
+
+    def calc_volatility(self, loockback: int = 1) -> float:
+        period = self.df.tail(loockback).copy()
+        period.loc[:, 'log_return'] = np.log(period[KLine.Col.close] / period[KLine.Col.close].shift(1))
+        std = period['log_return'].std()
+        return round(std * 100, 2)

@@ -36,11 +36,11 @@ class Base(ABC):
                         if len(kline.df) < self.loockback:
                             continue
                     
-                        direction = self.determine_trade_direction(kline, symbol)  
                         kline.add_atr()    
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
-
+                        direction = self.determine_trade_direction(kline, symbol)  
+                        
                         if direction:
                             deal = Trade(
                                 base_asset=symbol.replace('USDT', ''),
