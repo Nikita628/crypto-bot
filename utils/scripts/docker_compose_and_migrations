@@ -6,9 +6,9 @@ cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
 #run migrations
-echo 'migrations are running'
-cd /var/bot-app/crypto-bot/utils/dbmate/ ; dbmate up
-echo 'migrations running are ended'
+#echo 'migrations are running'
+#cd /var/bot-app/crypto-bot/utils/dbmate/ ; dbmate up
+#echo 'migrations running are ended'
 
 #run docker server
 echo "running server and ui docker"
