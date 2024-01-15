@@ -7,7 +7,7 @@ git config --global user.email "dmitrystopkov@gmail.com"
 eval $(ssh-agent -s)
 ssh-add /root/github_ssh_keys/key
 git reset --hard
-git pull git@github.com:Nikita628/crypto-bot.git migrations_and_python_server
+git pull git@github.com:Nikita628/crypto-bot.git prod
 
 chmod +x /var/bot-app/crypto-bot/utils/scripts/start_infrastructure
 chmod +x /var/bot-app/crypto-bot/utils/scripts/git_pull
