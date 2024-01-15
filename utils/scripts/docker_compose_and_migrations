@@ -14,11 +14,7 @@ docker-compose -f docker-compose-prod.yml up --build -d db
 echo "running server and ui docker"
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
-systemctl daemon-reload
-systemctl restart bot_deployment_server
-echo $?
 if [[ $? -ne 0 ]]; then
-  echo '222'
   exit 1
 else
   exit 0
