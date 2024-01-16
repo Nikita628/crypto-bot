@@ -10,4 +10,4 @@ COPY . /app
 
 RUN chmod +x entry_point.sh
 
-CMD ["entry_point.sh"]
+CMD ["/bin/bash", "/entry_point.sh"]
