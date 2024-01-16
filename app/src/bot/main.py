@@ -81,6 +81,11 @@ strategies: List[Base] = [
 
     # dual momentum customized ####################
     DualMomentumCustomized(
+        name='dual_momentum_customized',
+        is_over_price_exit=True,
+    ),
+
+    DualMomentumCustomized(
         name='dual_momentum_customized_greedy', 
         greedy_profit_percentage=1, 
         hard_stop_loss_percentage=-3,
