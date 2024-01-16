@@ -129,7 +129,6 @@ class DualMomentum(Base):
         prev_stoch_short = kline.df[KLine.Col.stoch_short_d].iloc[-2]
         prev_stoch_long = kline.df[KLine.Col.stoch_long_d].iloc[-2]
         prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
-        prev_mfi = kline.df[KLine.Col.mfi].iloc[-2]
 
         if direction == TradeDirection.long.value:
             return (
@@ -143,9 +142,6 @@ class DualMomentum(Base):
                     (prev_rsi > _OVERBOUGHT 
                      and kline.is_below(KLine.Col.rsi, _OVERBOUGHT)
                      and kline.is_downward(KLine.Col.rsi)),
-                    (prev_mfi > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.mfi, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.mfi)),
                 ])
             )
         else:
@@ -160,9 +156,6 @@ class DualMomentum(Base):
                     (prev_rsi < _OVERSOLD 
                      and kline.is_above(KLine.Col.rsi, _OVERSOLD)
                      and kline.is_upward(KLine.Col.rsi)),
-                    (prev_mfi < _OVERSOLD 
-                     and kline.is_above(KLine.Col.mfi, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.mfi)),
                 ])
             )
 
@@ -170,7 +163,6 @@ class DualMomentum(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()
-        kline.add_mfi()
 
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
