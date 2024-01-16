@@ -10,4 +10,4 @@ COPY . /app
 
 RUN chmod +x entry_point.sh
 
-CMD ["python", "-u"]
+CMD ["entry_point.sh"]
