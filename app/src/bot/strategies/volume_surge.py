@@ -77,10 +77,10 @@ class VolumeSurge(Base):
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, 30, overbought_limit),
+            kline.is_between(KLine.Col.rsi, 50, overbought_limit),
 
             kline.is_upward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, 30, overbought_limit),
+            kline.is_between(KLine.Col.mfi, 50, overbought_limit),
         ])
     
 
