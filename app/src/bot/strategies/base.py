@@ -64,9 +64,9 @@ class Base(ABC):
                     except Exception as e:
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                             
-                    time.sleep(5)
+                    time.sleep(2.5)
                         
-                time.sleep(300)
+                time.sleep(60)
         except RateLimitException as e:
             self.log(f"search_entry: rate limit error {e}")
             raise e
@@ -101,7 +101,7 @@ class Base(ABC):
                     except Exception as e:
                         self.log(f"search_exit: Failed to process data for {trade.base_asset}: {e}")
 
-                time.sleep(60)
+                time.sleep(30)
         except RateLimitException as e:
             self.log(f"search_exit: rate limit error {e}")
             raise e
