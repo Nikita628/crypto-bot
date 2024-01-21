@@ -27,6 +27,7 @@ class Asset(Base):
     coin = TextField(column_name='coin', primary_key=True)
     amount = FloatField(column_name='amount', null=False)
     user_id = ForeignKeyField(User, related_name='id')
+    strategy = TextField(column_name='strategy', null=False)
 
     class Meta:
         table_name = 'asset'
@@ -53,12 +54,15 @@ class Trade(Base):
         table_name = 'trade'
 
 
-class SuspendedSymbol(Base):
-    suspention_start_date = DateTimeField(column_name='suspention_start_date', primary_key=True)
+class Hold(Base):
+    id = AutoField(column_name='id', primary_key=True)
     symbol = TextField(column_name='symbol', null=False)
+    strategy = TextField(column_name='strategy', null=False)
+    start_time = DateTimeField(column_name='start_time', null=False)
+    end_time = DateTimeField(column_name='end_time', null=False)
 
     class Meta:
-        table_name = 'suspended_symbol'
+        table_name = 'hold'
 
 
 class HistoryData(Base):
