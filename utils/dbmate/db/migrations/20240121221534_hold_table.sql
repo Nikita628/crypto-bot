@@ -4,7 +4,8 @@ CREATE TABLE public.hold (
                               symbol text NOT NULL,
                               strategy text NOT NULL,
                               start_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                              end_time TIMESTAMP WITH TIME ZONE NOT NULL
+                              end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+                              user_id integer NOT NULL references public.user(id)
 );
 
 -- migrate:down
