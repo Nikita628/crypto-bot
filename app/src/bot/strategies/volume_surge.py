@@ -1,7 +1,8 @@
 from bot.kline import KLine
 from bot.trade import (
     Trade, 
-    TradeDirection, 
+    TradeDirection,
+    get_current_profit_percentage, 
     is_trailing_stop,
     is_greedy_profit_reached,
     is_atr_stop_loss,
@@ -20,10 +21,12 @@ class VolumeSurge(Base):
             name = 'volume_surge',
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
+            hard_stop_loss_percentage:Optional[float] = None,
         ):
         super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
+        self.hard_stop_loss_percentage = hard_stop_loss_percentage
 
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
@@ -59,6 +62,9 @@ class VolumeSurge(Base):
             self.trailing_stop_percentage
         ):
             reason = 'trailing stop'
+        elif (self.hard_stop_loss_percentage 
+              and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
+            reason = 'hard stop loss'
             
         return reason
 
@@ -77,10 +83,10 @@ class VolumeSurge(Base):
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, 50, overbought_limit),
+            kline.is_between(KLine.Col.rsi, 40, overbought_limit),
 
             kline.is_upward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, 50, overbought_limit),
+            kline.is_between(KLine.Col.mfi, 40, overbought_limit),
         ])
     
 
