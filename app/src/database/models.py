@@ -60,6 +60,7 @@ class Hold(Base):
     strategy = TextField(column_name='strategy', null=False)
     start_time = DateTimeField(column_name='start_time', null=False)
     end_time = DateTimeField(column_name='end_time', null=False)
+    user_id = ForeignKeyField(User, related_name='id', null=False)
 
     class Meta:
         table_name = 'hold'
