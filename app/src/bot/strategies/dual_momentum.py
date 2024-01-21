@@ -237,6 +237,7 @@ class DualMomentum(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long_d),
                 kline.is_downward(KLine.Col.stoch_short_d),
+            ]) or all([
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
             ])
@@ -247,6 +248,7 @@ class DualMomentum(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long_d),
                 kline.is_upward(KLine.Col.stoch_short_d),
+            ]) or all ([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
             ])

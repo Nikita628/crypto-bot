@@ -24,7 +24,7 @@ _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 # additional check on stochastics - they should both be going
 # in one direction, and not overbought/oversold
 
-_MIN_SLOPE = 5
+_MIN_SLOPE = 2
 _OVERBOUGHT = 80
 _OVERSOLD = 20
 
@@ -293,6 +293,7 @@ class DualMomentumCustomized(Base):
             all([
                 kline.is_downward(KLine.Col.stoch_long_d),
                 kline.is_downward(KLine.Col.stoch_short_d),
+            ]) or all([
                 kline.is_below(KLine.Col.rsi, 50),
                 kline.is_downward(KLine.Col.rsi),
             ])
@@ -303,6 +304,7 @@ class DualMomentumCustomized(Base):
             all([
                 kline.is_upward(KLine.Col.stoch_long_d),
                 kline.is_upward(KLine.Col.stoch_short_d),
+            ]) or all ([
                 kline.is_upward(KLine.Col.rsi),
                 kline.is_above(KLine.Col.rsi, 50),
             ])
