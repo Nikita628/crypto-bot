@@ -73,9 +73,20 @@ CREATE TABLE public.history_data (
                                      volume real NOT NULL
 );
 
+CREATE TABLE public.hold (
+                              id BIGSERIAL primary key,
+                              symbol text NOT NULL,
+                              strategy text NOT NULL,
+                              start_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              end_time TIMESTAMP WITH TIME ZONE NOT NULL,
+                              user_id integer NOT NULL references public.user(id)
+);
+
 CREATE TABLE public.asset (
-                              coin text PRIMARY KEY,
+                              id BIGSERIAL primary key,
+                              coin text NOT NULL,
                               amount real NOT NULL,
+                              strategy text NOT NULL,
                               user_id integer NOT NULL references public.user(id)
 );
 
@@ -85,6 +96,7 @@ DROP TRIGGER IF EXISTS update_highest_profit_trigger ON public.trade;
 
 DROP FUNCTION IF EXISTS update_highest_profit_percentage();
 
+DROP TABLE IF EXISTS public.hold;
 DROP TABLE IF EXISTS public.asset;
 DROP TABLE IF EXISTS public.history_data;
 DROP TABLE IF EXISTS public.trade;
