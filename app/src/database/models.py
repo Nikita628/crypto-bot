@@ -24,10 +24,11 @@ class User(Base):
 
 
 class Asset(Base):
-    coin = TextField(column_name='coin', primary_key=True)
+    id = AutoField(column_name='id', primary_key=True)
+    coin = TextField(column_name='coin', null=False)
     amount = FloatField(column_name='amount', null=False)
-    user_id = ForeignKeyField(User, related_name='id')
     strategy = TextField(column_name='strategy', null=False)
+    user_id = ForeignKeyField(User, related_name='id')
 
     class Meta:
         table_name = 'asset'
