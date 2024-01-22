@@ -87,7 +87,7 @@ def get_all_active(strategy: str) -> List[Trade]:
 
 
 def is_expired(trade: Trade) -> bool:
-    return trade and datetime.datetime.now() - trade.entry_date > _EXPIRATION_PERIOD_HOURS*60*60
+    return trade and (trade.entry_date + datetime.timedelta(hours=_EXPIRATION_PERIOD_HOURS)) > datetime.datetime.utcnow()
 
 
 def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start = 0.0) -> bool:
