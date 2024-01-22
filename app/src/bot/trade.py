@@ -90,10 +90,10 @@ def is_expired(trade: Trade) -> bool:
     return trade and datetime.datetime.now() - trade.entry_date > _EXPIRATION_PERIOD_HOURS*60*60
 
 
-def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start = 0.0) -> bool:
+def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start_percentage = 1.0) -> bool:
     current_profit_percentage = get_current_profit_percentage(running_price, trade)
     return (
-        current_profit_percentage > trailing_start and
+        current_profit_percentage >= trailing_start_percentage and
         trade.highest_profit_percentage > current_profit_percentage and
         (trade.highest_profit_percentage - current_profit_percentage) >= trailing_stop_percentage
     )
