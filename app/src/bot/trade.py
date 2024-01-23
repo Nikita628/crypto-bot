@@ -15,7 +15,9 @@ class Trade:
             id: int = None,
             symbol: str = None,
             base_asset: str = None,
-            quote_asset: str = None, 
+            base_asset_amount: float = None,
+            quote_asset: str = None,
+            quote_asset_amount: float = None, 
             entry_price: float = None,
             entry_date: datetime.datetime = None,
             exit_price: float or None = None,
@@ -120,6 +122,7 @@ def get_current_profit_percentage(running_price: float, trade: Trade) -> float:
 def enter(trade: Trade):
     database.models.Trade.create(
            base_asset = trade.base_asset,
+           base_asset_amount = trade.base_asset_amount,
            quote_asset = trade.quote_asset,
            entry_price = trade.entry_price,
            running_price = trade.entry_price,

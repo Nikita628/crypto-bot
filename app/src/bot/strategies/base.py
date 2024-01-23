@@ -12,6 +12,7 @@ from bot.trade import (
     get_all_active,
     is_already_trading,
 )
+import bot.asset as asset
 from bot.binance import BinanceInterval
 from integration.telegram import post, TradeSignal
 
@@ -35,15 +36,25 @@ class Base(ABC):
 
                         if len(kline.df) < self.loockback:
                             continue
-                    
+
+                        
                         kline.add_atr()    
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
                         direction = self.determine_trade_direction(kline, symbol)  
                         
                         if direction:
+
+                            asset_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
+                            if not asset_amount or asset_amount < asset.AssetConstants.amount_per_trade:
+                                continue
+
+                            new_asset_amount = asset_amount - asset.AssetConstants.amount_per_trade
+                            asset.update_amount(amount=new_asset_amount, coin='USDT', strategy=self.strategy)                                   
+
                             trade = Trade(
                                 base_asset=symbol.replace('USDT', ''),
+                                base_asset_amount=current_price*asset.AssetConstants.amount_per_trade,
                                 quote_asset='USDT',
                                 entry_price=current_price,
                                 direction=direction,
@@ -65,6 +76,8 @@ class Base(ABC):
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                             
                     time.sleep(2.5)
+
+                    break
                         
                 time.sleep(60)
         except RateLimitException as e:

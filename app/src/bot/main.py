@@ -11,6 +11,8 @@ from typing import List
 from integration.telegram import consume_signals_queue
 import os
 import json
+import asset
+
 
 # TODO: future websockets and async migration
 # fetch 500 previous candlesticks over HTTP first,
@@ -135,6 +137,12 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
     ),
     VolumeSurge(
+        name='volume_surge_greedy_hard_stop',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        hold_period_hours=24,
+    ),
+    VolumeSurge(
         name='volume_surge_trailing',
         trailing_stop_percentage=1,
     ),
@@ -164,6 +172,13 @@ def start_bot():
     threads: List[threading.Thread] = []
 
     for strategy in strategies:
+        # create assets if need
+        if not asset.is_exists(coin = 'USDT', strategy = strategy.strategy):
+            new_asset = asset.Asset(
+                strategy=strategy.strategy,
+            )
+            asset.create_test_instance(new_asset)
+
         buy_thread = threading.Thread(target=strategy.search_entry)
         sell_thread = threading.Thread(target=strategy.search_exit)
         threads.append(buy_thread)
