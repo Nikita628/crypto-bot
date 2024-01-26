@@ -3,14 +3,14 @@ import datetime
 import database.models
 
 _USER_ID = 1
-_START_AMOUNT = 1000 # 1000 USDT, for example
-_PORTION_PER_TRADE = 0.1 # 10%
-_AMOUNT_PER_TRADE = _START_AMOUNT*_PORTION_PER_TRADE
+_START_USDT_AMOUNT = 1000 # 1000 USDT, for example
+_PER_TRADE_PORTION = 0.1 # 10%
+_PER_TRADE_USDT_AMOUNT = _START_USDT_AMOUNT*_PER_TRADE_PORTION
 
 class AssetConstants(float, Enum):
-    start_amount = _START_AMOUNT
-    portion_per_trade = _PORTION_PER_TRADE
-    amount_per_trade = _AMOUNT_PER_TRADE
+    start_usdt_amount = _START_USDT_AMOUNT
+    per_trade_portion = _PER_TRADE_PORTION
+    per_trade_ustd_amount = _PER_TRADE_USDT_AMOUNT
 
 class Asset:
     def __init__(
@@ -27,7 +27,7 @@ class Asset:
         self.strategy = strategy
         self.user_id = user_id
 
-def get_amount(coin: str, strategy: str):
+def get_amount(coin: str, strategy: str) -> float:
     asset = database.models.Asset.get(
         database.models.Asset.coin == coin,
         database.models.Asset.strategy == strategy,
@@ -36,7 +36,7 @@ def get_amount(coin: str, strategy: str):
     if bool(asset):
         return asset.amount
     else:
-        return false
+        return 0
 
 
 def is_exists(coin: str, strategy: str) -> bool:
@@ -58,7 +58,7 @@ def create(asset: Asset):
 def create_test_instance(asset: Asset):
     database.models.Asset.create(
            coin = 'USDT',
-           amount = AssetConstants.start_amount,
+           amount = AssetConstants.start_usdt_amount,
            strategy = asset.strategy,
            user_id = _USER_ID,
         )

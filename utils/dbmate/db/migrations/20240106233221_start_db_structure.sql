@@ -89,7 +89,8 @@ CREATE TABLE public.asset (
                               coin text NOT NULL,
                               amount real NOT NULL,
                               strategy text NOT NULL,
-                              user_id integer NOT NULL references public.user(id)
+                              user_id integer NOT NULL references public.user(id),
+                              UNIQUE (coin, strategy, user_id)
 );
 
 

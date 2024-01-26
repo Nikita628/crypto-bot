@@ -46,7 +46,7 @@ class Trade(Base):
     exit_price = FloatField(column_name='exit_price', null=True)
     exit_date = DateTimeField(column_name='exit_date', null=True)
     exit_reason = TextField(column_name='exit_reason', null=True)
-    profit_percentage = FloatField(column_name='profit_percentage', null=True)
+    profit_percentage = FloatField(column_name='profit_percentage', null=False)
     highest_profit_percentage = FloatField(column_name='highest_profit_percentage', null=False)
     running_price = FloatField(column_name='running_price', null=False)
     direction = TextField(column_name='direction', null=False)

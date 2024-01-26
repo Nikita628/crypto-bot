@@ -45,16 +45,16 @@ class Base(ABC):
                         
                         if direction:
 
-                            asset_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
-                            if not asset_amount or asset_amount < asset.AssetConstants.amount_per_trade:
+                            available_usdt_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
+                            if available_usdt_amount < asset.AssetConstants.amount_per_trade:
                                 continue
 
-                            new_asset_amount = asset_amount - asset.AssetConstants.amount_per_trade
-                            asset.update_amount(amount=new_asset_amount, coin='USDT', strategy=self.strategy)                                   
+                            new_available_usdt_amount = available_usdt_amount - asset.AssetConstants.per_trade_ustd_amount
+                            asset.update_amount(amount=new_available_usdt_amount, coin='USDT', strategy=self.strategy)                             
 
                             trade = Trade(
                                 base_asset=symbol.replace('USDT', ''),
-                                base_asset_amount=current_price*asset.AssetConstants.amount_per_trade,
+                                base_asset_amount=current_price*asset.AssetConstants.per_trade_ustd_amount,
                                 quote_asset='USDT',
                                 entry_price=current_price,
                                 direction=direction,
