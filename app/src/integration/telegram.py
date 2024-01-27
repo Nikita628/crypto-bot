@@ -34,6 +34,7 @@ class TradeSignal:
         self.strategy = strategy
         self.symbol = symbol
         self.is_long = is_long
+        self.direction = 'long' if is_long else 'short'
         self.date = f'\n{datetime.datetime.utcnow().strftime("%b %d, %Y %H:%M")}'
         self.running_price = running_price
         self.url = f'\nhttps://www.binance.com/en/trade/{symbol.replace("USDT", "")}_USDT'
@@ -50,8 +51,7 @@ class TradeEntrySignal(TradeSignal):
         self.is_long = is_long
 
     def __str__(self):
-        direction = 'long' if self.is_long else 'short'
-        result = f"{self.strategy}\n{self.symbol} entry {direction}"
+        result = f"{self.strategy}\n{self.symbol} entry {self.direction}"
         result += f'\nprice: {self.running_price} USDT'
         result += self.date
         result += self.url
@@ -72,9 +72,8 @@ class TradeExitSignal(TradeSignal):
         self.profit_percentage = profit_percentage
 
     def __str__(self):
-        direction = 'long' if self.is_long else 'short'
         exit_reason = f'\nexit_reason: {self.exit_reason}'
-        result = f"{self.strategy}\n{self.symbol} exit {direction}" 
+        result = f"{self.strategy}\n{self.symbol} exit {self.direction}" 
         result += exit_reason
         result += f'\nprofit_percentage: {self.profit_percentage}'
         result += f'\nprice: {self.running_price} USDT'
