@@ -1,11 +1,14 @@
 from peewee import *
+from playhouse.pool import PooledPostgresqlExtDatabase
 import os
 
-db = PostgresqlDatabase(
+db = PooledPostgresqlExtDatabase(
     database=os.environ.get('POSTGRES_DB'), 
     user=os.environ.get('POSTGRES_USER'), 
     password=os.environ.get('POSTGRES_PASSWORD'), 
-    host=os.environ.get('POSTGRES_HOST')
+    host=os.environ.get('POSTGRES_HOST'),
+    max_connections=32,
+    stale_timeout=300,  # 5 minutes
 )
 
 class Base(Model):
