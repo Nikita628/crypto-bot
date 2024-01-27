@@ -78,6 +78,7 @@ class VolumeSurge(Base):
         overbought_limit = 80
 
         return all([
+            
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
             kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 3),
             is_pvt_surged_upward,
