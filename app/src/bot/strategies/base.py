@@ -13,7 +13,7 @@ from bot.trade import (
     is_already_trading,
 )
 from bot.binance import BinanceInterval
-from integration.telegram import post, TradeSignal
+from integration.telegram import post, TradeEntrySignal, TradeExitSignal
 
 class Base(ABC):
     def __init__(self, timeframe: BinanceInterval, loockback: int, strategy: str) -> None:
@@ -52,10 +52,9 @@ class Base(ABC):
                             )
                             enter(trade)
                             self.log(f'entered {symbol}')
-                            post(TradeSignal(
+                            post(TradeEntrySignal(
                                 strategy=self.strategy,
                                 symbol=symbol,
-                                is_entry=True,
                                 is_long=direction.value == TradeDirection.long.value,
                                 running_price=current_price,
                             ))
@@ -88,11 +87,13 @@ class Base(ABC):
                         if exit_reason:
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
-                            post(TradeSignal(
+                            post(TradeExitSignal(
                                 strategy=self.strategy, 
                                 symbol=trade.symbol, 
                                 exit_reason=exit_reason,
                                 running_price=running_price,
+                                is_long=trade.direction == TradeDirection.long.value,
+                                profit_percentage=trade.profit_percentage,
                             ))
                         else:
                             extend(trade.id, running_price)

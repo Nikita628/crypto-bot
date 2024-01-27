@@ -28,32 +28,58 @@ class TradeSignal:
             self,
             strategy: str,
             symbol: str,
-            is_entry: bool = False,
+            running_price: float,
             is_long: bool = False,
-            running_price: float = 0,
-            exit_reason: str = None,
         ):
         self.strategy = strategy
         self.symbol = symbol
         self.is_long = is_long
-        self.is_entry = is_entry
-        self.exit_reason = exit_reason
-        self.date = datetime.datetime.utcnow()
+        self.date = f'\n{datetime.datetime.utcnow().strftime("%b %d, %Y %H:%M")}'
         self.running_price = running_price
+        self.url = f'\nhttps://www.binance.com/en/trade/{symbol.replace("USDT", "")}_USDT'
+   
+class TradeEntrySignal(TradeSignal):
+    def __init__(
+            self,
+            strategy: str,
+            symbol: str,
+            running_price: float,
+            is_long: bool = False,
+        ):
+        super().__init__(strategy, symbol, running_price, is_long)
+        self.is_long = is_long
 
     def __str__(self):
-        direction = '\nlong' if self.is_long else 'short' if self.is_entry else ''
-        date = f'\n{self.date.strftime("%b %d, %Y %H:%M")}'
-        exit_reason = f'\nexit_reason: {self.exit_reason}' if not self.is_entry else ''
-        result = f"{self.strategy}\n{self.symbol} {'entry' if self.is_entry else 'exit'} {direction}"
-        url = f'\nhttps://www.binance.com/en/trade/{self.symbol.replace("USDT", "")}_USDT'
+        direction = 'long' if self.is_long else 'short'
+        result = f"{self.strategy}\n{self.symbol} entry {direction}"
+        result += f'\nprice: {self.running_price} USDT'
+        result += self.date
+        result += self.url
+        return result
+    
+class TradeExitSignal(TradeSignal):
+    def __init__(
+            self,
+            strategy: str,
+            symbol: str,
+            running_price: float,
+            exit_reason: str,
+            profit_percentage: float,
+            is_long: bool = False,
+        ):
+        super().__init__(strategy, symbol, running_price, is_long)
+        self.exit_reason = exit_reason
+        self.profit_percentage = profit_percentage
 
-        if exit_reason:
-            result += exit_reason
-
-        result += f'\n{self.running_price} USDT'
-        result += date
-        result += url
+    def __str__(self):
+        direction = 'long' if self.is_long else 'short'
+        exit_reason = f'\nexit_reason: {self.exit_reason}'
+        result = f"{self.strategy}\n{self.symbol} exit {direction}" 
+        result += exit_reason
+        result += f'\nprofit_percentage: {self.profit_percentage}'
+        result += f'\nprice: {self.running_price} USDT'
+        result += self.date
+        result += self.url
         return result
 
 
