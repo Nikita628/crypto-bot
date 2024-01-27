@@ -8,7 +8,7 @@ from strategies import (
     VolumeSurge,
 )
 from typing import List
-from integration.telegram import consume_signals_queue
+from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
 
@@ -176,6 +176,10 @@ def start_bot():
         threads.append(tg_bot_signals_consumer)
         tg_bot_signals_consumer.start()
         
+    tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
+    threads.append(tg_bot_errors_consumer)
+    tg_bot_errors_consumer.start()
+    
     for thread in threads:
         thread.join()
 

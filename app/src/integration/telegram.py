@@ -8,8 +8,11 @@ import datetime
 
 _CRYPTO_BOT_TOKEN = os.environ.get('CRYPTO_BOT_TOKEN')
 _CRYPTO_BOT_SIGNALS_CHAT_ID = os.environ.get('CRYPTO_BOT_SIGNALS_CHAT_ID')
+_CRYPTO_BOT_STATUS_CHAT_ID = os.environ.get('CRYPTO_BOT_STATUS_CHAT_ID')
 
-if not _CRYPTO_BOT_TOKEN or not _CRYPTO_BOT_SIGNALS_CHAT_ID:
+if (not _CRYPTO_BOT_TOKEN 
+    or not _CRYPTO_BOT_SIGNALS_CHAT_ID
+    or not _CRYPTO_BOT_STATUS_CHAT_ID):
     raise ValueError('telegram bot env variables are not set')
 
 _REQUEST = HTTPXRequest(
@@ -20,7 +23,7 @@ _REQUEST = HTTPXRequest(
     pool_timeout=30
 )
 _SIGNALS_QUEUE = queue.Queue()
-# dual_momentum_crypto_bot
+_ERRORS_QUEUE = queue.Queue()
 _TG_BOT = Bot(token=_CRYPTO_BOT_TOKEN, request=_REQUEST)
 
 class TradeSignal:
@@ -63,6 +66,7 @@ class TradeExitSignal(TradeSignal):
             strategy: str,
             symbol: str,
             running_price: float,
+            entry_price: float,
             exit_reason: str,
             profit_percentage: float,
             is_long: bool = False,
@@ -70,19 +74,20 @@ class TradeExitSignal(TradeSignal):
         super().__init__(strategy, symbol, running_price, is_long)
         self.exit_reason = exit_reason
         self.profit_percentage = profit_percentage
+        self.entry_price = entry_price
 
     def __str__(self):
-        exit_reason = f'\nexit_reason: {self.exit_reason}'
         result = f"{self.strategy}\n{self.symbol} exit {self.direction}" 
-        result += exit_reason
+        result += f'\nentry price: {self.entry_price} USDT'
+        result += f'\nexit price: {self.running_price} USDT'
         result += f'\nprofit_percentage: {self.profit_percentage}'
-        result += f'\nprice: {self.running_price} USDT'
+        result += f'\nexit_reason: {self.exit_reason}'
         result += self.date
         result += self.url
         return result
 
 
-async def _post_async(signal: TradeSignal):
+async def _post_signal_async(signal: TradeSignal):
     # trying to send a message several times with retries,
     # in case of a network error
     max_attempts = 10
@@ -98,6 +103,22 @@ async def _post_async(signal: TradeSignal):
                 time.sleep(delay_between_attempts)
 
 
+async def _post_error_async(error_msg: str):
+    # trying to send a message several times with retries,
+    # in case of a network error
+    max_attempts = 10
+    base_delay_between_attempts = 1
+
+    for attempt in range(max_attempts):
+        try:
+            await _TG_BOT.send_message(chat_id=_CRYPTO_BOT_STATUS_CHAT_ID, text=error_msg)
+            break
+        except Exception as e:
+            if attempt < max_attempts - 1:
+                delay_between_attempts = base_delay_between_attempts * attempt
+                time.sleep(delay_between_attempts)
+
+
 def consume_signals_queue():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -106,7 +127,7 @@ def consume_signals_queue():
         while True:
             signal = _SIGNALS_QUEUE.get()
             try:
-                await loop.create_task(_post_async(signal))
+                await loop.create_task(_post_signal_async(signal))
                 _SIGNALS_QUEUE.task_done()
             except Exception as e:
                 print(f"Failed to consume signal: {signal}, error: {e}")
@@ -115,5 +136,25 @@ def consume_signals_queue():
     loop.run_until_complete(consume())
 
 
-def post(signal: TradeSignal):  
+def consume_errors_queue():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+
+    async def consume():
+        while True:
+            error_msg = _ERRORS_QUEUE.get()
+            try:
+                await loop.create_task(_post_error_async(error_msg))
+                _ERRORS_QUEUE.task_done()
+            except Exception as e:
+                print(f"Failed to consume error: {error_msg}, error: {e}")
+            time.sleep(5)
+
+    loop.run_until_complete(consume())
+
+
+def post_signal(signal: TradeSignal):  
     _SIGNALS_QUEUE.put(signal)
+
+def post_error(error_msg: str):  
+    _ERRORS_QUEUE.put(error_msg)
