@@ -12,7 +12,6 @@ from typing import Optional
 from strategies.base import Base
 
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
-_PVT_SURGE_PERCENTAGE = 5
 
 class VolumeSurge(Base):
     def __init__(
@@ -22,12 +21,17 @@ class VolumeSurge(Base):
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
+            pvt_surge_percentage:float = 5,
+            pvt_range_percentage:float = 3,
+            pvt_range_loockback:int = 7,
         ):
         super().__init__(timeframe, _LOOCKBACK, name)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
-
+        self.pvt_surge_percentage = pvt_surge_percentage
+        self.pvt_range_percentage = pvt_range_percentage
+        self.pvt_range_loockback = pvt_range_loockback
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_pvt()
@@ -73,13 +77,17 @@ class VolumeSurge(Base):
         current_pvt = kline.df[KLine.Col.pvt].iloc[-1]
         previous_pvt = kline.df[KLine.Col.pvt].iloc[-2]
         is_pvt_surged_upward = current_pvt > previous_pvt and (
-            (current_pvt - previous_pvt) / previous_pvt * 100 > _PVT_SURGE_PERCENTAGE
+            abs((current_pvt - previous_pvt) / previous_pvt * 100) > self.pvt_surge_percentage
         )
         overbought_limit = 80
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
-            kline.is_ranging_within_percentage(KLine.Col.pvt, -8, -1, 3),
+            kline.is_ranging_within_percentage(
+                KLine.Col.pvt, 
+                self.pvt_range_loockback,
+                self.pvt_range_percentage
+            ),
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.rsi),

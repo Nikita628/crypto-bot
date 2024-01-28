@@ -138,6 +138,15 @@ strategies: List[Base] = [
         name='volume_surge_trailing',
         trailing_stop_percentage=1,
     ),
+     VolumeSurge(
+        timeframe=BinanceInterval.h4,
+        name='volume_surge_greedy_hard_stop_4h',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=2,
+        pvt_surge_percentage=4,
+        pvt_range_loockback=6,
+    ),
 ]
 
 def run_test():
