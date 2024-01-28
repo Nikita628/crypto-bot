@@ -11,6 +11,7 @@ from bot.trade import (
     extend,
     get_all_active,
     is_already_trading,
+    get_current_profit_percentage,
 )
 from bot.binance import BinanceInterval
 from integration.telegram import post_signal, post_error, TradeEntrySignal, TradeExitSignal
@@ -88,11 +89,6 @@ class Base(ABC):
                         if exit_reason:
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
-                            profit_percentage = (
-                                (running_price - trade.entry_price) / trade.entry_price * 100 
-                                if trade.direction == TradeDirection.long.value 
-                                else (trade.entry_price - running_price) / trade.entry_price * 100
-                            )
                             post_signal(TradeExitSignal(
                                 strategy=self.strategy, 
                                 symbol=trade.symbol, 
@@ -100,7 +96,7 @@ class Base(ABC):
                                 running_price=running_price,
                                 entry_price=trade.entry_price,
                                 is_long=trade.direction == TradeDirection.long.value,
-                                profit_percentage=profit_percentage,
+                                profit_percentage=get_current_profit_percentage(running_price, trade),
                             ))
                         else:
                             extend(trade.id, running_price)
