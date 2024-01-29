@@ -49,6 +49,7 @@ class VolumeSurge(Base):
 
         kline.add_pvt()
         kline.add_mfi()
+        kline.add_rsi()
 
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
             reason = 'long exit'
