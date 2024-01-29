@@ -101,6 +101,7 @@ class VolumeSurge(Base):
     def is_long_exit(self, kline: KLine):
         return all([
             kline.is_downward(KLine.Col.mfi),
+            kline.is_downward(KLine.Col.rsi),
             kline.is_downward(KLine.Col.pvt),
         ])
        
