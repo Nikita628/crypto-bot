@@ -42,7 +42,6 @@ class Base(ABC):
                         if is_already_trading(symbol, self.strategy):
                             continue
 
-                        print(hold.is_active(symbol, self.strategy))
                         if hold.is_active(symbol, self.strategy):
                             continue
 
