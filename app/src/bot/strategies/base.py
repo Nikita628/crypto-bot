@@ -12,12 +12,13 @@ from bot.trade import (
     extend,
     get_all_active,
     is_already_trading,
+    get_current_profit_percentage,
 )
 import bot.asset as asset
 import bot.hold as hold
 from bot.binance import BinanceInterval
 from typing import Optional
-from integration.telegram import post, TradeSignal
+from integration.telegram import post_signal, post_error, TradeEntrySignal, TradeExitSignal
 
 class Base(ABC):
     def __init__(
@@ -75,10 +76,9 @@ class Base(ABC):
                             )
                             enter(trade)
                             self.log(f'entered {symbol}')
-                            post(TradeSignal(
+                            post_signal(TradeEntrySignal(
                                 strategy=self.strategy,
                                 symbol=symbol,
-                                is_entry=True,
                                 is_long=direction.value == TradeDirection.long.value,
                                 running_price=current_price,
                             ))
@@ -86,15 +86,16 @@ class Base(ABC):
                         raise e
                     except Exception as e:
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
-                            
-                    time.sleep(2.5)
-
+                        post_error(f"search_entry: Failed to process data for {symbol}: {e}")                        
+                    time.sleep(2.5) 
                 time.sleep(60)
         except RateLimitException as e:
             self.log(f"search_entry: rate limit error {e}")
+            post_error(f"search_entry: rate limit error {e}")
             raise e
         except Exception as e:
             self.log(f'search_entry: global error {e}')
+            post_error(f'search_entry: global error {e}')
 
 
     def search_exit(self):
@@ -123,11 +124,14 @@ class Base(ABC):
 
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
-                            post(TradeSignal(
+                            post_signal(TradeExitSignal(
                                 strategy=self.strategy, 
                                 symbol=trade.symbol, 
                                 exit_reason=exit_reason,
                                 running_price=running_price,
+                                entry_price=trade.entry_price,
+                                is_long=trade.direction == TradeDirection.long.value,
+                                profit_percentage=get_current_profit_percentage(running_price, trade),
                             ))
                         else:
                             extend(trade.id, running_price)
@@ -135,13 +139,15 @@ class Base(ABC):
                         raise e
                     except Exception as e:
                         self.log(f"search_exit: Failed to process data for {trade.base_asset}: {e}")
-
+                        post_error(f"search_exit: Failed to process data for {trade.base_asset}: {e}")
                 time.sleep(30)
         except RateLimitException as e:
             self.log(f"search_exit: rate limit error {e}")
+            post_error(f"search_exit: rate limit error {e}")
             raise e
         except Exception as e:
             self.log(f'search_exit: global error {e}')
+            post_error(f'search_exit: global error {e}')
 
 
     @abstractmethod

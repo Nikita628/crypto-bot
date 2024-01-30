@@ -8,7 +8,7 @@ from strategies import (
     VolumeSurge,
 )
 from typing import List
-from integration.telegram import consume_signals_queue
+from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
 import asset
@@ -101,21 +101,21 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
     ),
 
-    DualMomentumCustomized(
-        name='dual_momentum_customized_atr_limit', 
-        is_over_price_exit=True,
-        trailing_stop_percentage=1,
-        hard_stop_loss_percentage=-3,
-        atr_limit=8,
-    ),
+    # DualMomentumCustomized(
+    #     name='dual_momentum_customized_atr_limit', 
+    #     is_over_price_exit=True,
+    #     trailing_stop_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    #     atr_limit=8,
+    # ),
 
-    DualMomentumCustomized(
-        name='dual_momentum_customized_volatility_limit', 
-        is_over_price_exit=True,
-        trailing_stop_percentage=1,
-        hard_stop_loss_percentage=-3,
-        volatility_limit=6,
-    ),
+    # DualMomentumCustomized(
+    #     name='dual_momentum_customized_volatility_limit', 
+    #     is_over_price_exit=True,
+    #     trailing_stop_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    #     volatility_limit=6,
+    # ),
 
     DualMomentumCustomized(
         name='dual_momentum_customized_lower_greedy', 
@@ -127,10 +127,10 @@ strategies: List[Base] = [
 
     # volume surge ##############################
     VolumeSurge(), 
-    VolumeSurge(
-        name='volume_surge_greedy',
-        greedy_profit_percentage=1,
-    ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy',
+    #     greedy_profit_percentage=1,
+    # ),
     VolumeSurge(
         name='volume_surge_greedy_hard_stop',
         greedy_profit_percentage=1,
@@ -139,6 +139,23 @@ strategies: List[Base] = [
     VolumeSurge(
         name='volume_surge_trailing',
         trailing_stop_percentage=1,
+    ),
+    VolumeSurge(
+        name='volume_surge_trailing_small',
+        hard_stop_loss_percentage=-3,
+        trailing_stop_percentage=1,
+        pvt_range_percentage=1,
+        pvt_surge_percentage=2,
+        pvt_range_loockback=7,
+    ),
+     VolumeSurge(
+        timeframe=BinanceInterval.h4,
+        name='volume_surge_greedy_hard_stop_4h',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=2,
+        pvt_surge_percentage=4,
+        pvt_range_loockback=6,
     ),
     VolumeSurge(
         name='volume_surge_greedy_hard_stop_hold_24',
@@ -191,6 +208,10 @@ def start_bot():
         threads.append(tg_bot_signals_consumer)
         tg_bot_signals_consumer.start()
         
+    tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
+    threads.append(tg_bot_errors_consumer)
+    tg_bot_errors_consumer.start()
+    
     for thread in threads:
         thread.join()
 

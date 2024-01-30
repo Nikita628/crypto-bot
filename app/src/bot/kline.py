@@ -193,16 +193,12 @@ class KLine:
     def is_between(self, source_column: str, min: float, max: float) -> bool:
         return self.is_below(source_column, max) and self.is_above(source_column, min)
     
-    def is_ranging_within_percentage(self, source_column: str, start: int, end: int = -1, range_percentage: float = 1):
-        """
-        :param start: included
-        :param end: excluded
-        """
-        values = self.df[source_column].iloc[start:end]
+    def is_ranging_within_percentage(self, source_column: str, loockback: int = 7, range_percentage: float = 1):
+        values = self.df[source_column].iloc[-(loockback + 1):-1]
 
         for i in values:
             for j in values:
-                if i != j and abs((i - j) / abs(i) * 100) > range_percentage:
+                if i != j and abs((i - j) / i * 100) > range_percentage:
                     return False
 
         return True
