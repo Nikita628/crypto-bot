@@ -56,8 +56,6 @@ class Base(ABC):
                         current_price = kline.get_running_price()
                         direction = self.determine_trade_direction(kline, symbol)
 
-                        direction = TradeDirection.long
-                        
                         if direction:
 
                             available_usdt_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
