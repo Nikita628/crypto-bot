@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import time
+import datetime
 from typing import Optional
 from bot.kline import KLine
 from bot.binance import get_kline, get_all_usdt_symbols, RateLimitException
@@ -13,14 +14,23 @@ from bot.trade import (
     is_already_trading,
 )
 import bot.asset as asset
+import bot.hold as hold
 from bot.binance import BinanceInterval
+from typing import Optional
 from integration.telegram import post, TradeSignal
 
 class Base(ABC):
-    def __init__(self, timeframe: BinanceInterval, loockback: int, strategy: str) -> None:
+    def __init__(
+            self,
+            timeframe: BinanceInterval,
+            loockback: int,
+            strategy: str,
+            hold_period_hours:Optional[float] = None,
+        ) -> None:
         self.timeframe = timeframe
         self.loockback = loockback
         self.strategy = strategy
+        self.hold_period_hours = hold_period_hours
 
     def search_entry(self):
         try:
@@ -32,29 +42,34 @@ class Base(ABC):
                         if is_already_trading(symbol, self.strategy):
                             continue
 
+                        print(hold.is_active(symbol, self.strategy))
+                        if hold.is_active(symbol, self.strategy):
+                            continue
+
                         kline = get_kline(symbol, self.timeframe, self.loockback)
 
                         if len(kline.df) < self.loockback:
                             continue
 
-                        
                         kline.add_atr()    
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
-                        direction = self.determine_trade_direction(kline, symbol)  
+                        direction = self.determine_trade_direction(kline, symbol)
+
+                        direction = TradeDirection.long
                         
                         if direction:
 
                             available_usdt_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
-                            if available_usdt_amount < asset.AssetConstants.amount_per_trade:
+                            if available_usdt_amount < asset.AssetConstants.per_trade_ustd_amount:
                                 continue
 
-                            new_available_usdt_amount = available_usdt_amount - asset.AssetConstants.per_trade_ustd_amount
-                            asset.update_amount(amount=new_available_usdt_amount, coin='USDT', strategy=self.strategy)                             
+                            delta_usdt_amount = -asset.AssetConstants.per_trade_ustd_amount # negative value
+                            asset.update_amount(delta=delta_usdt_amount, coin='USDT', strategy=self.strategy)                          
 
                             trade = Trade(
                                 base_asset=symbol.replace('USDT', ''),
-                                base_asset_amount=current_price*asset.AssetConstants.per_trade_ustd_amount,
+                                base_asset_amount=asset.AssetConstants.per_trade_ustd_amount/current_price,
                                 quote_asset='USDT',
                                 entry_price=current_price,
                                 direction=direction,
@@ -75,9 +90,10 @@ class Base(ABC):
                     except Exception as e:
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                             
+                    break
                     time.sleep(2.5)
 
-                    break
+                break
                         
                 time.sleep(60)
         except RateLimitException as e:
@@ -99,6 +115,18 @@ class Base(ABC):
                         exit_reason = self.determine_exit_reason(kline, trade)
 
                         if exit_reason:
+
+                            if self.hold_period_hours and float(self.hold_period_hours) != 0:
+                                end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=self.hold_period_hours)
+                                new_hold = hold.Hold(
+                                    symbol=trade.symbol, 
+                                    strategy=self.strategy, 
+                                    end_time=end_time,
+                                )
+                                hold.add(new_hold)
+                                
+                            asset.update_amount(delta=trade.quote_asset_amount, coin='USDT', strategy=self.strategy)
+
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
                             post(TradeSignal(

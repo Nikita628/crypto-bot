@@ -63,9 +63,23 @@ def create_test_instance(asset: Asset):
            user_id = _USER_ID,
         )
      
-def update_amount(amount: float, coin: str, strategy: str):
+def update_amount(delta: float, coin: str, strategy: str):
+    if not is_exists(coin=coin, strategy=strategy):
+        new_asset = Asset(
+            coin=coin,
+            amount=0,
+            strategy=strategy
+        )
+        create(new_asset)
+        current_amount = 0
+    else:
+        current_amount = get_amount(coin=coin, strategy=strategy)
+
+    if current_amount + delta < 0:
+        return
+
     query = database.models.Asset.update(
-            amount = amount
+            amount = current_amount + delta
         ).where(
             (database.models.Asset.coin == coin) 
             & (database.models.Asset.strategy == strategy)

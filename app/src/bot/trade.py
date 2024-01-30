@@ -34,7 +34,9 @@ class Trade:
         self.id = id
         self.symbol = symbol
         self.base_asset = base_asset
+        self.base_asset_amount = base_asset_amount
         self.quote_asset = quote_asset
+        self.quote_asset_amount = quote_asset_amount
         self.entry_price = entry_price
         self.entry_date = entry_date
         self.exit_price = exit_price
@@ -53,7 +55,9 @@ def _map_trade(trade: database.models.Trade):
         id = trade.id,
         symbol = trade.symbol,
         base_asset = trade.base_asset,
+        base_asset_amount = trade.base_asset_amount,
         quote_asset = trade.quote_asset,
+        quote_asset_amount = trade.quote_asset_amount,
         entry_price = trade.entry_price,
         entry_date = trade.entry_date,
         exit_price = trade.exit_price,

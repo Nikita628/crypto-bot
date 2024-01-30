@@ -137,14 +137,14 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
     ),
     VolumeSurge(
-        name='volume_surge_greedy_hard_stop',
+        name='volume_surge_trailing',
+        trailing_stop_percentage=1,
+    ),
+    VolumeSurge(
+        name='volume_surge_greedy_hard_stop_hold_24',
         greedy_profit_percentage=1,
         hard_stop_loss_percentage=-3,
         hold_period_hours=24,
-    ),
-    VolumeSurge(
-        name='volume_surge_trailing',
-        trailing_stop_percentage=1,
     ),
 ]
 
