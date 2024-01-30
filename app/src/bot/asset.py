@@ -47,6 +47,14 @@ def is_exists(coin: str, strategy: str) -> bool:
     )
     return bool(asset)
 
+def delete(coin: str, strategy: str):
+    query = database.models.Asset.delete().where(
+            (database.models.Asset.coin == coin) 
+            & (database.models.Asset.strategy == strategy)
+            & (database.models.Asset.user_id == _USER_ID)
+        )
+    query.execute()
+
 def create(asset: Asset):
     database.models.Asset.create(
            coin = asset.coin,
@@ -62,27 +70,15 @@ def create_test_instance(asset: Asset):
            strategy = asset.strategy,
            user_id = _USER_ID,
         )
-     
+
 def update_amount(delta: float, coin: str, strategy: str):
-    if not is_exists(coin=coin, strategy=strategy):
-        new_asset = Asset(
-            coin=coin,
-            amount=0,
-            strategy=strategy
-        )
-        create(new_asset)
-        current_amount = 0
-    else:
-        current_amount = get_amount(coin=coin, strategy=strategy)
-
-    if current_amount + delta < 0:
-        return
-
-    query = database.models.Asset.update(
-            amount = current_amount + delta
-        ).where(
-            (database.models.Asset.coin == coin) 
-            & (database.models.Asset.strategy == strategy)
-            & (database.models.Asset.user_id == _USER_ID)
-        )
+    query = (database.models.Asset.insert(
+           coin = coin,
+           amount = delta,
+           strategy = strategy,
+           user_id = _USER_ID,
+        ).on_conflict(
+            conflict_target=[database.models.Asset.coin, database.models.Asset.strategy, database.models.Asset.user_id],
+            update={database.models.Asset.amount: database.models.Asset.amount + delta}
+        ))
     query.execute()
