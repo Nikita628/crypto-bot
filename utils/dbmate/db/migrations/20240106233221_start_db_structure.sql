@@ -87,7 +87,7 @@ CREATE TABLE public.hold (
 CREATE TABLE public.asset (
                               id BIGSERIAL primary key,
                               coin text NOT NULL,
-                              amount real NOT NULL,
+                              amount real CHECK (amount >= 0),
                               strategy text NOT NULL,
                               user_id integer NOT NULL references public.user(id),
                               UNIQUE (coin, strategy, user_id)
