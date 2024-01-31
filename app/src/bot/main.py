@@ -62,11 +62,11 @@ import asset
 
 strategies: List[Base] = [
     # dual momentum ############################
-    DualMomentum(
-        name='dual_momentum_greedy',
-        greedy_profit_percentage=1,
-        is_over_price_exit=True,
-    ),
+    # DualMomentum(
+    #     name='dual_momentum_greedy',
+    #     greedy_profit_percentage=1,
+    #     is_over_price_exit=True,
+    # ),
 
     DualMomentum(
         name='dual_momentum_trailing',
@@ -74,12 +74,12 @@ strategies: List[Base] = [
         is_over_price_exit=True,
     ),
 
-    DualMomentum(
-        name='dual_momentum_lower_greedy',
-        greedy_profit_percentage=1,
-        is_lower_timeframe_confirmation=True,
-        is_over_price_exit=True,
-    ),
+    # DualMomentum(
+    #     name='dual_momentum_lower_greedy',
+    #     greedy_profit_percentage=1,
+    #     is_lower_timeframe_confirmation=True,
+    #     is_over_price_exit=True,
+    # ),
 
     # dual momentum customized ####################
     DualMomentumCustomized(
@@ -117,13 +117,13 @@ strategies: List[Base] = [
     #     volatility_limit=6,
     # ),
 
-    DualMomentumCustomized(
-        name='dual_momentum_customized_lower_greedy', 
-        greedy_profit_percentage=1, 
-        hard_stop_loss_percentage=-3,
-        is_over_price_exit=True,
-        is_lower_timeframe_confirmation=True,
-    ),
+    # DualMomentumCustomized(
+    #     name='dual_momentum_customized_lower_greedy', 
+    #     greedy_profit_percentage=1, 
+    #     hard_stop_loss_percentage=-3,
+    #     is_over_price_exit=True,
+    #     is_lower_timeframe_confirmation=True,
+    # ),
 
     # volume surge ##############################
     VolumeSurge(), 
@@ -162,6 +162,39 @@ strategies: List[Base] = [
         greedy_profit_percentage=1,
         hard_stop_loss_percentage=-3,
         hold_period_hours=24,
+    ),
+    VolumeSurge(
+        timeframe=BinanceInterval.h4,
+        name='volume_surge_greedy_hard_stop_4h_2',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=1,
+        pvt_surge_percentage=2,
+        pvt_range_loockback=6,
+    ),
+    VolumeSurge(
+        name='volume_surge_greedy_hard_stop_6',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=3,
+        pvt_surge_percentage=6,
+        pvt_range_loockback=7,
+    ),
+    VolumeSurge(
+        name='volume_surge_greedy_hard_stop_7',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=4,
+        pvt_surge_percentage=7,
+        pvt_range_loockback=7,
+    ),
+    VolumeSurge(
+        name='volume_surge_greedy_hard_stop_8',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        pvt_range_percentage=5,
+        pvt_surge_percentage=8,
+        pvt_range_loockback=7,
     ),
 ]
 
