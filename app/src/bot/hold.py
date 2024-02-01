@@ -12,7 +12,7 @@ class Hold:
             symbol: str = None,
             strategy: str = None,
             start_time: datetime.datetime = None,
-            end_time: datetime.datetime or None = None,
+            end_time: datetime.datetime = None,
             user_id: int = None,
         ):
         self.id = id
