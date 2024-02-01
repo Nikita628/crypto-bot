@@ -15,7 +15,9 @@ class Trade:
             id: int = None,
             symbol: str = None,
             base_asset: str = None,
-            quote_asset: str = None, 
+            base_asset_amount: float = None,
+            quote_asset: str = None,
+            quote_asset_amount: float = None, 
             entry_price: float = None,
             entry_date: datetime.datetime = None,
             exit_price: float or None = None,
@@ -32,7 +34,9 @@ class Trade:
         self.id = id
         self.symbol = symbol
         self.base_asset = base_asset
+        self.base_asset_amount = base_asset_amount
         self.quote_asset = quote_asset
+        self.quote_asset_amount = quote_asset_amount
         self.entry_price = entry_price
         self.entry_date = entry_date
         self.exit_price = exit_price
@@ -51,7 +55,9 @@ def _map_trade(trade: database.models.Trade):
         id = trade.id,
         symbol = trade.symbol,
         base_asset = trade.base_asset,
+        base_asset_amount = trade.base_asset_amount,
         quote_asset = trade.quote_asset,
+        quote_asset_amount = trade.quote_asset_amount,
         entry_price = trade.entry_price,
         entry_date = trade.entry_date,
         exit_price = trade.exit_price,
@@ -87,7 +93,7 @@ def get_all_active(strategy: str) -> List[Trade]:
 
 
 def is_expired(trade: Trade) -> bool:
-    return trade and datetime.datetime.now() - trade.entry_date > _EXPIRATION_PERIOD_HOURS*60*60
+    return trade and (trade.entry_date + datetime.timedelta(hours=_EXPIRATION_PERIOD_HOURS)) > datetime.datetime.utcnow()
 
 
 def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start_percentage = 1.0) -> bool:
@@ -122,6 +128,7 @@ def get_current_profit_percentage(running_price: float, trade: Trade) -> float:
 def enter(trade: Trade):
     database.models.Trade.create(
            base_asset = trade.base_asset,
+           base_asset_amount = trade.base_asset_amount,
            quote_asset = trade.quote_asset,
            entry_price = trade.entry_price,
            running_price = trade.entry_price,

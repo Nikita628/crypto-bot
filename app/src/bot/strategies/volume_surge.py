@@ -18,6 +18,7 @@ class VolumeSurge(Base):
             self, 
             timeframe: BinanceInterval = BinanceInterval.day, 
             name = 'volume_surge',
+            hold_period_hours:Optional[float] = None,
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
@@ -25,7 +26,7 @@ class VolumeSurge(Base):
             pvt_range_percentage:float = 3,
             pvt_range_loockback:int = 7,
         ):
-        super().__init__(timeframe, _LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage

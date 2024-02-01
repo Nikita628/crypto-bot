@@ -30,8 +30,10 @@ def do_post():
                 if result != 0:
                     result_message = 'compose or migrations error'
 
-        except:
-            result_message = 'error'
+        except Exception as e:
+            if not e:
+                e = 'unknown'           
+            result_message = e
 
         error_label = ''
         if result_message != 'success':
