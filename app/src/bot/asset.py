@@ -74,7 +74,7 @@ def create_test_instance(asset: Asset):
 def update_amount(delta: float, coin: str, strategy: str):
     query = (database.models.Asset.insert(
            coin = coin,
-           amount = delta,
+           amount = 0,
            strategy = strategy,
            user_id = _USER_ID,
         ).on_conflict(
