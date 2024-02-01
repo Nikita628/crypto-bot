@@ -11,6 +11,8 @@ from typing import List
 from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
+import asset
+
 
 # TODO: future websockets and async migration
 # fetch 500 previous candlesticks over HTTP first,
@@ -156,6 +158,12 @@ strategies: List[Base] = [
         pvt_range_loockback=6,
     ),
     VolumeSurge(
+        name='volume_surge_greedy_hard_stop_hold_24',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
+        hold_period_hours=24,
+    ),
+    VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h_2',
         greedy_profit_percentage=1,
@@ -214,6 +222,13 @@ def start_bot():
     threads: List[threading.Thread] = []
 
     for strategy in strategies:
+        # create assets if need
+        if not asset.is_exists(coin = 'USDT', strategy = strategy.strategy):
+            new_asset = asset.Asset(
+                strategy=strategy.strategy,
+            )
+            asset.create_test_instance(new_asset)
+
         buy_thread = threading.Thread(target=strategy.search_entry)
         sell_thread = threading.Thread(target=strategy.search_exit)
         threads.append(buy_thread)
@@ -225,10 +240,12 @@ def start_bot():
         tg_bot_signals_consumer = threading.Thread(target=consume_signals_queue)
         threads.append(tg_bot_signals_consumer)
         tg_bot_signals_consumer.start()
-        
-    tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
-    threads.append(tg_bot_errors_consumer)
-    tg_bot_errors_consumer.start()
+
+    if os.environ.get('NEED_TO_POST_STATUS_IN_TG') == 'true':
+        tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
+        threads.append(tg_bot_errors_consumer)
+        tg_bot_errors_consumer.start()
+    
     
     for thread in threads:
         thread.join()

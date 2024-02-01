@@ -15,7 +15,9 @@ CREATE TABLE public.trade (
                               id BIGSERIAL primary key,
                               symbol text GENERATED ALWAYS AS (base_asset || quote_asset) STORED,
                               base_asset text NOT NULL,
+                              base_asset_amount real NOT NULL,
                               quote_asset text NOT NULL,
+                              quote_asset_amount real GENERATED ALWAYS AS (base_asset_amount * running_price) STORED,
                               entry_price real NOT NULL,
                               entry_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               exit_price real,
@@ -73,10 +75,22 @@ CREATE TABLE public.history_data (
                                      volume real NOT NULL
 );
 
-CREATE TABLE public.asset (
-                              coin text PRIMARY KEY,
-                              amount real NOT NULL,
+CREATE TABLE public.hold (
+                              id BIGSERIAL primary key,
+                              symbol text NOT NULL,
+                              strategy text NOT NULL,
+                              start_time TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                              end_time TIMESTAMP WITH TIME ZONE NOT NULL,
                               user_id integer NOT NULL references public.user(id)
+);
+
+CREATE TABLE public.asset (
+                              id BIGSERIAL primary key,
+                              coin text NOT NULL,
+                              amount real CHECK (amount >= 0),
+                              strategy text NOT NULL,
+                              user_id integer NOT NULL references public.user(id),
+                              UNIQUE (coin, strategy, user_id)
 );
 
 
@@ -85,6 +99,7 @@ DROP TRIGGER IF EXISTS update_highest_profit_trigger ON public.trade;
 
 DROP FUNCTION IF EXISTS update_highest_profit_percentage();
 
+DROP TABLE IF EXISTS public.hold;
 DROP TABLE IF EXISTS public.asset;
 DROP TABLE IF EXISTS public.history_data;
 DROP TABLE IF EXISTS public.trade;
