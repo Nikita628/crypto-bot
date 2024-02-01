@@ -240,10 +240,12 @@ def start_bot():
         tg_bot_signals_consumer = threading.Thread(target=consume_signals_queue)
         threads.append(tg_bot_signals_consumer)
         tg_bot_signals_consumer.start()
-        
-    tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
-    threads.append(tg_bot_errors_consumer)
-    tg_bot_errors_consumer.start()
+
+    if os.environ.get('NEED_TO_POST_STATUS_IN_TG') == 'true':
+        tg_bot_errors_consumer = threading.Thread(target=consume_errors_queue)
+        threads.append(tg_bot_errors_consumer)
+        tg_bot_errors_consumer.start()
+    
     
     for thread in threads:
         thread.join()
