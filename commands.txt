@@ -61,7 +61,6 @@ docker stop $(docker ps -a -q)
 //remove docker containers
 docker ps --filter status=exited -q | xargs docker rm
 
-
 //copy out from docker
 containerID=`docker ps -aqf "name=crypto-bot-server"`
 docker cp -a $containerID:/app/src/database/migrations/. /var/www/db/migrations/
