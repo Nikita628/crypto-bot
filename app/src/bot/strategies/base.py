@@ -120,7 +120,8 @@ class Base(ABC):
                                 )
                                 hold.add(new_hold)
                                 
-                            asset.update_amount(delta=trade.quote_asset_amount, coin=trade.quote_asset, strategy=self.strategy)
+                            quote_asset_amount = running_price*trade.base_asset_amount
+                            asset.update_amount(delta=quote_asset_amount, coin=trade.quote_asset, strategy=self.strategy)
 
                             exit(trade.id, running_price, exit_reason)
                             self.log(f'exited {trade.symbol}, reason {exit_reason}')
