@@ -68,6 +68,7 @@ docker cp -a $containerID:/app/src/database/migrations/. /var/www/db/migrations/
 //server logs
 docker logs crypto-bot-server
 
+
 //dbmate
 //create migration
 cd /var/www/dbmate/ ; dbmate new <migration_name> //migrations folder /var/www/dbmate/db/migrations/
