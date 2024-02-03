@@ -1,5 +1,5 @@
-from bot.kline import KLine
-from bot.trade import (
+from bot.models.kline import KLine
+from bot.models.trade import (
     Trade, 
     TradeDirection,
     get_current_profit_percentage, 
@@ -7,7 +7,7 @@ from bot.trade import (
     is_greedy_profit_reached,
     is_atr_stop_loss,
 )
-from bot.binance import BinanceInterval
+from bot.exchange.binance import BinanceInterval
 from typing import Optional
 from strategies.base import Base
 
@@ -82,6 +82,7 @@ class VolumeSurge(Base):
             abs((current_pvt - previous_pvt) / previous_pvt * 100) > self.pvt_surge_percentage
         )
         overbought_limit = 80
+        oversold_limit = 30
 
         return all([
             # all previous pvt do not change significantly (i.e. pvt is flat on the chart)
@@ -93,10 +94,10 @@ class VolumeSurge(Base):
             is_pvt_surged_upward,
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, 40, overbought_limit),
+            kline.is_between(KLine.Col.rsi, oversold_limit, overbought_limit),
 
             kline.is_upward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, 40, overbought_limit),
+            kline.is_between(KLine.Col.mfi, oversold_limit, overbought_limit),
         ])
     
 

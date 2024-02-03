@@ -1,5 +1,5 @@
-from bot.kline import KLine
-from bot.trade import (
+from bot.models.kline import KLine
+from bot.models.trade import (
     Trade, 
     TradeDirection, 
     is_trailing_stop,
@@ -7,7 +7,7 @@ from bot.trade import (
     is_atr_stop_loss,
     get_current_profit_percentage,
 )
-from bot.binance import BinanceInterval, get_kline
+from bot.exchange.binance import BinanceInterval, get_kline
 from typing import Optional
 from strategies.base import Base
 

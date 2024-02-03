@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 import time
 import datetime
 from typing import Optional
-from bot.kline import KLine
-from bot.binance import get_kline, get_all_usdt_symbols, RateLimitException
-from bot.trade import (
+from bot.models.kline import KLine
+from bot.exchange.binance import get_kline, get_all_usdt_symbols, RateLimitException
+from bot.models.trade import (
     TradeDirection,
     Trade,
     enter,
@@ -14,9 +14,9 @@ from bot.trade import (
     is_already_trading,
     get_current_profit_percentage,
 )
-import bot.asset as asset
-import bot.hold as hold
-from bot.binance import BinanceInterval
+import bot.models.asset as asset
+import bot.models.hold as hold
+from bot.exchange.binance import BinanceInterval
 from typing import Optional
 from integration.telegram import post_signal, post_error, TradeEntrySignal, TradeExitSignal
 

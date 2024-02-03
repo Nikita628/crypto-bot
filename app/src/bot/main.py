@@ -1,6 +1,6 @@
 import threading
 import time
-from bot.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
+from bot.exchange.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
 from strategies import (
     Base,
     DualMomentum,
@@ -11,7 +11,7 @@ from typing import List
 from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
-import asset
+import bot.models.asset as asset
 
 
 # TODO: future websockets and async migration
@@ -70,7 +70,7 @@ strategies: List[Base] = [
 
     DualMomentum(
         name='dual_momentum_trailing',
-        trailing_stop_percentage=1,
+        trailing_stop_percentage=0.5,
         is_over_price_exit=True,
     ),
 
@@ -89,7 +89,7 @@ strategies: List[Base] = [
 
     DualMomentumCustomized(
         name='dual_momentum_customized_greedy', 
-        greedy_profit_percentage=1, 
+        greedy_profit_percentage=0.5, 
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
     ),
@@ -97,7 +97,7 @@ strategies: List[Base] = [
     DualMomentumCustomized(
         name='dual_momentum_customized_trailing', 
         is_over_price_exit=True,
-        trailing_stop_percentage=1,
+        trailing_stop_percentage=0.5,
         hard_stop_loss_percentage=-3,
     ),
 
@@ -131,27 +131,27 @@ strategies: List[Base] = [
     #     name='volume_surge_greedy',
     #     greedy_profit_percentage=1,
     # ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop',
-        greedy_profit_percentage=1,
-        hard_stop_loss_percentage=-3,
-    ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy_hard_stop',
+    #     greedy_profit_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    # ),
     VolumeSurge(
         name='volume_surge_trailing',
-        trailing_stop_percentage=1,
+        trailing_stop_percentage=0.5,
     ),
     VolumeSurge(
         name='volume_surge_trailing_small',
         hard_stop_loss_percentage=-3,
-        trailing_stop_percentage=1,
+        trailing_stop_percentage=0.5,
         pvt_range_percentage=1,
-        pvt_surge_percentage=2,
+        pvt_surge_percentage=1.5,
         pvt_range_loockback=7,
     ),
      VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h',
-        greedy_profit_percentage=1,
+        greedy_profit_percentage=0.5,
         hard_stop_loss_percentage=-3,
         pvt_range_percentage=2,
         pvt_surge_percentage=4,
@@ -166,7 +166,7 @@ strategies: List[Base] = [
     VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h_2',
-        greedy_profit_percentage=1,
+        greedy_profit_percentage=0.5,
         hard_stop_loss_percentage=-3,
         pvt_range_percentage=1,
         pvt_surge_percentage=2,
@@ -188,13 +188,31 @@ strategies: List[Base] = [
         pvt_surge_percentage=7,
         pvt_range_loockback=7,
     ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy_hard_stop_8',
+    #     greedy_profit_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    #     pvt_range_percentage=5,
+    #     pvt_surge_percentage=8,
+    #     pvt_range_loockback=7,
+    # ),
     VolumeSurge(
-        name='volume_surge_greedy_hard_stop_8',
-        greedy_profit_percentage=1,
+        name='volume_surge_greedy_hard_stop_4h_1.5',
+        timeframe=BinanceInterval.h4,
+        greedy_profit_percentage=0.5,
         hard_stop_loss_percentage=-3,
-        pvt_range_percentage=5,
-        pvt_surge_percentage=8,
-        pvt_range_loockback=7,
+        pvt_range_percentage=1,
+        pvt_surge_percentage=1.5,
+        pvt_range_loockback=6,
+    ),
+    VolumeSurge(
+        name='volume_surge_greedy_hard_stop_1h_2',
+        timeframe=BinanceInterval.h1,
+        greedy_profit_percentage=0.2,
+        hard_stop_loss_percentage=-2,
+        pvt_range_percentage=1,
+        pvt_surge_percentage=2,
+        pvt_range_loockback=10,
     ),
 ]
 

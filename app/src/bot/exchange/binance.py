@@ -1,10 +1,8 @@
 import requests
 import pandas as pd
 from enum import Enum
-from bot.kline import KLine
+from bot.models.kline import KLine
 from typing import List
-from requests.adapters import HTTPAdapter
-from urllib3.util import Retry
 import time
 import json
 import os

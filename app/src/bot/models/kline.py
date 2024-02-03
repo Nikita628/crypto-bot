@@ -1,7 +1,7 @@
 import pandas as pd
 import pandas_ta
 import numpy as np
-from bot.trade import TradeDirection
+from models.trade import TradeDirection
 
 class KLine:
     class Col:
