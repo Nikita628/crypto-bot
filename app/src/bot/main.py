@@ -1,6 +1,6 @@
 import threading
 import time
-from bot.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
+from bot.exchange.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
 from strategies import (
     Base,
     DualMomentum,
@@ -11,7 +11,7 @@ from typing import List
 from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
-import asset
+import bot.models.asset as asset
 
 
 # TODO: future websockets and async migration
