@@ -62,15 +62,17 @@ import bot.models.asset as asset
 
 strategies: List[Base] = [
     # dual momentum ############################
-    # DualMomentum(
-    #     name='dual_momentum_greedy',
-    #     greedy_profit_percentage=1,
-    #     is_over_price_exit=True,
-    # ),
+    DualMomentum(
+        name='dual_momentum_greedy',
+        greedy_profit_percentage=0.5,
+        hard_stop_loss_percentage=-3,
+        is_over_price_exit=True,
+    ),
 
     DualMomentum(
         name='dual_momentum_trailing',
         trailing_stop_percentage=0.5,
+        hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
     ),
 
