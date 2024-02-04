@@ -6,6 +6,7 @@ from strategies import (
     DualMomentum,
     DualMomentumCustomized,
     VolumeSurge,
+    VolumeSurgeCustomized,
 )
 from typing import List
 from integration.telegram import consume_signals_queue, consume_errors_queue
@@ -115,14 +116,14 @@ strategies: List[Base] = [
         name='volume_surge_trailing',
         trailing_stop_percentage=0.5,
     ),
-    VolumeSurge(
-        name='volume_surge_trailing_small',
-        hard_stop_loss_percentage=-3,
-        trailing_stop_percentage=0.5,
-        pvt_range_percentage=1,
-        pvt_surge_percentage=1.5,
-        pvt_range_loockback=7,
-    ),
+    # VolumeSurge(
+    #     name='volume_surge_trailing_small',
+    #     hard_stop_loss_percentage=-3,
+    #     trailing_stop_percentage=0.5,
+    #     pvt_range_percentage=1,
+    #     pvt_surge_percentage=1.5,
+    #     pvt_range_loockback=7,
+    # ),
      VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h',
@@ -138,22 +139,22 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
         hold_period_hours=24,
     ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_6',
-        greedy_profit_percentage=1,
-        hard_stop_loss_percentage=-3,
-        pvt_range_percentage=3,
-        pvt_surge_percentage=6,
-        pvt_range_loockback=7,
-    ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_7',
-        greedy_profit_percentage=1,
-        hard_stop_loss_percentage=-3,
-        pvt_range_percentage=4,
-        pvt_surge_percentage=7,
-        pvt_range_loockback=7,
-    ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy_hard_stop_6',
+    #     greedy_profit_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    #     pvt_range_percentage=3,
+    #     pvt_surge_percentage=6,
+    #     pvt_range_loockback=7,
+    # ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy_hard_stop_7',
+    #     greedy_profit_percentage=1,
+    #     hard_stop_loss_percentage=-3,
+    #     pvt_range_percentage=4,
+    #     pvt_surge_percentage=7,
+    #     pvt_range_loockback=7,
+    # ),
     VolumeSurge(
         name='volume_surge_greedy_hard_stop_4h_1.5',
         timeframe=BinanceInterval.h4,
@@ -181,6 +182,22 @@ strategies: List[Base] = [
         pvt_surge_percentage=80,
         pvt_range_loockback=10,
     ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_5min',
+        timeframe=BinanceInterval.min5,
+        greedy_profit_percentage=0.2,
+        hard_stop_loss_percentage=-2,
+        pvt_range_loockback=12,
+        pvt_surge_multiplier=4,
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_4h',
+        timeframe=BinanceInterval.h4,
+        greedy_profit_percentage=0.2,
+        hard_stop_loss_percentage=-2,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+    )
 ]
 
 def run_test():
