@@ -236,3 +236,17 @@ class KLine:
         period.loc[:, 'log_return'] = np.log(period[KLine.Col.close] / period[KLine.Col.close].shift(1))
         std = period['log_return'].std()
         return round(std * 100, 2)
+    
+
+    def calc_ranging_percentage(self, source_column: str, loockback: int = 7) -> float:
+        values = self.df[source_column].iloc[-(loockback + 1):-1]
+        min = values.min()
+        max = values.max()
+        range = max - min
+        percentage_range = abs(range / min) * 100
+        return percentage_range
+    
+
+    def get_max(self, source_column: str, loockback: int = 7) -> float:
+        values = self.df[source_column].iloc[-(loockback + 1):-1]
+        return values.max()
