@@ -173,12 +173,12 @@ strategies: List[Base] = [
         pvt_range_loockback=10,
     ),
     VolumeSurge(
-        name='volume_surge_greedy_hard_stop_5min_25',
+        name='volume_surge_greedy_hard_stop_5min_80',
         timeframe=BinanceInterval.min5,
         greedy_profit_percentage=0.2,
         hard_stop_loss_percentage=-2,
-        pvt_range_percentage=15,
-        pvt_surge_percentage=25,
+        pvt_range_percentage=50,
+        pvt_surge_percentage=80,
         pvt_range_loockback=10,
     ),
 ]
