@@ -12,6 +12,7 @@ from typing import Optional
 from strategies.base import Base
 
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_MIN_PVT_SURGED_PERCENTAGE = 1
 
 class VolumeSurgeCustomized(Base):
     def __init__(
@@ -94,6 +95,7 @@ class VolumeSurgeCustomized(Base):
 
         is_long = all([
             current_pvt > max_pvt,
+            pvt_surged_percentage > _MIN_PVT_SURGED_PERCENTAGE,
             pvt_surged_percentage >= percentage_range * self.pvt_surge_multiplier,
 
             kline.is_upward(KLine.Col.rsi),
@@ -102,7 +104,6 @@ class VolumeSurgeCustomized(Base):
             kline.is_upward(KLine.Col.mfi),
             kline.is_between(KLine.Col.mfi, oversold_limit, overbought_limit),
         ])
-
 
         if is_long:
             print(f'current_pvt: {current_pvt}, percentage_range: {percentage_range}, max_pvt: {max_pvt}, pvt_surged_pct: {pvt_surged_percentage}')
