@@ -1,5 +1,6 @@
 from bot.models.kline import KLine
 from bot.models.trade import (
+    ExitReason,
     Trade, 
     TradeDirection,
     get_current_profit_percentage, 
@@ -19,6 +20,7 @@ class VolumeSurge(Base):
             timeframe: BinanceInterval = BinanceInterval.day, 
             name = 'volume_surge',
             hold_period_hours:Optional[float] = None,
+            hold_exit_reason:Optional[float] = None,
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
@@ -26,7 +28,7 @@ class VolumeSurge(Base):
             pvt_range_percentage:float = 3,
             pvt_range_loockback:int = 7,
         ):
-        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours)
+        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
@@ -53,24 +55,24 @@ class VolumeSurge(Base):
         kline.add_rsi()
 
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
-            reason = 'long exit'
+            reason = ExitReason.long_exit
         elif is_atr_stop_loss(kline.get_running_price(), trade):
-            reason = 'ATR stop loss'
+            reason = ExitReason.atr_stop_loss
         elif self.greedy_profit_percentage and is_greedy_profit_reached(
             kline.get_running_price(), 
             trade, 
             greedy_percentage=self.greedy_profit_percentage
         ):
-            reason = 'greedy percentage'
+            reason = ExitReason.greedy_percentage
         elif self.trailing_stop_percentage and is_trailing_stop(
             kline.get_running_price(), 
             trade, 
             self.trailing_stop_percentage
         ):
-            reason = 'trailing stop'
+            reason = ExitReason.trailing_stop
         elif (self.hard_stop_loss_percentage 
               and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
-            reason = 'hard stop loss'
+            reason = ExitReason.hard_stop_loss
             
         return reason
 

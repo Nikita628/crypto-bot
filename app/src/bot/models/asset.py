@@ -82,3 +82,15 @@ def update_amount(delta: float, coin: str, strategy: str):
             update={database.models.Asset.amount: database.models.Asset.amount + delta}
         ))
     query.execute()
+
+def test_and(delta: float, coin: str, strategy: str):
+    query = (database.models.Asset.insert(
+           coin = coin,
+           amount = 0,
+           strategy = strategy,
+           user_id = _USER_ID,
+        ).on_conflict(
+            conflict_target=[database.models.Asset.coin, database.models.Asset.strategy, database.models.Asset.user_id],
+            update={database.models.Asset.amount: database.models.Asset.amount + delta}
+        ))
+    query.execute()

@@ -5,6 +5,7 @@ from typing import Optional
 from bot.models.kline import KLine
 from bot.exchange.binance import get_kline, get_all_usdt_symbols, RateLimitException
 from bot.models.trade import (
+    ExitReason,
     TradeDirection,
     Trade,
     enter,
@@ -27,11 +28,13 @@ class Base(ABC):
             loockback: int,
             strategy: str,
             hold_period_hours:Optional[float] = None,
+            hold_exit_reason:Optional[set] = set(),
         ) -> None:
         self.timeframe = timeframe
         self.loockback = loockback
         self.strategy = strategy
         self.hold_period_hours = hold_period_hours
+        self.hold_exit_reason = hold_exit_reason
 
     def search_entry(self):
         try:
@@ -51,7 +54,7 @@ class Base(ABC):
                         if len(kline.df) < self.loockback:
                             continue
 
-                        kline.add_atr()    
+                        kline.add_atr()
                         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
                         current_price = kline.get_running_price()
                         direction = self.determine_trade_direction(kline, symbol)
@@ -87,7 +90,8 @@ class Base(ABC):
                     except Exception as e:
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                         post_error(f"search_entry: Failed to process data for {symbol}: {e}")                        
-                    time.sleep(2.5) 
+                    time.sleep(2.5)
+                    """ break  """
                 time.sleep(60)
         except RateLimitException as e:
             self.log(f"search_entry: rate limit error {e}")
@@ -111,7 +115,7 @@ class Base(ABC):
 
                         if exit_reason:
 
-                            if self.hold_period_hours and float(self.hold_period_hours) != 0:
+                            if self.hold_period_hours and float(self.hold_period_hours) != 0 and ((exit_reason in self.hold_exit_reason) or (ExitReason.any in self.hold_exit_reason)):
                                 end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=self.hold_period_hours)
                                 new_hold = hold.Hold(
                                     symbol=trade.symbol, 
@@ -119,16 +123,20 @@ class Base(ABC):
                                     end_time=end_time,
                                 )
                                 hold.add(new_hold)
-                                
-                            quote_asset_amount = running_price*trade.base_asset_amount
+
+                            if trade.direction == TradeDirection.short.value:
+                                quote_asset_amount = trade.entry_price*trade.base_asset_amount
+                            else:
+                                quote_asset_amount = running_price*trade.base_asset_amount
+                            
                             asset.update_amount(delta=quote_asset_amount, coin=trade.quote_asset, strategy=self.strategy)
 
-                            exit(trade.id, running_price, exit_reason)
-                            self.log(f'exited {trade.symbol}, reason {exit_reason}')
+                            exit(trade.id, running_price, exit_reason.value)
+                            self.log(f'exited {trade.symbol}, reason {exit_reason.value}')
                             post_signal(TradeExitSignal(
                                 strategy=self.strategy, 
                                 symbol=trade.symbol, 
-                                exit_reason=exit_reason,
+                                exit_reason=exit_reason.value,
                                 running_price=running_price,
                                 entry_price=trade.entry_price,
                                 is_long=trade.direction == TradeDirection.long.value,

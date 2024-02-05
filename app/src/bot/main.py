@@ -12,6 +12,14 @@ from integration.telegram import consume_signals_queue, consume_errors_queue
 import os
 import json
 import bot.models.asset as asset
+from bot.models.trade import ExitReason
+import redis
+
+""" r = redis.Redis(host="redis", port=6379, decode_responses=True)
+d = r.set('foo', 'bar')
+print(d)
+v = r.get('foo')
+print(v) """
 
 
 # TODO: future websockets and async migration
@@ -148,7 +156,7 @@ strategies: List[Base] = [
         pvt_surge_percentage=1.5,
         pvt_range_loockback=7,
     ),
-     VolumeSurge(
+    VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h',
         greedy_profit_percentage=0.5,
@@ -162,6 +170,7 @@ strategies: List[Base] = [
         greedy_profit_percentage=1,
         hard_stop_loss_percentage=-3,
         hold_period_hours=24,
+        hold_exit_reason={ExitReason.long_exit, ExitReason.short_exit}
     ),
     VolumeSurge(
         timeframe=BinanceInterval.h4,
