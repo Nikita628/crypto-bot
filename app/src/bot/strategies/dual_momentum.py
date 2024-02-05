@@ -7,6 +7,7 @@ from bot.models.trade import (
     is_trailing_stop,
     is_greedy_profit_reached,
     is_atr_stop_loss,
+    get_current_profit_percentage,
 )
 from bot.exchange.binance import BinanceInterval, get_kline
 from typing import Optional
@@ -28,12 +29,14 @@ class DualMomentum(Base):
             greedy_profit_percentage:Optional[float] = None,
             is_lower_timeframe_confirmation:bool = False,
             is_over_price_exit:bool = False,
+            hard_stop_loss_percentage:Optional[float] = None,
         ):
         super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
         self.is_over_price_exit = is_over_price_exit
+        self.hard_stop_loss_percentage = hard_stop_loss_percentage
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -187,6 +190,9 @@ class DualMomentum(Base):
         ):
             reason = ExitReason.trailing_stop
         elif self.is_over_price_exit and self.is_over_price(kline, trade.direction):
+            reason = ExitReason.overprice_exit
+
+        elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
             reason = ExitReason.overprice_exit
 
         return reason

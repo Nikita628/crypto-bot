@@ -7,7 +7,7 @@ db = PooledPostgresqlExtDatabase(
     user=os.environ.get('POSTGRES_USER'), 
     password=os.environ.get('POSTGRES_PASSWORD'), 
     host=os.environ.get('POSTGRES_HOST'),
-    max_connections=32,
+    max_connections=64,
     stale_timeout=300,  # 5 minutes
 )
 
