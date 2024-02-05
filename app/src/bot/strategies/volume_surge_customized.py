@@ -12,6 +12,7 @@ from typing import Optional
 from strategies.base import Base
 
 _LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_MIN_PVT_SURGED_PERCENTAGE = 1
 
 class VolumeSurgeCustomized(Base):
     def __init__(
@@ -19,13 +20,14 @@ class VolumeSurgeCustomized(Base):
             timeframe: BinanceInterval = BinanceInterval.day, 
             name = 'volume_surge',
             hold_period_hours:Optional[float] = None,
+            hold_exit_reason:Optional[set] = set(),
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
             pvt_surge_multiplier:float = 4,
             pvt_range_loockback:int = 7,
         ):
-        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours)
+        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
@@ -93,6 +95,7 @@ class VolumeSurgeCustomized(Base):
 
         is_long = all([
             current_pvt > max_pvt,
+            pvt_surged_percentage > _MIN_PVT_SURGED_PERCENTAGE,
             pvt_surged_percentage >= percentage_range * self.pvt_surge_multiplier,
 
             kline.is_upward(KLine.Col.rsi),
@@ -101,7 +104,6 @@ class VolumeSurgeCustomized(Base):
             kline.is_upward(KLine.Col.mfi),
             kline.is_between(KLine.Col.mfi, oversold_limit, overbought_limit),
         ])
-
 
         if is_long:
             print(f'current_pvt: {current_pvt}, percentage_range: {percentage_range}, max_pvt: {max_pvt}, pvt_surged_pct: {pvt_surged_percentage}')
