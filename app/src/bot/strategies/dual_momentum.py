@@ -24,7 +24,7 @@ class DualMomentum(Base):
             timeframe: BinanceInterval=BinanceInterval.day, 
             name='dual_momentum',
             hold_period_hours:Optional[float] = None,
-            hold_exit_reason:Optional[float] = None,
+            hold_exit_reason:Optional[set] = set(),
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             is_lower_timeframe_confirmation:bool = False,
