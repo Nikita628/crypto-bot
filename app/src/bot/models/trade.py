@@ -5,6 +5,16 @@ from typing import List
 
 _EXPIRATION_PERIOD_HOURS = 48
 
+class ExitReason(Enum):
+    any = 'any'
+    long_exit = 'long exit'
+    short_exit = 'short exit'
+    atr_stop_loss = 'ATR stop loss'
+    greedy_percentage = 'greedy percentage'
+    trailing_stop = 'trailing stop'
+    hard_stop_loss = 'hard stop loss'
+    overprice_exit = 'overprice exit'
+
 class TradeDirection(Enum):
     long = 'long'
     short = 'short'

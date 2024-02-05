@@ -1,5 +1,6 @@
 from bot.models.kline import KLine
 from bot.models.trade import (
+    ExitReason,
     Trade, 
     TradeDirection, 
     is_trailing_stop,
@@ -33,6 +34,8 @@ class DualMomentumCustomized(Base):
             self, 
             timeframe:BinanceInterval = BinanceInterval.day, 
             name = 'dual_momentum_customized',
+            hold_period_hours:Optional[float] = None,
+            hold_exit_reason:Optional[set] = set(),
             trailing_stop_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
@@ -43,7 +46,7 @@ class DualMomentumCustomized(Base):
             # x > 10 - high, x < 5 - low
             volatility_limit:Optional[float] = None,
         ):
-        super().__init__(timeframe, _LOOCKBACK, name)
+        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
@@ -95,27 +98,27 @@ class DualMomentumCustomized(Base):
 
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
-            reason = 'long exit'
+            reason = ExitReason.long_exit
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
-            reason = 'short exit'
+            reason = ExitReason.short_exit
         elif is_atr_stop_loss(kline.get_running_price(), trade):
-            reason = 'ATR stop loss'
+            reason = ExitReason.atr_stop_loss
         elif self.greedy_profit_percentage and is_greedy_profit_reached(
             kline.get_running_price(), 
             trade, 
             greedy_percentage=self.greedy_profit_percentage
         ):
-            reason = 'gready percentage'
+            reason = ExitReason.greedy_percentage
         elif self.trailing_stop_percentage and is_trailing_stop(
             kline.get_running_price(), 
             trade, 
             self.trailing_stop_percentage
         ):
-            reason = 'trailing stop'
+            reason = ExitReason.trailing_stop
         elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
-            reason = 'hard stop loss'
+            reason = ExitReason.hard_stop_loss
         elif self.is_over_price_exit and self.is_over_price(kline, trade.direction):
-            reason = 'overprice exit'
+            reason = ExitReason.overprice_exit
             
         return reason
     

@@ -17,18 +17,22 @@ CREATE TABLE public.trade (
                               base_asset text NOT NULL,
                               base_asset_amount real NOT NULL,
                               quote_asset text NOT NULL,
-                              quote_asset_amount real GENERATED ALWAYS AS (base_asset_amount * running_price) STORED,
+                              quote_asset_amount real GENERATED ALWAYS AS 
+                                        (CASE
+                                            WHEN direction = 'short' THEN (1 + (entry_price - running_price) / entry_price) * (base_asset_amount * entry_price)
+                                            ELSE base_asset_amount * running_price
+                                        END) STORED,
                               entry_price real NOT NULL,
                               entry_date TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
                               exit_price real,
                               exit_date TIMESTAMP WITH TIME ZONE,
                               exit_reason text,
                               profit_percentage real GENERATED ALWAYS AS
-                                     (CASE
-                                          WHEN direction = 'long' THEN (running_price - entry_price) / entry_price * 100
-                                          WHEN direction = 'short' THEN (entry_price - running_price) / entry_price * 100
-                                          ELSE 0
-                                      END) STORED,
+                                        (CASE
+                                            WHEN direction = 'long' THEN (running_price - entry_price) / entry_price * 100
+                                            WHEN direction = 'short' THEN (entry_price - running_price) / entry_price * 100
+                                            ELSE 0
+                                        END) STORED,
                               highest_profit_percentage real NOT NULL default 0,
                               running_price real NOT NULL,
                               direction public.trade_direction NOT NULL,

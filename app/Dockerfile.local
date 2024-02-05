@@ -3,6 +3,14 @@ FROM python:3.8
 RUN pip install debugpy
 RUN pip install watchdog
 
+#RUN apt-get update && apt-get upgrade --yes
+#RUN apt-get install lsb-release
+#RUN curl -fsSL https://packages.redis.io/gpg | gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+#RUN echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/redis.list
+#RUN apt-get update
+#RUN apt-get install redis --yes
+#RUN redis-server --daemonize yes
+
 WORKDIR /app
 
 COPY requirements.txt /app
