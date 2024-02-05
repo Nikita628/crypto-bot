@@ -91,7 +91,6 @@ class Base(ABC):
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                         post_error(f"search_entry: Failed to process data for {symbol}: {e}")                        
                     time.sleep(2.5)
-                    """ break  """
                 time.sleep(60)
         except RateLimitException as e:
             self.log(f"search_entry: rate limit error {e}")
