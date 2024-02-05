@@ -110,6 +110,12 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
     ),
 
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_no_hard_stop', 
+        is_over_price_exit=True,
+        trailing_stop_percentage=0.5,
+    ),
+
     # DualMomentumCustomized(
     #     name='dual_momentum_customized_atr_limit', 
     #     is_over_price_exit=True,
@@ -119,20 +125,10 @@ strategies: List[Base] = [
     # ),
 
     # volume surge ##############################
-    VolumeSurge(), 
     VolumeSurge(
         name='volume_surge_trailing',
         trailing_stop_percentage=0.5,
     ),
-
-    # VolumeSurge(
-    #     name='volume_surge_trailing_small',
-    #     hard_stop_loss_percentage=-3,
-    #     trailing_stop_percentage=0.5,
-    #     pvt_range_percentage=1,
-    #     pvt_surge_percentage=1.5,
-    #     pvt_range_loockback=7,
-    # ),
     VolumeSurge(
         timeframe=BinanceInterval.h4,
         name='volume_surge_greedy_hard_stop_4h',
@@ -149,22 +145,6 @@ strategies: List[Base] = [
         hold_period_hours=24,
         hold_exit_reason={ExitReason.long_exit, ExitReason.short_exit}
     ),
-    # VolumeSurge(
-    #     name='volume_surge_greedy_hard_stop_6',
-    #     greedy_profit_percentage=1,
-    #     hard_stop_loss_percentage=-3,
-    #     pvt_range_percentage=3,
-    #     pvt_surge_percentage=6,
-    #     pvt_range_loockback=7,
-    # ),
-    # VolumeSurge(
-    #     name='volume_surge_greedy_hard_stop_7',
-    #     greedy_profit_percentage=1,
-    #     hard_stop_loss_percentage=-3,
-    #     pvt_range_percentage=4,
-    #     pvt_surge_percentage=7,
-    #     pvt_range_loockback=7,
-    # ),
     VolumeSurge(
         name='volume_surge_greedy_hard_stop_4h_1.5',
         timeframe=BinanceInterval.h4,
@@ -183,15 +163,6 @@ strategies: List[Base] = [
         pvt_surge_percentage=2,
         pvt_range_loockback=10,
     ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_5min_80',
-        timeframe=BinanceInterval.min5,
-        greedy_profit_percentage=0.2,
-        hard_stop_loss_percentage=-2,
-        pvt_range_percentage=50,
-        pvt_surge_percentage=80,
-        pvt_range_loockback=10,
-    ),
     VolumeSurgeCustomized(
         name='volume_surge_customized_5min',
         timeframe=BinanceInterval.min5,
@@ -206,6 +177,12 @@ strategies: List[Base] = [
         greedy_profit_percentage=0.2,
         hard_stop_loss_percentage=-2,
         pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_1d',
+        greedy_profit_percentage=1,
+        hard_stop_loss_percentage=-3,
         pvt_surge_multiplier=2,
     )
 ]
