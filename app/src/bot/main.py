@@ -116,14 +116,6 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.5,
     ),
 
-    # DualMomentumCustomized(
-    #     name='dual_momentum_customized_atr_limit', 
-    #     is_over_price_exit=True,
-    #     trailing_stop_percentage=1,
-    #     hard_stop_loss_percentage=-3,
-    #     atr_limit=8,
-    # ),
-
     # volume surge ##############################
     VolumeSurge(
         name='volume_surge_trailing',
