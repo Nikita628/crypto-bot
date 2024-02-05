@@ -1,7 +1,6 @@
 // to start the project
 docker-compose -f docker-compose-local.yml up --build -d
 
-
 1. install docker
 2. run the above command to start containers
 3. open pgAdmin, add new server with settings (settings for pgAdmin are in docker-compose file)
