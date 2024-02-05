@@ -1,5 +1,6 @@
 from bot.models.kline import KLine
 from bot.models.trade import (
+    ExitReason,
     Trade, 
     TradeDirection,
     get_current_profit_percentage, 
@@ -62,24 +63,24 @@ class VolumeSurgeCustomized(Base):
         kline.add_rsi()
 
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
-            reason = 'long exit'
+            reason = ExitReason.long_exit
         elif is_atr_stop_loss(kline.get_running_price(), trade):
-            reason = 'ATR stop loss'
+            reason = ExitReason.atr_stop_loss
         elif self.greedy_profit_percentage and is_greedy_profit_reached(
             kline.get_running_price(), 
             trade, 
             greedy_percentage=self.greedy_profit_percentage
         ):
-            reason = 'greedy percentage'
+            reason = ExitReason.greedy_percentage
         elif self.trailing_stop_percentage and is_trailing_stop(
             kline.get_running_price(), 
             trade, 
             self.trailing_stop_percentage
         ):
-            reason = 'trailing stop'
+            reason = ExitReason.trailing_stop
         elif (self.hard_stop_loss_percentage 
               and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
-            reason = 'hard stop loss'
+            reason = ExitReason.hard_stop_loss
             
         return reason
 

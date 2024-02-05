@@ -91,7 +91,6 @@ class Base(ABC):
                         self.log(f"search_entry: Failed to process data for {symbol}: {e}")
                         post_error(f"search_entry: Failed to process data for {symbol}: {e}")                        
                     time.sleep(2.5)
-
                 time.sleep(60)
         except RateLimitException as e:
             self.log(f"search_entry: rate limit error {e}")
@@ -125,7 +124,7 @@ class Base(ABC):
                                 hold.add(new_hold)
 
                             if trade.direction == TradeDirection.short.value:
-                                quote_asset_amount = trade.entry_price*trade.base_asset_amount
+                                quote_asset_amount = (1 + (trade.entry_price - running_price) / trade.entry_price) * (trade.base_asset_amount * trade.entry_price)
                             else:
                                 quote_asset_amount = running_price*trade.base_asset_amount
                             
