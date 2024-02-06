@@ -8,7 +8,7 @@ from bot.models.trade import (
     is_greedy_profit_reached,
     is_atr_stop_loss,
 )
-from bot.exchange.binance import BinanceInterval
+from bot.exchange.binance import BinanceInterval, get_kline
 from typing import Optional
 from strategies.base import Base
 
@@ -27,6 +27,7 @@ class VolumeSurgeCustomized(Base):
             hard_stop_loss_percentage:Optional[float] = None,
             pvt_surge_multiplier:float = 4,
             pvt_range_loockback:int = 7,
+            is_lower_timeframe_confirmation:bool = False,
         ):
         super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
@@ -34,6 +35,7 @@ class VolumeSurgeCustomized(Base):
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
         self.pvt_surge_multiplier = pvt_surge_multiplier
         self.pvt_range_loockback = pvt_range_loockback
+        self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_pvt()
@@ -44,15 +46,39 @@ class VolumeSurgeCustomized(Base):
         current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
         atr_percentage = current_atr_value / kline.get_running_price() * 100
 
+        direction = None
+
         if (self.greedy_profit_percentage 
             and self.greedy_profit_percentage > 0
             and atr_percentage <= self.greedy_profit_percentage):
             return None
 
         if self.is_long_entry(kline):
-            return TradeDirection.long
+            direction = TradeDirection.long
+        
+        if (direction 
+            and self.is_lower_timeframe_confirmation 
+            and not self.is_lower_timeframe_confirmed(direction, symbol)):
+            direction = None
    
-        return None
+        return direction
+    
+
+    def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
+        lower_kline = get_kline(symbol, BinanceInterval.min15, _LOOCKBACK)
+        lower_kline.add_pvt()
+        lower_kline.add_rsi(window=16)
+        lower_kline.add_mfi(length=16)
+
+        return all([
+            lower_kline.is_upward(KLine.Col.rsi),
+            lower_kline.is_between(KLine.Col.rsi, 50, 90),
+
+            lower_kline.is_upward(KLine.Col.mfi),
+            lower_kline.is_between(KLine.Col.mfi, 50, 90),
+
+            lower_kline.is_upward(KLine.Col.pvt),
+        ])
 
 
     def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:

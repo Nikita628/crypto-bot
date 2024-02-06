@@ -116,14 +116,6 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.5,
     ),
 
-    # DualMomentumCustomized(
-    #     name='dual_momentum_customized_atr_limit', 
-    #     is_over_price_exit=True,
-    #     trailing_stop_percentage=1,
-    #     hard_stop_loss_percentage=-3,
-    #     atr_limit=8,
-    # ),
-
     # volume surge ##############################
     VolumeSurge(
         name='volume_surge_trailing',
@@ -169,7 +161,7 @@ strategies: List[Base] = [
         greedy_profit_percentage=0.2,
         hard_stop_loss_percentage=-2,
         pvt_range_loockback=12,
-        pvt_surge_multiplier=4,
+        pvt_surge_multiplier=3,
     ),
     VolumeSurgeCustomized(
         name='volume_surge_customized_4h',
@@ -180,11 +172,37 @@ strategies: List[Base] = [
         pvt_surge_multiplier=2,
     ),
     VolumeSurgeCustomized(
+        name='volume_surge_customized_4h_lower_confirmation',
+        timeframe=BinanceInterval.h4,
+        greedy_profit_percentage=0.2,
+        hard_stop_loss_percentage=-4,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+        is_lower_timeframe_confirmation=True,
+    ),
+    VolumeSurgeCustomized(
         name='volume_surge_customized_1d',
         greedy_profit_percentage=1,
         hard_stop_loss_percentage=-3,
         pvt_surge_multiplier=2,
-    )
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_trailing_4h',
+        timeframe=BinanceInterval.h4,
+        trailing_stop_percentage=0.2,
+        hard_stop_loss_percentage=-2,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_trailing_4h_lower_confirmation',
+        timeframe=BinanceInterval.h4,
+        trailing_stop_percentage=0.2,
+        hard_stop_loss_percentage=-4,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+        is_lower_timeframe_confirmation=True,
+    ),
 ]
 
 def run_test():
