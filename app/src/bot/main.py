@@ -185,7 +185,24 @@ strategies: List[Base] = [
         greedy_profit_percentage=1,
         hard_stop_loss_percentage=-3,
         pvt_surge_multiplier=2,
-    )
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_trailing_4h',
+        timeframe=BinanceInterval.h4,
+        trailing_stop_percentage=0.2,
+        hard_stop_loss_percentage=-2,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+    ),
+    VolumeSurgeCustomized(
+        name='volume_surge_customized_trailing_4h_lower_confirmation',
+        timeframe=BinanceInterval.h4,
+        trailing_stop_percentage=0.2,
+        hard_stop_loss_percentage=-4,
+        pvt_range_loockback=6,
+        pvt_surge_multiplier=2,
+        is_lower_timeframe_confirmation=True,
+    ),
 ]
 
 def run_test():
