@@ -69,8 +69,15 @@ class VolumeSurgeCustomized(Base):
         lower_kline.add_pvt()
         lower_kline.add_rsi(window=16)
         lower_kline.add_mfi(length=16)
+        lower_kline.add_gmma()
 
         return all([
+            lower_kline.is_short_gmma_upward(),
+            lower_kline.is_short_term_GMMA_above_long_term_GMMA(),
+            lower_kline.is_long_gmma_upward(),
+
+            lower_kline.is_price_action_not_mixing_with_gmma(),
+
             lower_kline.is_upward(KLine.Col.rsi),
             lower_kline.is_between(KLine.Col.rsi, 50, 90),
 
