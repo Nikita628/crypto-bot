@@ -73,7 +73,7 @@ class VolumeSurgeCustomized(Base):
 
         return all([
             lower_kline.is_short_gmma_upward(),
-            lower_kline.is_short_term_GMMA_above_long_term_GMMA(),
+            lower_kline.is_short_term_GMMA_above_long_term_GMMA(direction),
             lower_kline.is_long_gmma_upward(),
 
             lower_kline.is_price_action_not_mixing_with_gmma(),
