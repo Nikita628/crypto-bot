@@ -1,7 +1,6 @@
 import datetime
 import database.models
 import bot.models.asset as asset
-import bot.models.hold as hold
 from enum import Enum
 from typing import List
 
