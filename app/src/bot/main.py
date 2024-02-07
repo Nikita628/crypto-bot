@@ -90,6 +90,12 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.5,
     ),
 
+    DualMomentum(
+        name='dual_momentum_trailing_small',
+        trailing_stop_percentage=0.2,
+        trailing_start_percentage=0.3,
+    ),
+
     # dual momentum customized ####################
     DualMomentumCustomized(
         name='dual_momentum_customized',
