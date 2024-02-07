@@ -108,7 +108,13 @@ def is_expired(trade: Trade) -> bool:
 
 
 def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentage = 1.0, trailing_start_percentage = 1.0) -> bool:
-    # trailing activates only after current_profit_percentage is higher than trailing_start_percentage
+    if trailing_start_percentage == None:
+        trailing_start_percentage = 1.0
+
+    if trailing_stop_percentage == None:
+        trailing_stop_percentage = 1.0
+        
+    # by default, trailing activates only after current_profit_percentage is higher than trailing_start_percentage
     # meaning that we must be in profit for at least 1%
     current_profit_percentage = get_current_profit_percentage(running_price, trade)
     return (

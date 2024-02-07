@@ -65,11 +65,13 @@ class VolumeSurgeCustomized(Base):
     
 
     def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
-        lower_kline = get_kline(symbol, BinanceInterval.min15, _LOOCKBACK)
+        lower_kline = get_kline(symbol, BinanceInterval.min1, _LOOCKBACK)
         lower_kline.add_pvt()
-        lower_kline.add_rsi(window=16)
-        lower_kline.add_mfi(length=16)
+        lower_kline.add_rsi()
+        lower_kline.add_mfi()
         lower_kline.add_gmma()
+        lower_kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
+        lower_kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
 
         return all([
             lower_kline.is_short_gmma_upward(),
@@ -77,6 +79,12 @@ class VolumeSurgeCustomized(Base):
             lower_kline.is_long_gmma_upward(),
 
             lower_kline.is_price_action_not_mixing_with_gmma(direction),
+
+            lower_kline.is_upward(KLine.Col.stoch_short_d),
+            lower_kline.is_upward(KLine.Col.stoch_long_d),
+
+            lower_kline.is_between(KLine.Col.stoch_long_d, 20, 85),
+            lower_kline.is_between(KLine.Col.stoch_short_d, 20, 85),
 
             lower_kline.is_upward(KLine.Col.rsi),
             lower_kline.is_between(KLine.Col.rsi, 50, 90),
