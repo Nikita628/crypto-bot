@@ -63,13 +63,19 @@ class DualMomentumCustomized(Base):
         kline.add_rsi()
         kline.add_sma(KLine.Col.volume_sma, KLine.Col.volume)
         kline.add_mfi()
+        kline.add_atr()
 
         direction = None
 
+        current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
+        atr_percentage = current_atr_value / kline.get_running_price() * 100
+
+        if (self.greedy_profit_percentage 
+            and self.greedy_profit_percentage > 0
+            and atr_percentage <= self.greedy_profit_percentage):
+            return None
+
         if self.atr_limit and self.atr_limit > 0:
-            atr = kline.df[KLine.Col.atr].iloc[-1]
-            price = kline.df[KLine.Col.close].iloc[-1]
-            atr_percentage = atr / price * 100
             if atr_percentage > self.atr_limit:
                 return None
             

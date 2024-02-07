@@ -40,6 +40,15 @@ class VolumeSurge(Base):
         kline.add_pvt()
         kline.add_mfi()
         kline.add_rsi()
+        kline.add_atr()
+
+        current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
+        atr_percentage = current_atr_value / kline.get_running_price() * 100
+
+        if (self.greedy_profit_percentage 
+            and self.greedy_profit_percentage > 0
+            and atr_percentage <= self.greedy_profit_percentage):
+            return None
 
         if self.is_long_entry(kline):
             return TradeDirection.long
