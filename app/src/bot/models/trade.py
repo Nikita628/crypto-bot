@@ -1,5 +1,6 @@
 import datetime
 import database.models
+import bot.models.asset as asset
 from enum import Enum
 from typing import List
 
@@ -141,31 +142,96 @@ def get_current_profit_percentage(running_price: float, trade: Trade) -> float:
     )
 
 
+
 def enter(trade: Trade):
-    database.models.Trade.create(
-           base_asset = trade.base_asset,
-           base_asset_amount = trade.base_asset_amount,
-           quote_asset = trade.quote_asset,
-           entry_price = trade.entry_price,
-           running_price = trade.entry_price,
-           direction = trade.direction.value, 
-           user_id = _USER_ID,
-           strategy = trade.strategy,
-           atr_percentage = trade.atr_percentage,
-        )
+    available_usdt_amount = asset.get_amount(coin=trade.quote_asset, strategy=trade.strategy)
+    if available_usdt_amount < asset.AssetConstants.per_trade_ustd_amount:
+        return
+
+    delta_usdt_amount = -asset.AssetConstants.per_trade_ustd_amount # negative value
+    
+    with database.models.db.atomic() as transaction:
+        try:
+            (database.models.Asset.insert(
+                coin = trade.quote_asset,
+                amount = 0,
+                strategy = trade.strategy,
+                user_id = _USER_ID,
+            ).on_conflict(
+                conflict_target=[database.models.Asset.coin, database.models.Asset.strategy, database.models.Asset.user_id],
+                update={database.models.Asset.amount: database.models.Asset.amount + delta_usdt_amount}
+            )).execute()
+
+            database.models.Trade.create(
+                base_asset = trade.base_asset,
+                base_asset_amount = trade.base_asset_amount,
+                quote_asset = trade.quote_asset,
+                entry_price = trade.entry_price,
+                running_price = trade.entry_price,
+                direction = trade.direction.value, 
+                user_id = _USER_ID,
+                strategy = trade.strategy,
+                atr_percentage = trade.atr_percentage,
+            )
+
+            transaction.commit()
+        
+        except Exception as e:
+            transaction.rollback()
+            raise e
+
     
 
-def exit(id: int, running_price: float, reason: str):
-    query = database.models.Trade.update(
-            exit_price = running_price,
-            exit_reason = reason,
-            exit_date =  datetime.datetime.utcnow(),
-            running_price = running_price
-        ).where(
-            (database.models.Trade.id == id) 
-            & (database.models.Trade.user_id == _USER_ID)
-        )
-    query.execute()
+def exit(
+        trade: database.models.Trade,
+        running_price: float, 
+        exit_reason: ExitReason, 
+        strategy: str, 
+        hold_period_hours: float = None, 
+        hold_exit_reason: set = set()
+    ):
+    with database.models.db.atomic() as transaction:
+        try:
+            if hold_period_hours and float(hold_period_hours) != 0 and ((exit_reason in hold_exit_reason) or (ExitReason.any in hold_exit_reason)):
+                end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=hold_period_hours)
+                database.models.Hold.create(
+                    symbol = trade.symbol,
+                    strategy = strategy,
+                    end_time = end_time,
+                    user_id = _USER_ID,
+                )
+
+            if trade.direction == TradeDirection.short.value:
+                quote_asset_amount = (1 + (trade.entry_price - running_price) / trade.entry_price) * (trade.base_asset_amount * trade.entry_price)
+            else:
+                quote_asset_amount = running_price*trade.base_asset_amount
+
+            (database.models.Asset.insert(
+                coin = trade.quote_asset,
+                amount = 0,
+                strategy = trade.strategy,
+                user_id = _USER_ID,
+            ).on_conflict(
+                conflict_target=[database.models.Asset.coin, database.models.Asset.strategy, database.models.Asset.user_id],
+                update={database.models.Asset.amount: database.models.Asset.amount + quote_asset_amount}
+            )).execute()
+
+            database.models.Trade.update(
+                exit_price = running_price,
+                exit_reason = exit_reason.value,
+                exit_date =  datetime.datetime.utcnow(),
+                running_price = running_price
+            ).where(
+                (database.models.Trade.id == trade.id) 
+                & (database.models.Trade.user_id == _USER_ID)
+            ).execute()
+
+            transaction.commit()
+        
+        except Exception as e:
+            transaction.rollback()
+            raise e
+    
     
 
 def extend(id: int, running_price: float):
