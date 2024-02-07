@@ -61,13 +61,6 @@ class Base(ABC):
 
                         if direction:
 
-                            available_usdt_amount = asset.get_amount(coin='USDT', strategy=self.strategy)
-                            if available_usdt_amount < asset.AssetConstants.per_trade_ustd_amount:
-                                continue
-
-                            delta_usdt_amount = -asset.AssetConstants.per_trade_ustd_amount # negative value
-                            asset.update_amount(delta=delta_usdt_amount, coin='USDT', strategy=self.strategy)                          
-
                             trade = Trade(
                                 base_asset=symbol.replace('USDT', ''),
                                 base_asset_amount=asset.AssetConstants.per_trade_ustd_amount/current_price,
@@ -78,6 +71,7 @@ class Base(ABC):
                                 atr_percentage=current_atr_value / current_price * 100
                             )
                             enter(trade)
+                            
                             self.log(f'entered {symbol}')
                             post_signal(TradeEntrySignal(
                                 strategy=self.strategy,
@@ -114,23 +108,14 @@ class Base(ABC):
 
                         if exit_reason:
 
-                            if self.hold_period_hours and float(self.hold_period_hours) != 0 and ((exit_reason in self.hold_exit_reason) or (ExitReason.any in self.hold_exit_reason)):
-                                end_time = datetime.datetime.utcnow() + datetime.timedelta(hours=self.hold_period_hours)
-                                new_hold = hold.Hold(
-                                    symbol=trade.symbol, 
-                                    strategy=self.strategy, 
-                                    end_time=end_time,
-                                )
-                                hold.add(new_hold)
-
-                            if trade.direction == TradeDirection.short.value:
-                                quote_asset_amount = (1 + (trade.entry_price - running_price) / trade.entry_price) * (trade.base_asset_amount * trade.entry_price)
-                            else:
-                                quote_asset_amount = running_price*trade.base_asset_amount
-                            
-                            asset.update_amount(delta=quote_asset_amount, coin=trade.quote_asset, strategy=self.strategy)
-
-                            exit(trade.id, running_price, exit_reason.value)
+                            exit(
+                                trade,
+                                running_price, 
+                                exit_reason, 
+                                self.strategy, 
+                                self.hold_period_hours, 
+                                self.hold_exit_reason
+                            )
                             self.log(f'exited {trade.symbol}, reason {exit_reason.value}')
                             post_signal(TradeExitSignal(
                                 strategy=self.strategy, 
@@ -159,7 +144,7 @@ class Base(ABC):
 
 
     @abstractmethod
-    def determine_exit_reason(self, kline: KLine, deal: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, deal: Trade) -> Optional[ExitReason]:
         pass
 
     @abstractmethod
