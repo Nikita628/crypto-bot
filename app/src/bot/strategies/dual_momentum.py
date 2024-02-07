@@ -84,8 +84,7 @@ class DualMomentum(Base):
         elif self.trailing_stop_percentage and is_trailing_stop(
             kline.get_running_price(), 
             trade, 
-            self.trailing_stop_percentage,
-            self.trailing_start_percentage
+            self.trailing_stop_percentage
         ):
             reason = ExitReason.trailing_stop
         elif self.is_over_price_exit and self.is_over_price(kline, trade.direction):
