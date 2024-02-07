@@ -90,7 +90,7 @@ class DualMomentumCustomized(Base):
         return direction
         
 
-    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[ExitReason]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()

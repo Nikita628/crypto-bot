@@ -165,7 +165,7 @@ class DualMomentum(Base):
                 ])
             )
 
-    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[ExitReason]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()
@@ -195,7 +195,7 @@ class DualMomentum(Base):
         elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
             reason = ExitReason.overprice_exit
 
-        return reason
+        return ExitReason.overprice_exit
 
     def is_long_entry(self, kline: KLine):      
         return all([

@@ -88,7 +88,7 @@ class VolumeSurgeCustomized(Base):
         ])
 
 
-    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[ExitReason]:
         reason = None
 
         kline.add_pvt()
