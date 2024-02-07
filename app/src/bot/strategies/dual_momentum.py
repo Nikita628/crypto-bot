@@ -195,7 +195,7 @@ class DualMomentum(Base):
         elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
             reason = ExitReason.overprice_exit
 
-        return ExitReason.overprice_exit
+        return reason
 
     def is_long_entry(self, kline: KLine):      
         return all([
