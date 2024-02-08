@@ -1,6 +1,6 @@
 import threading
 import time
-from bot.exchange.binance import BinanceInterval, fill_in_usdt_symbols, get_kline, get_all_usdt_symbols
+from bot.exchange.binance import BinanceInterval, cache_usdt_symbols_list, get_kline, get_all_usdt_symbols
 from strategies import (
     Base,
     DualMomentum,
@@ -211,31 +211,12 @@ strategies: List[Base] = [
     ),
 ]
 
-def run_test():
-    usdt_symbols = get_all_usdt_symbols()
-    not_volatile_symbols = []
-    for symbol in usdt_symbols:
-        kline = get_kline(symbol, BinanceInterval.day, 501)
-        kline.add_atr()
-        current_atr = kline.df['atr'].iloc[-1]
-        current_close = kline.df['close'].iloc[-1]
-        atr_percentage = current_atr / current_close * 100
-        if atr_percentage < 8:
-            not_volatile_symbols.append(symbol)
-        time.sleep(1)
-    return not_volatile_symbols
-
 def start_bot():
-    fill_in_usdt_symbols()
-
-    # symbols = run_test()
-    # with open('low_atr_symbols.json', 'w') as file:
-    #     json.dump(symbols, file) 
-    
+    cache_usdt_symbols_list()
+ 
     threads: List[threading.Thread] = []
 
     for strategy in strategies:
-        # create assets if need
         if not asset.is_exists(coin = 'USDT', strategy = strategy.strategy):
             new_asset = asset.Asset(
                 strategy=strategy.strategy,
