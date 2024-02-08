@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, jsonify
 from database.models import HistoryData, Asset
 from flask_cors import CORS
 import os
