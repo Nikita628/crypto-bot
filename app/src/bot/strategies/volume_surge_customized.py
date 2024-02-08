@@ -80,11 +80,11 @@ class VolumeSurgeCustomized(Base):
 
             lower_kline.is_price_action_not_mixing_with_gmma(direction),
 
-            lower_kline.is_upward(KLine.Col.stoch_short_d),
+            # lower_kline.is_upward(KLine.Col.stoch_short_d),
             lower_kline.is_upward(KLine.Col.stoch_long_d),
 
             lower_kline.is_between(KLine.Col.stoch_long_d, 20, 85),
-            lower_kline.is_between(KLine.Col.stoch_short_d, 20, 85),
+            # lower_kline.is_between(KLine.Col.stoch_short_d, 20, 85),
 
             lower_kline.is_upward(KLine.Col.rsi),
             lower_kline.is_between(KLine.Col.rsi, 50, 90),
