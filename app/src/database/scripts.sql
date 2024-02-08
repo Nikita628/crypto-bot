@@ -10,22 +10,21 @@ where strategy = 'dual_momentum'
 order by entry_date
 
 
-
+------------------ trades statistics ------------------------------
 SELECT 
-strategy, 
-
-count(*) as total_trades,
-sum(profit_percentage) as "total_profit%",
-
-(select count(*) from trade where exit_date is null and strategy = tr.strategy) as opened_trades,
-(select sum(profit_percentage) from trade where exit_date is null and strategy = tr.strategy) as "opened_trades_profit%",
-
-(select count(*) from trade where exit_date is not null and strategy = tr.strategy) as closed_trades,
-(select sum(profit_percentage) from trade where exit_date is not null and strategy = tr.strategy) as "closed_trades_profit%",
-
-(select count(*) from trade where exit_date is not null and strategy = tr.strategy and profit_percentage > 0) as closed_in_profit_trades,
-(select count(*) from trade where exit_date is not null and strategy = tr.strategy and profit_percentage <= 0) as closed_in_loss_trades
-
-from trade tr
-group by strategy
-order by "total_profit%" desc;
+ -- 0.1 fraction of total usdt asset amount used for a trade
+    strategy, 
+    COUNT(*) AS total_trades,
+    SUM(profit_percentage * 0.1) AS "total_profit%",
+    COUNT(*) FILTER (WHERE exit_date IS NULL) AS opened_trades,
+    SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NULL) AS "opened_trades_profit%",
+    COUNT(*) FILTER (WHERE exit_date IS NOT NULL) AS closed_trades,
+    SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NOT NULL) AS "closed_trades_profit%",
+    COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage > 0) AS closed_in_profit_trades,
+    COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS closed_in_loss_trades
+FROM 
+    trade tr
+GROUP BY 
+    strategy
+ORDER BY 
+    "total_profit%" DESC;
