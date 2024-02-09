@@ -5,6 +5,8 @@ echo "running db docker"
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
+sleep 2
+
 #run migrations
 echo 'migrations are running'
 cd /var/bot-app/crypto-bot/utils/dbmate/ ; dbmate up
