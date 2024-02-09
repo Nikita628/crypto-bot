@@ -10,9 +10,7 @@ import json
 app = Flask(__name__)
 
 load_dotenv()
-_CRYPTO_BOT_SIGNALS_CHAT_ID = os.getenv('CRYPTO_BOT_SIGNALS_CHAT_ID')
 _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
-_NEED_TO_POST_STATUS_IN_TG = os.getenv('NEED_TO_POST_STATUS_IN_TG')
 _CLEAR_DATA_TOKEN = os.getenv('CLEAR_DATA_TOKEN')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
