@@ -81,9 +81,7 @@ def do_action():
 <b>Result:</b> {result_message}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
-
         return result_message
-
 
 if __name__ == '__main__':
     app.run(debug=True)
