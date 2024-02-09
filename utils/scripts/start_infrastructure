@@ -38,11 +38,6 @@ echo "running db docker"
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
-#run docker server
-echo "running server and ui docker"
-cd /var/bot-app/crypto-bot/
-docker-compose -f docker-compose-prod.yml up --build -d server
-
 #run migrations
 echo 'migrations are running'
 cd /var/bot-app/crypto-bot/utils/dbmate/
@@ -58,6 +53,11 @@ dbmate down
 dbmate down
 dbmate up
 echo 'migrations running are ended'
+
+#run docker server
+echo "running server and ui docker"
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d server
 
 systemctl daemon-reload
 systemctl stop bot_deployment_server
