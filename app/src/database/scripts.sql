@@ -15,13 +15,26 @@ SELECT
  -- 0.1 fraction of total usdt asset amount used for a trade
     strategy, 
     COUNT(*) AS total_trades,
-    SUM(profit_percentage * 0.1) AS "total_profit%",
+
+    ROUND(SUM(profit_percentage * 0.1)::DECIMAL, 3) AS "total_profit%",
+
     COUNT(*) FILTER (WHERE exit_date IS NULL) AS opened_trades,
-    SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NULL) AS "opened_trades_profit%",
+
+    ROUND((SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NULL))::DECIMAL, 3) AS "opened_trades_profit%",
+
     COUNT(*) FILTER (WHERE exit_date IS NOT NULL) AS closed_trades,
-    SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NOT NULL) AS "closed_trades_profit%",
+
+    ROUND((SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NOT NULL))::DECIMAL, 3) AS "closed_trades_profit%",
+
     COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage > 0) AS closed_in_profit_trades,
-    COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS closed_in_loss_trades
+
+    COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS closed_in_loss_trades,
+	
+	ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage > 0) AS DECIMAL) / 
+		(COUNT(*) FILTER (WHERE exit_date IS NOT NULL)) * 100, 2) AS "closed_in_profit_trades%",
+        
+	ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS DECIMAL) / 
+		  (COUNT(*) FILTER (WHERE exit_date IS NOT NULL)) * 100, 2) AS "closed_in_loss_trades%"
 FROM 
     trade tr
 GROUP BY 
