@@ -86,5 +86,3 @@ pip install gunicorn
 systemctl daemon-reload ; systemctl start bot_deployment_server ; systemctl enable bot_deployment_server
 systemctl restart bot_deployment_server
 systemctl status bot_deployment_server
-
-ttt
