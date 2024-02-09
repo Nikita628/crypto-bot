@@ -10,8 +10,8 @@ import json
 app = Flask(__name__)
 
 load_dotenv()
-_CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CLEAR_DATA_TOKEN = os.getenv('CLEAR_DATA_TOKEN')
+_CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
@@ -23,10 +23,12 @@ def do_action():
             result_message = 'success'
 
             try:
+                call('chmod +x /var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
                 result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
                 if result != 0:
                     result_message = 'git pull error'
                 else:
+                    call('chmod +x /var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                     result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
                     if result != 0:
                         result_message = 'compose or migrations error'
