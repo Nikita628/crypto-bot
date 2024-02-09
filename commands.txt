@@ -81,9 +81,10 @@ systemctl reload apache2
 a2ensite deployment_server.conf
 a2dissite 000-default.conf
 
-
 //flask server
 pip install gunicorn
 systemctl daemon-reload ; systemctl start bot_deployment_server ; systemctl enable bot_deployment_server
 systemctl restart bot_deployment_server
 systemctl status bot_deployment_server
+
+ttt
