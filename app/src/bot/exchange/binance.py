@@ -105,9 +105,8 @@ def cache_usdt_symbols_list():
             _USDT_SYMBOLS = json.load(file)
     else:
         _USDT_SYMBOLS = _filter_out_dangerous_symbols(get_all_usdt_symbols())
-
-    with open(file_path, 'w') as file:
-        json.dump(_USDT_SYMBOLS, file)
+        with open(file_path, 'w') as file:
+            json.dump(_USDT_SYMBOLS, file)
 
 
 def _filter_out_dangerous_symbols(all_usdt_symbols: List[str]) -> List[str]:
