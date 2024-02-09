@@ -12,51 +12,76 @@ app = Flask(__name__)
 load_dotenv()
 _CRYPTO_BOT_SIGNALS_CHAT_ID = os.getenv('CRYPTO_BOT_SIGNALS_CHAT_ID')
 _CRYPTO_BOT_STATUS_CHAT_ID = os.getenv('CRYPTO_BOT_STATUS_CHAT_ID')
+_NEED_TO_POST_STATUS_IN_TG = os.getenv('NEED_TO_POST_STATUS_IN_TG')
+_CLEAR_DATA_TOKEN = os.getenv('CLEAR_DATA_TOKEN')
 _CRYPTO_BOT_TOKEN = os.getenv('CRYPTO_BOT_TOKEN')
 SEND_URL = f'https://api.telegram.org/bot{_CRYPTO_BOT_TOKEN}/sendMessage'
 
 @app.route('/', methods=['POST', 'GET'])
-def do_post():
-    git_event = json.loads(request.data)
-    if git_event.get('ref') == 'refs/heads/prod':
-        result_message = 'success'
+def do_action():
+    if request.method == 'POST':
+        git_event = json.loads(request.data)
+        if git_event.get('ref') == 'refs/heads/prod':
+            result_message = 'success'
 
-        try:
-            result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
-            if result != 0:
-                result_message = 'git pull error'
-            else:
-                result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
+            try:
+                result = call('/var/bot-app/crypto-bot/utils/scripts/git_pull', shell=True)
                 if result != 0:
-                    result_message = 'compose or migrations error'
+                    result_message = 'git pull error'
+                else:
+                    result = call('/var/bot-app/crypto-bot/utils/scripts/docker_compose_and_migrations', shell=True)
+                    if result != 0:
+                        result_message = 'compose or migrations error'
 
-        except Exception as e:
-            if not e:
-                e = 'unknown'           
-            result_message = e
+            except Exception as e:
+                if not e:
+                    e = 'unknown'           
+                result_message = e
 
-        error_label = ''
-        if result_message != 'success':
-            error_label = '<b>ERROR</b> '
+            error_label = ''
+            if result_message != 'success':
+                error_label = '<b>ERROR</b> '
 
-        message = f'''
+            message = f'''
 <b>{error_label}Crypto-bot message</b>
 <b>Action:</b> auto deployment
 <b>Result:</b> {result_message}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
+            response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+
+            # retry if failed
+            if not response:
+                count = 1
+                while (not response and count <= 5):
+                    time.sleep(5)
+                    response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
+                    count += 1
+
+            return 'prod branch action'
+        else:
+            return 'other branch action'
+    else:
+        action = request.args.get('action')
+        clear_data_token = request.args.get('token')
+        result_message = 'success'
+        if action == 'clear_data' and clear_data_token == _CLEAR_DATA_TOKEN:
+            result = call('/var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
+            if result != 0:
+                result_message = 'error on delete or start docker'
+        else:
+            result_message = 'invalid credentials'
+
+        error_label = ''
+        if result_message != 'success':
+            error_label = '<b>ERROR</b> '
+        message = f'''
+<b>{error_label}Crypto-bot message</b>
+<b>Action:</b> clear data
+<b>Result:</b> {result_message}
+<b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
 
-        # retry if failed
-        if not response:
-            count = 1
-            while (not response and count <= 5):
-                time.sleep(5)
-                response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
-                count += 1
-
-        return 'prod branch action'
-    else:
-        return 'other branch action'
+        return result_message
 
 
 if __name__ == '__main__':
