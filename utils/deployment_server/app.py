@@ -65,6 +65,7 @@ def do_action():
         clear_data_token = request.args.get('token')
         result_message = 'success'
         if action == 'clear_data' and clear_data_token == _CLEAR_DATA_TOKEN:
+            call('chmod +x /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
             result = call('/var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
             if result != 0:
                 result_message = 'error on delete or start docker'
