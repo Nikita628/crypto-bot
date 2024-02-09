@@ -217,7 +217,6 @@ def start_bot():
     threads: List[threading.Thread] = []
 
     for strategy in strategies:
-        print(strategy.strategy)
         if not asset.is_exists(coin = 'USDT', strategy = strategy.strategy):
             new_asset = asset.Asset(
                 strategy=strategy.strategy,
