@@ -45,16 +45,6 @@ docker-compose -f docker-compose-prod.yml up --build -d db
 #run migrations
 echo 'migrations are running'
 cd /var/bot-app/crypto-bot/utils/dbmate/
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
-dbmate down
 dbmate up
 echo 'migrations running are ended'
 
