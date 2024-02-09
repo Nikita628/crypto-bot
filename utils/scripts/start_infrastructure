@@ -13,9 +13,6 @@ fi
 docker stop $(docker ps -a -q)
 docker ps --filter status=exited -q | xargs docker rm
 docker rmi $(docker images -q)
-docker volume rm bot_pgadmin_data
-docker volume rm bot_postgres_data
-docker volume rm crypto-bot_pgadmin_data
 docker volume rm crypto-bot_postgres_data
 docker system prune 
 
@@ -42,16 +39,18 @@ echo "running db docker"
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d db
 
-#run docker server
-echo "running server and ui docker"
-cd /var/bot-app/crypto-bot/
-docker-compose -f docker-compose-prod.yml up --build -d server
+sleep 5
 
 #run migrations
 echo 'migrations are running'
 cd /var/bot-app/crypto-bot/utils/dbmate/
 dbmate up
 echo 'migrations running are ended'
+
+#run docker server
+echo "running server and ui docker"
+cd /var/bot-app/crypto-bot/
+docker-compose -f docker-compose-prod.yml up --build -d server
 
 systemctl daemon-reload
 systemctl stop bot_deployment_server
