@@ -63,7 +63,7 @@ class DualMomentum(Base):
         return direction
     
 
-    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[str]:
+    def determine_exit_reason(self, kline: KLine, trade: Trade) -> Optional[ExitReason]:
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()
@@ -110,27 +110,27 @@ class DualMomentum(Base):
             
 
     def is_lower_timeframe_long_entry(self, kline: KLine):    
-        return all([
-            kline.is_upward(KLine.Col.rsi),
-            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
-            kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT),
+        return (
+            kline.is_upward(KLine.Col.rsi)
+            and kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE)
+            and kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT)
 
-            kline.is_upward(KLine.Col.mfi),
-            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-        ])
+            and kline.is_upward(KLine.Col.mfi)
+            and kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE)
+            and kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT)
+        )
     
 
     def is_lower_timeframe_short_entry(self, kline: KLine):
-        return all([
-            kline.is_downward(KLine.Col.rsi),
-            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
-            kline.is_between(KLine.Col.rsi, _OVERSOLD, 50),
+        return (
+            kline.is_downward(KLine.Col.rsi)
+            and kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE)
+            and kline.is_between(KLine.Col.rsi, _OVERSOLD, 50)
 
-            kline.is_downward(KLine.Col.mfi),
-            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-        ]) 
+            and kline.is_downward(KLine.Col.mfi)
+            and kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE)
+            and kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT)
+        ) 
     
 
     def is_over_price(self, kline: KLine, direction: TradeDirection):
@@ -142,99 +142,107 @@ class DualMomentum(Base):
 
         if direction == TradeDirection.long.value:
             return (
-                any([
-                    (prev_stoch_short > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.stoch_short_d, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.stoch_long_d, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.stoch_long_d)),
-                    (prev_rsi > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.rsi, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.rsi)),
-                ])
+                (
+                    prev_stoch_short > _OVERBOUGHT 
+                    and kline.is_below(KLine.Col.stoch_short_d, _OVERBOUGHT)
+                    and kline.is_downward(KLine.Col.stoch_short_d)
+                )
+                or (
+                    prev_stoch_long > _OVERBOUGHT 
+                    and kline.is_below(KLine.Col.stoch_long_d, _OVERBOUGHT)
+                    and kline.is_downward(KLine.Col.stoch_long_d)
+                )
+                or (
+                    prev_rsi > _OVERBOUGHT 
+                    and kline.is_below(KLine.Col.rsi, _OVERBOUGHT)
+                    and kline.is_downward(KLine.Col.rsi)
+                ),
             )
         else:
             return (
-                any([
-                    (prev_stoch_short < _OVERSOLD 
+                (
+                    prev_stoch_short < _OVERSOLD 
                      and kline.is_above(KLine.Col.stoch_short_d, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long < _OVERSOLD 
+                     and kline.is_upward(KLine.Col.stoch_short_d)
+                )
+                or (
+                    prev_stoch_long < _OVERSOLD 
                      and kline.is_above(KLine.Col.stoch_long_d, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.stoch_long_d)),
-                    (prev_rsi < _OVERSOLD 
+                     and kline.is_upward(KLine.Col.stoch_long_d)
+                )
+                or (
+                    prev_rsi < _OVERSOLD 
                      and kline.is_above(KLine.Col.rsi, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.rsi)),
-                ])
+                     and kline.is_upward(KLine.Col.rsi)
+                )
             )
 
 
     def is_long_entry(self, kline: KLine):      
-        return all([
-            kline.is_upward(KLine.Col.ema_200), 
+        return (
+            kline.is_upward(KLine.Col.ema_200)
 
-            kline.is_long_gmma_above_200ema(), 
-            kline.is_long_gmma_upward(),
+            and kline.is_long_gmma_above_200ema()
+            and kline.is_long_gmma_upward()
 
-            kline.is_short_term_GMMA_above_long_term_GMMA(),
-            kline.is_short_gmma_upward(),
+            and kline.is_short_term_GMMA_above_long_term_GMMA()
+            and kline.is_short_gmma_upward()
 
-            kline.is_upward(KLine.Col.stoch_short_d),
-            kline.is_upward(KLine.Col.stoch_long_d),
+            and kline.is_upward(KLine.Col.stoch_short_d)
+            and kline.is_upward(KLine.Col.stoch_long_d)
 
-            kline.is_upward(KLine.Col.rsi),
-            kline.is_above(KLine.Col.rsi, 50),
+            and kline.is_upward(KLine.Col.rsi)
+            and kline.is_above(KLine.Col.rsi, 50)
 
-            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
-            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70),
+            and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
+            and kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70)
 
-            kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
-        ])
+            and kline.is_price_action_not_mixing_with_gmma(TradeDirection.long)
+        )
     
 
     def is_short_entry(self, kline: KLine):
-        return all([
-            kline.is_downward(KLine.Col.ema_200), 
+        return (
+            kline.is_downward(KLine.Col.ema_200)
 
-            kline.is_long_gmma_below_200ema(), 
-            kline.is_long_gmma_downward(),
+            and kline.is_long_gmma_below_200ema()
+            and kline.is_long_gmma_downward()
 
-            kline.is_short_term_GMMA_below_long_term_GMMA(),
-            kline.is_short_gmma_downward(),
+            and kline.is_short_term_GMMA_below_long_term_GMMA()
+            and kline.is_short_gmma_downward()
 
-            kline.is_downward(KLine.Col.stoch_short_d),
-            kline.is_downward(KLine.Col.stoch_long_d),
+            and kline.is_downward(KLine.Col.stoch_short_d)
+            and kline.is_downward(KLine.Col.stoch_long_d)
 
-            kline.is_downward(KLine.Col.rsi),
-            kline.is_below(KLine.Col.rsi, 50),
+            and kline.is_downward(KLine.Col.rsi)
+            and kline.is_below(KLine.Col.rsi, 50)
 
-            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
-            kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT),
+            and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
+            and kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT)
 
-            kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
-        ])
+            and kline.is_price_action_not_mixing_with_gmma(TradeDirection.short)
+        )
     
 
     def is_long_exit(self, kline: KLine):
         return (
-            all([
-                kline.is_downward(KLine.Col.stoch_long_d),
-                kline.is_downward(KLine.Col.stoch_short_d),
-            ]) or all([
-                kline.is_below(KLine.Col.rsi, 50),
-                kline.is_downward(KLine.Col.rsi),
-            ])
+            (
+                kline.is_downward(KLine.Col.stoch_long_d)
+                and kline.is_downward(KLine.Col.stoch_short_d)
+            ) or (
+                kline.is_below(KLine.Col.rsi, 50)
+                and kline.is_downward(KLine.Col.rsi)
+            )
         )
 
 
     def is_short_exit(self, kline: KLine):
         return (
-            all([
-                kline.is_upward(KLine.Col.stoch_long_d),
-                kline.is_upward(KLine.Col.stoch_short_d),
-            ]) or all ([
-                kline.is_upward(KLine.Col.rsi),
-                kline.is_above(KLine.Col.rsi, 50),
-            ])
+            (
+                kline.is_upward(KLine.Col.stoch_long_d)
+                and kline.is_upward(KLine.Col.stoch_short_d)
+            ) or (
+                kline.is_upward(KLine.Col.rsi)
+                and kline.is_above(KLine.Col.rsi, 50)
+            )
         )
