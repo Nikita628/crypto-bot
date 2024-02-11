@@ -30,11 +30,11 @@ SELECT
 
     COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS closed_in_loss_trades,
 	
-	ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage > 0) AS DECIMAL) / 
-		(COUNT(*) FILTER (WHERE exit_date IS NOT NULL)) * 100, 2) AS "closed_in_profit_trades%",
-        
-	ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS DECIMAL) / 
-		  (COUNT(*) FILTER (WHERE exit_date IS NOT NULL)) * 100, 2) AS "closed_in_loss_trades%"
+    ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage > 0) AS DECIMAL) / 
+          NULLIF(COUNT(*) FILTER (WHERE exit_date IS NOT NULL), 0) * 100, 2) AS "closed_in_profit_trades%",
+
+    ROUND(CAST(COUNT(*) FILTER (WHERE exit_date IS NOT NULL AND profit_percentage <= 0) AS DECIMAL) / 
+          NULLIF(COUNT(*) FILTER (WHERE exit_date IS NOT NULL), 0) * 100, 2) AS "closed_in_loss_trades%"
 FROM 
     trade tr
 GROUP BY 
