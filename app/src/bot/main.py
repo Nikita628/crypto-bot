@@ -212,7 +212,9 @@ strategies: List[Base] = [
 ]
 
 def start_bot():
+    print('caching usdt symbols...')
     cache_usdt_symbols_list()
+    print('cached usdt symbols')
  
     threads: List[threading.Thread] = []
 
