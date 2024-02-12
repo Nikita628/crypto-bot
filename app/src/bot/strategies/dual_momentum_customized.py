@@ -37,6 +37,7 @@ class DualMomentumCustomized(Base):
             hold_period_hours:Optional[float] = None,
             hold_exit_reason:Optional[set] = set(),
             trailing_stop_percentage:Optional[float] = None,
+            trailing_start_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
             is_over_price_exit:bool = False,
@@ -48,6 +49,7 @@ class DualMomentumCustomized(Base):
         ):
         super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
+        self.trailing_start_percentage = trailing_start_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
         self.is_over_price_exit = is_over_price_exit
@@ -118,7 +120,8 @@ class DualMomentumCustomized(Base):
         elif self.trailing_stop_percentage and is_trailing_stop(
             kline.get_running_price(), 
             trade, 
-            self.trailing_stop_percentage
+            self.trailing_stop_percentage,
+            self.trailing_start_percentage
         ):
             reason = ExitReason.trailing_stop
         elif (self.hard_stop_loss_percentage and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
@@ -127,6 +130,7 @@ class DualMomentumCustomized(Base):
             reason = ExitReason.overprice_exit
             
         return reason
+    
     
     def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
         lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
@@ -258,14 +262,14 @@ class DualMomentumCustomized(Base):
 
             kline.is_upward(KLine.Col.rsi),
             kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT),
-            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
+            # kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
 
             # custom tech indicators additionally to dual momentum 
             kline.is_upward(KLine.Col.mfi),
             kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
+            # kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
         ])
     
 
@@ -287,16 +291,17 @@ class DualMomentumCustomized(Base):
 
             kline.is_downward(KLine.Col.rsi),
             kline.is_between(KLine.Col.rsi, _OVERSOLD, 50),
-            kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
+            # kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
 
             # custom tech indicators additionally to dual momentum      
             kline.is_downward(KLine.Col.mfi),
             kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-            kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
+            # kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE),
         ])
     
+
     def is_long_exit(self, kline: KLine):
         return (
             all([
@@ -307,6 +312,7 @@ class DualMomentumCustomized(Base):
                 kline.is_downward(KLine.Col.rsi),
             ])
         )
+
 
     def is_short_exit(self, kline: KLine):
         return (

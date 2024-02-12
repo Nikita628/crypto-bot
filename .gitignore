@@ -3,3 +3,4 @@ __pycache__
 transactions.csv
 ui/node_modules/
 .env
+/app/tradable_symbols.json

@@ -117,6 +117,12 @@ strategies: List[Base] = [
     ),
 
     DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_small',
+        trailing_stop_percentage=0.1,
+        trailing_start_percentage=0.5,
+    ),
+
+    DualMomentumCustomized(
         name='dual_momentum_customized_trailing_no_hard_stop', 
         is_over_price_exit=True,
         trailing_stop_percentage=0.5,
