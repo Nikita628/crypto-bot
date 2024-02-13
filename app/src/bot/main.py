@@ -79,6 +79,11 @@ strategies: List[Base] = [
     ),
 
     DualMomentum(
+        name='dual_momentum_greedy_no_hard_stop',
+        greedy_profit_percentage=0.5,
+    ),
+
+    DualMomentum(
         name='dual_momentum_trailing',
         trailing_stop_percentage=0.5,
         hard_stop_loss_percentage=-3,

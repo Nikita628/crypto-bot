@@ -175,7 +175,9 @@ class KLine:
         return True
     
     def is_above(self, source_column: str, value: float) -> bool:
-        return self.df[source_column].iloc[-1] > value
+        current_val = self.df[source_column].iloc[-1]
+        res = current_val > value
+        return res
     
     def is_downward(self, source_column: str, lookback = 1) -> bool:
         if (lookback < 1):
@@ -188,7 +190,9 @@ class KLine:
         return True
     
     def is_below(self, source_column: str, value: float) -> bool:
-        return self.df[source_column].iloc[-1] < value
+        current_val = self.df[source_column].iloc[-1]
+        res = current_val < value
+        return res
     
     def is_between(self, source_column: str, min: float, max: float) -> bool:
         return self.is_below(source_column, max) and self.is_above(source_column, min)
