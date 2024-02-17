@@ -68,6 +68,7 @@ class DualMomentum(Base):
         kline.add_stoch(5, 3, 2, KLine.Col.stoch_short_d, KLine.Col.stoch_short_k)
         kline.add_stoch(20, 3, 8, KLine.Col.stoch_long_d, KLine.Col.stoch_long_k)
         kline.add_rsi()
+        kline.add_atr()
 
         reason = None
         if trade.direction == TradeDirection.long.value and self.is_long_exit(kline):
