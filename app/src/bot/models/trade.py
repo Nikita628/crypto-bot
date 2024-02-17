@@ -8,13 +8,14 @@ _EXPIRATION_PERIOD_HOURS = 48
 
 class ExitReason(Enum):
     any = 'any'
-    long_exit = 'long exit'
-    short_exit = 'short exit'
-    atr_stop_loss = 'ATR stop loss'
-    greedy_percentage = 'greedy percentage'
-    trailing_stop = 'trailing stop'
-    hard_stop_loss = 'hard stop loss'
-    overprice_exit = 'overprice exit'
+    long_exit = 'long exit' # exit as defined by strategy technical indicators
+    short_exit = 'short exit' # exit as defined by strategy technical indicators
+    atr_stop_loss = 'ATR stop loss' # when loss % reached current ATR
+    greedy_percentage = 'greedy percentage' # when profit reached given percentage
+    trailing_stop = 'trailing stop' # when profit went down from highest profit by given percentage
+    hard_stop_loss = 'hard stop loss' # when loss reached given percentage
+    overprice_exit = 'overprice exit' # when asset was overbought/oversold, and stepped out of overbought/oversold area
+    stop_loss_atr_percentage = 'stop loss ATR percentage' # when loss reached given percentage of ATR
 
 class TradeDirection(Enum):
     long = 'long'

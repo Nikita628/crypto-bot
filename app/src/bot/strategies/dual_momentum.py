@@ -31,6 +31,7 @@ class DualMomentum(Base):
             is_lower_timeframe_confirmation:bool = False,
             is_over_price_exit:bool = False,
             hard_stop_loss_percentage:Optional[float] = None,
+            stop_loss_atr_percentage:Optional[float] = None,
         ):
         super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_start_percentage = trailing_start_percentage
@@ -39,7 +40,7 @@ class DualMomentum(Base):
         self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
         self.is_over_price_exit = is_over_price_exit
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
-
+        self.stop_loss_atr_percentage = stop_loss_atr_percentage
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -93,6 +94,12 @@ class DualMomentum(Base):
         elif (self.hard_stop_loss_percentage 
               and get_current_profit_percentage(kline.get_running_price(), trade) < self.hard_stop_loss_percentage):
             reason = ExitReason.overprice_exit
+        elif self.stop_loss_atr_percentage:
+            current_profit_percentage = get_current_profit_percentage(kline.get_running_price(), trade)
+            current_atr_percentage = kline.get_current_atr_percentage()
+            if (current_profit_percentage < 0 
+                and abs(current_profit_percentage / current_atr_percentage) >= self.stop_loss_atr_percentage):
+                reason = ExitReason.stop_loss_atr_percentage
 
         return reason
     

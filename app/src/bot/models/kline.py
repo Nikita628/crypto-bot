@@ -31,6 +31,12 @@ class KLine:
     def get_running_price(self) -> float:
         return self.df[KLine.Col.close].iloc[-1]
     
+    def get_current_atr(self) -> float:
+        return self.df[KLine.Col.atr].iloc[-1]
+    
+    def get_current_atr_percentage(self) -> float:
+        return self.get_current_atr() / self.get_running_price() * 100
+    
     def is_rsi_overbought(self, overbought_limit = 80) -> bool: 
         return self.is_above(KLine.Col.rsi, overbought_limit)
     

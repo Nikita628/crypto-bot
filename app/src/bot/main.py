@@ -101,6 +101,13 @@ strategies: List[Base] = [
         trailing_start_percentage=0.3,
     ),
 
+    DualMomentum(
+        name='dual_momentum_trailing_0.5_stop_atr_0.7',
+        trailing_stop_percentage=0.2,
+        trailing_start_percentage=0.5,
+        stop_loss_atr_percentage=0.7,
+    ),
+
     # dual momentum customized ####################
     DualMomentumCustomized(
         name='dual_momentum_customized',
@@ -171,14 +178,6 @@ strategies: List[Base] = [
         pvt_range_percentage=1,
         pvt_surge_percentage=2,
         pvt_range_loockback=10,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_5min',
-        timeframe=BinanceInterval.min5,
-        greedy_profit_percentage=0.2,
-        hard_stop_loss_percentage=-2,
-        pvt_range_loockback=12,
-        pvt_surge_multiplier=3,
     ),
     VolumeSurgeCustomized(
         name='volume_surge_customized_4h',
