@@ -76,10 +76,12 @@ strategies: List[Base] = [
         greedy_profit_percentage=0.5,
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentum(
         name='dual_momentum_greedy_no_hard_stop',
+        is_atr_stop_loss_exit=True,
         greedy_profit_percentage=0.5,
     ),
 
@@ -88,17 +90,20 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.5,
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentum(
         name='dual_momentum_trailing_no_hard_stop',
         trailing_stop_percentage=0.5,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentum(
         name='dual_momentum_trailing_small',
         trailing_stop_percentage=0.2,
         trailing_start_percentage=0.3,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentum(
@@ -106,12 +111,31 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.2,
         trailing_start_percentage=0.5,
         stop_loss_atr_percentage=0.7,
+        is_atr_stop_loss_exit=True,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_stoch_and_rsi',
+        trailing_stop_percentage=0.5,
+        is_stoch_and_rsi_exit=True,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_stoch_or_rsi',
+        trailing_stop_percentage=0.5,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_or_rsi',
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.25,
     ),
 
     # dual momentum customized ####################
     DualMomentumCustomized(
         name='dual_momentum_customized',
         is_over_price_exit=True,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentumCustomized(
@@ -119,6 +143,7 @@ strategies: List[Base] = [
         greedy_profit_percentage=0.5, 
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentumCustomized(
@@ -126,41 +151,47 @@ strategies: List[Base] = [
         is_over_price_exit=True,
         trailing_stop_percentage=0.5,
         hard_stop_loss_percentage=-3,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentumCustomized(
         name='dual_momentum_customized_trailing_small',
         trailing_stop_percentage=0.1,
         trailing_start_percentage=0.5,
+        is_atr_stop_loss_exit=True,
     ),
 
     DualMomentumCustomized(
         name='dual_momentum_customized_trailing_no_hard_stop', 
         is_over_price_exit=True,
         trailing_stop_percentage=0.5,
+        is_atr_stop_loss_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_no_hard_stop_no_overprice', 
+        trailing_stop_percentage=0.5,
+        is_atr_stop_loss_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_stoch_or_rsi', 
+        trailing_stop_percentage=0.5,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_stoch_and_rsi', 
+        trailing_stop_percentage=0.5,
+        is_stoch_and_rsi_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_small_stoch_or_rsi', 
+        trailing_stop_percentage=0.5,
+        trailing_start_percentage=0.5,
     ),
 
     # volume surge ##############################
-    VolumeSurge(
-        name='volume_surge_trailing',
-        trailing_stop_percentage=0.5,
-    ),
-    VolumeSurge(
-        timeframe=BinanceInterval.h4,
-        name='volume_surge_greedy_hard_stop_4h',
-        greedy_profit_percentage=0.5,
-        hard_stop_loss_percentage=-3,
-        pvt_range_percentage=2,
-        pvt_surge_percentage=2.5,
-        pvt_range_loockback=6,
-    ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_hold_24',
-        greedy_profit_percentage=1,
-        hard_stop_loss_percentage=-3,
-        hold_period_hours=24,
-        hold_exit_reason={ExitReason.long_exit, ExitReason.short_exit}
-    ),
     VolumeSurge(
         name='volume_surge_greedy_hard_stop_4h_1.5',
         timeframe=BinanceInterval.h4,
@@ -170,15 +201,6 @@ strategies: List[Base] = [
         pvt_surge_percentage=1.3,
         pvt_range_loockback=6,
     ),
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_1h_2',
-        timeframe=BinanceInterval.h1,
-        greedy_profit_percentage=0.2,
-        hard_stop_loss_percentage=-2,
-        pvt_range_percentage=1,
-        pvt_surge_percentage=2,
-        pvt_range_loockback=10,
-    ),
     VolumeSurgeCustomized(
         name='volume_surge_customized_4h',
         timeframe=BinanceInterval.h4,
@@ -186,38 +208,6 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-2,
         pvt_range_loockback=6,
         pvt_surge_multiplier=2,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_4h_lower_confirmation',
-        timeframe=BinanceInterval.h4,
-        greedy_profit_percentage=0.2,
-        hard_stop_loss_percentage=-4,
-        pvt_range_loockback=6,
-        pvt_surge_multiplier=2,
-        is_lower_timeframe_confirmation=True,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_1d',
-        greedy_profit_percentage=1,
-        hard_stop_loss_percentage=-3,
-        pvt_surge_multiplier=2,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_trailing_4h',
-        timeframe=BinanceInterval.h4,
-        trailing_stop_percentage=0.2,
-        hard_stop_loss_percentage=-2,
-        pvt_range_loockback=6,
-        pvt_surge_multiplier=2,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_trailing_4h_lower_confirmation',
-        timeframe=BinanceInterval.h4,
-        trailing_stop_percentage=0.2,
-        hard_stop_loss_percentage=-4,
-        pvt_range_loockback=6,
-        pvt_surge_multiplier=2,
-        is_lower_timeframe_confirmation=True,
     ),
 ]
 

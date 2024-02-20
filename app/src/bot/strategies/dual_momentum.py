@@ -30,6 +30,8 @@ class DualMomentum(Base):
             greedy_profit_percentage:Optional[float] = None,
             is_lower_timeframe_confirmation:bool = False,
             is_over_price_exit:bool = False,
+            is_atr_stop_loss_exit:bool = False,
+            is_stoch_and_rsi_exit:bool = False,
             hard_stop_loss_percentage:Optional[float] = None,
             stop_loss_atr_percentage:Optional[float] = None,
         ):
@@ -41,6 +43,8 @@ class DualMomentum(Base):
         self.is_over_price_exit = is_over_price_exit
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
         self.stop_loss_atr_percentage = stop_loss_atr_percentage
+        self.is_atr_stop_loss_exit = is_atr_stop_loss_exit
+        self.is_stoch_and_rsi_exit = is_stoch_and_rsi_exit
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -75,7 +79,7 @@ class DualMomentum(Base):
             reason = ExitReason.long_exit
         elif trade.direction == TradeDirection.short.value and self.is_short_exit(kline):
             reason = ExitReason.short_exit
-        elif is_atr_stop_loss(kline.get_running_price(), trade):
+        elif self.is_atr_stop_loss_exit and is_atr_stop_loss(kline.get_running_price(), trade):
             reason = ExitReason.atr_stop_loss
         elif self.greedy_profit_percentage and is_greedy_profit_reached(
             kline.get_running_price(), 
@@ -235,6 +239,14 @@ class DualMomentum(Base):
     
 
     def is_long_exit(self, kline: KLine):
+        if self.is_stoch_and_rsi_exit:
+            return (
+                kline.is_downward(KLine.Col.stoch_long_d)
+                and kline.is_downward(KLine.Col.stoch_short_d)
+                and kline.is_below(KLine.Col.rsi, 50)
+                and kline.is_downward(KLine.Col.rsi)
+            )
+        
         return (
             (
                 kline.is_downward(KLine.Col.stoch_long_d)
@@ -247,6 +259,14 @@ class DualMomentum(Base):
 
 
     def is_short_exit(self, kline: KLine):
+        if self.is_stoch_and_rsi_exit:
+            return (
+                kline.is_upward(KLine.Col.stoch_long_d)
+                and kline.is_upward(KLine.Col.stoch_short_d)
+                and kline.is_upward(KLine.Col.rsi)
+                and kline.is_above(KLine.Col.rsi, 50)  
+            )
+
         return (
             (
                 kline.is_upward(KLine.Col.stoch_long_d)

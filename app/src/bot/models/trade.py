@@ -116,7 +116,7 @@ def is_trailing_stop(running_price: float, trade: Trade, trailing_stop_percentag
         trailing_stop_percentage = 1.0
         
     # by default, trailing activates only after current_profit_percentage is higher than trailing_start_percentage
-    # meaning that we must be in profit for at least 1%
+    # meaning that we must be in profit for at least for trailing_start_percentage
     current_profit_percentage = get_current_profit_percentage(running_price, trade)
     return (
         current_profit_percentage >= trailing_start_percentage and

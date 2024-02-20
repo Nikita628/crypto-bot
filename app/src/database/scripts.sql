@@ -41,3 +41,9 @@ GROUP BY
     strategy
 ORDER BY 
     "total_profit%" DESC;
+
+----------- strategy start date ------------------------------
+select strategy, min(entry_date) approximate_strategy_start_date
+from trade
+group by strategy
+order by approximate_strategy_start_date
