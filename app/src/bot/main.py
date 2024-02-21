@@ -131,6 +131,14 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.25,
     ),
 
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_or_rsi_hold_24',
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.25,
+        hold_period_hours=24,
+        hold_exit_reason={ExitReason.trailing_stop},
+    ),
+
     # dual momentum customized ####################
     DualMomentumCustomized(
         name='dual_momentum_customized',
