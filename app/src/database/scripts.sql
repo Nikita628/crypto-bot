@@ -14,6 +14,8 @@ order by entry_date
 SELECT 
  -- 0.1 fraction of total usdt asset amount used for a trade
     strategy, 
+	DATE(MIN(entry_date)) AS started_on,
+	
     COUNT(*) AS total_trades,
 
     ROUND(SUM(profit_percentage * 0.1)::DECIMAL, 3) AS "total_profit%",
@@ -41,9 +43,3 @@ GROUP BY
     strategy
 ORDER BY 
     "total_profit%" DESC;
-
------------ strategy start date ------------------------------
-select strategy, min(entry_date) approximate_strategy_start_date
-from trade
-group by strategy
-order by approximate_strategy_start_date

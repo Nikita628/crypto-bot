@@ -21,6 +21,8 @@ from bot.exchange.binance import BinanceInterval
 from typing import Optional
 from integration.telegram import post_signal, post_error, TradeEntrySignal, TradeExitSignal
 
+_MIN_ATR_PERCENTAGE = 1
+
 class Base(ABC):
     def __init__(
             self,
@@ -55,12 +57,15 @@ class Base(ABC):
                             continue
 
                         kline.add_atr()
-                        current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
+                        atr_percentage = kline.get_current_atr_percentage()
+
+                        if atr_percentage < _MIN_ATR_PERCENTAGE:
+                            continue
+
                         current_price = kline.get_running_price()
                         direction = self.determine_trade_direction(kline, symbol)
 
                         if direction:
-
                             trade = Trade(
                                 base_asset=symbol.replace('USDT', ''),
                                 base_asset_amount=asset.AssetConstants.per_trade_ustd_amount/current_price,
@@ -68,11 +73,13 @@ class Base(ABC):
                                 entry_price=current_price,
                                 direction=direction,
                                 strategy=self.strategy,
-                                atr_percentage=current_atr_value / current_price * 100
+                                atr_percentage=atr_percentage,
                             )
+
                             enter(trade)
                             
                             self.log(f'entered {symbol}')
+
                             post_signal(TradeEntrySignal(
                                 strategy=self.strategy,
                                 symbol=symbol,
@@ -107,7 +114,6 @@ class Base(ABC):
                         exit_reason = self.determine_exit_reason(kline, trade)
 
                         if exit_reason:
-
                             exit(
                                 trade,
                                 running_price, 
@@ -116,7 +122,9 @@ class Base(ABC):
                                 self.hold_period_hours, 
                                 self.hold_exit_reason
                             )
+
                             self.log(f'exited {trade.symbol}, reason {exit_reason.value}')
+
                             post_signal(TradeExitSignal(
                                 strategy=self.strategy, 
                                 symbol=trade.symbol, 
