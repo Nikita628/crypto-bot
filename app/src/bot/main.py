@@ -139,6 +139,15 @@ strategies: List[Base] = [
         hold_exit_reason={ExitReason.trailing_stop},
     ),
 
+    DualMomentum(
+        name='dual_momentum_plain_stoch_or_rsi',
+    ),
+
+    DualMomentum(
+        name='dual_momentum_plain_stoch_and_rsi',
+        is_stoch_and_rsi_exit=True,
+    ),
+
     # dual momentum customized ####################
     DualMomentumCustomized(
         name='dual_momentum_customized',
@@ -197,6 +206,15 @@ strategies: List[Base] = [
         name='dual_momentum_customized_trailing_small_stoch_or_rsi', 
         trailing_stop_percentage=0.5,
         trailing_start_percentage=0.5,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_plain_stoch_or_rsi',
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_plain_stoch_and_rsi',
+        is_stoch_and_rsi_exit=True,
     ),
 
     # volume surge ##############################
