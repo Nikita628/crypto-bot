@@ -2,7 +2,24 @@
 
 docker stop crypto-bot-server
 
-cat /var/bot-app/crypto-bot/utils/db_scripts/clear_data.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+delete_trade = "DELETE FROM public.trade"
+delete_asset = "DELETE FROM public.asset"
+delete_hold = "DELETE FROM public.hold"
+
+if [ "$strategy" != "" ]; then
+        delete_trade+=" WHERE strategy = "+strategy
+        delete_asset+=" WHERE strategy = "+strategy
+        delete_hold+=" WHERE strategy = "+strategy
+
+delete_trade+=";"
+delete_asset+=";"
+delete_hold+=";"
+
+#cat /var/bot-app/crypto-bot/utils/db_scripts/clear_data.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+
+$delete_trade | docker exec -i crypto-bot-db psql -U postgres -d postgres
+$delete_asset | docker exec -i crypto-bot-db psql -U postgres -d postgres
+$delete_hold | docker exec -i crypto-bot-db psql -U postgres -d postgres
 
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
@@ -12,4 +29,3 @@ if [[ $? -ne 0 ]]; then
 else
   exit 0
 fi
-
