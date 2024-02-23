@@ -2,14 +2,14 @@
 
 docker stop crypto-bot-server
 
-delete_trade = "DELETE FROM public.trade"
-delete_asset = "DELETE FROM public.asset"
-delete_hold = "DELETE FROM public.hold"
+delete_trade="DELETE FROM public.trade"
+delete_asset="DELETE FROM public.asset"
+delete_hold="DELETE FROM public.hold"
 
 if [ "$strategy" != "" ]; then
-        delete_trade+=" WHERE strategy = '"+strategy+"'"
-        delete_asset+=" WHERE strategy = '"+strategy+"'"
-        delete_hold+=" WHERE strategy = '"+strategy+"'"
+        delete_trade+=" WHERE strategy = '${strategy}'"
+        delete_asset+=" WHERE strategy = '${strategy}'"
+        delete_hold+=" WHERE strategy = '${strategy}'"
 fi
 
 delete_trade+=";"
