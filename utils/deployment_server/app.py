@@ -70,7 +70,7 @@ def do_action():
                 strategy = ''
 
             call('chmod +x /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
-            result = call('strategy=' + strategy + ' /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
+            result = call('strategy="' + strategy + '" /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
 
             if result != 0:
                 result_message = 'error on delete or start docker'
