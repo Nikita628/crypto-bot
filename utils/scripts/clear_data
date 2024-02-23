@@ -16,11 +16,12 @@ delete_trade+=";"
 delete_asset+=";"
 delete_hold+=";"
 
-#cat /var/bot-app/crypto-bot/utils/db_scripts/clear_data.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+echo "$delete_trade" > /tmp/clear_data.sql
+echo "$delete_asset" | tee -a /tmp/clear_data.sql
+echo "$delete_hold" | tee -a /tmp/clear_data.sql
 
-cat "$delete_trade" | docker exec -i crypto-bot-db psql -U postgres -d postgres
-cat "$delete_asset" | docker exec -i crypto-bot-db psql -U postgres -d postgres
-cat "$delete_hold" | docker exec -i crypto-bot-db psql -U postgres -d postgres
+#cat /var/bot-app/crypto-bot/utils/db_scripts/clear_data.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
+cat /tmp/clear_data.sql | docker exec -i crypto-bot-db psql -U postgres -d postgres
 
 cd /var/bot-app/crypto-bot/
 docker-compose -f docker-compose-prod.yml up --build -d server
