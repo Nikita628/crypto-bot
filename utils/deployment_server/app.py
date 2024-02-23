@@ -35,7 +35,7 @@ def do_action():
 
             except Exception as e:
                 if not e:
-                    e = 'unknown'           
+                    e = 'unknown'
                 result_message = e
 
             error_label = ''
@@ -63,21 +63,29 @@ def do_action():
     else:
         action = request.args.get('action')
         clear_data_token = request.args.get('token')
+        strategy = request.args.get('strategy')
         result_message = 'success'
         if action == 'clear_data' and clear_data_token == _CLEAR_DATA_TOKEN:
+            if not strategy:
+                strategy = ''
+
             call('chmod +x /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
-            result = call('/var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
+            result = call('strategy=' + strategy + ' /var/bot-app/crypto-bot/utils/scripts/clear_data', shell=True)
+
             if result != 0:
                 result_message = 'error on delete or start docker'
         else:
             result_message = 'invalid credentials'
 
+        if not strategy:
+            strategy = 'all'
         error_label = ''
         if result_message != 'success':
             error_label = '<b>ERROR</b> '
         message = f'''
 <b>{error_label}Crypto-bot message</b>
 <b>Action:</b> clear data
+<b>strategy:</b> {strategy}
 <b>Result:</b> {result_message}
 <b>DateTime:</b> {datetime.now().strftime("%m/%d/%Y, %H:%M:%S")}'''
         response = requests.post(SEND_URL, json={'chat_id': _CRYPTO_BOT_STATUS_CHAT_ID, 'parse_mode': 'html', 'text': message})
