@@ -177,7 +177,7 @@ class DualMomentum(Base):
             and kline.is_upward(KLine.Col.stoch_long_d)
 
             and kline.is_upward(KLine.Col.rsi)
-            and kline.is_above(KLine.Col.rsi, 50)
+            and kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT)
 
             and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
             and kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70)
@@ -200,7 +200,7 @@ class DualMomentum(Base):
             and kline.is_downward(KLine.Col.stoch_long_d)
 
             and kline.is_downward(KLine.Col.rsi)
-            and kline.is_below(KLine.Col.rsi, 50)
+            and kline.is_between(KLine.Col.rsi, _OVERSOLD, 50)
 
             and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
             and kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT)
