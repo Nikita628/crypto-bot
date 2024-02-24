@@ -132,6 +132,28 @@ strategies: List[Base] = [
     ),
 
     DualMomentum(
+        name='dual_momentum_trailing_small_stoch_and_rsi',
+        is_stoch_and_rsi_exit=True,
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.25,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_or_rsi_overprice',
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.25,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_and_rsi_overprice',
+        is_stoch_and_rsi_exit=True,
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.25,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentum(
         name='dual_momentum_trailing_small_stoch_or_rsi_hold_24',
         trailing_start_percentage=0.5,
         trailing_stop_percentage=0.25,
@@ -203,6 +225,19 @@ strategies: List[Base] = [
     ),
 
     DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_stoch_or_rsi_overprice', 
+        trailing_stop_percentage=0.5,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_stoch_and_rsi_overprice', 
+        trailing_stop_percentage=0.5,
+        is_stoch_and_rsi_exit=True,
+        is_over_price_exit=True,
+    ),
+
+    DualMomentumCustomized(
         name='dual_momentum_customized_trailing_small_stoch_or_rsi', 
         trailing_stop_percentage=0.5,
         trailing_start_percentage=0.5,
@@ -218,23 +253,23 @@ strategies: List[Base] = [
     ),
 
     # volume surge ##############################
-    VolumeSurge(
-        name='volume_surge_greedy_hard_stop_4h_1.5',
-        timeframe=BinanceInterval.h4,
-        greedy_profit_percentage=0.5,
-        hard_stop_loss_percentage=-3,
-        pvt_range_percentage=1,
-        pvt_surge_percentage=1.3,
-        pvt_range_loockback=6,
-    ),
-    VolumeSurgeCustomized(
-        name='volume_surge_customized_4h',
-        timeframe=BinanceInterval.h4,
-        greedy_profit_percentage=0.2,
-        hard_stop_loss_percentage=-2,
-        pvt_range_loockback=6,
-        pvt_surge_multiplier=2,
-    ),
+    # VolumeSurge(
+    #     name='volume_surge_greedy_hard_stop_4h_1.5',
+    #     timeframe=BinanceInterval.h4,
+    #     greedy_profit_percentage=0.5,
+    #     hard_stop_loss_percentage=-3,
+    #     pvt_range_percentage=1,
+    #     pvt_surge_percentage=1.3,
+    #     pvt_range_loockback=6,
+    # ),
+    # VolumeSurgeCustomized(
+    #     name='volume_surge_customized_4h',
+    #     timeframe=BinanceInterval.h4,
+    #     greedy_profit_percentage=0.2,
+    #     hard_stop_loss_percentage=-2,
+    #     pvt_range_loockback=6,
+    #     pvt_surge_multiplier=2,
+    # ),
 ]
 
 def start_bot():

@@ -160,45 +160,23 @@ class DualMomentumCustomized(Base):
 
 
     def is_over_price(self, kline: KLine, direction: TradeDirection):
-        prev_stoch_short = kline.df[KLine.Col.stoch_short_d].iloc[-2]
-        prev_stoch_long = kline.df[KLine.Col.stoch_long_d].iloc[-2]
-        prev_rsi = kline.df[KLine.Col.rsi].iloc[-2]
-        prev_mfi = kline.df[KLine.Col.mfi].iloc[-2]
-
+        # exit when an asset is overbought/oversold
+        is_over_price = False
         if direction == TradeDirection.long.value:
-            return (
-                any([
-                    (prev_stoch_short > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.stoch_short_d, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.stoch_long_d, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.stoch_long_d)),
-                    (prev_rsi > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.rsi, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.rsi)),
-                    (prev_mfi > _OVERBOUGHT 
-                     and kline.is_below(KLine.Col.mfi, _OVERBOUGHT)
-                     and kline.is_downward(KLine.Col.mfi)),
-                ])
+            is_over_price = (
+                kline.is_above(KLine.Col.stoch_short_d, _OVERBOUGHT)
+                and kline.is_above(KLine.Col.stoch_long_d, _OVERBOUGHT)
+                or kline.is_above(KLine.Col.rsi, _OVERBOUGHT)
+                or kline.is_above(KLine.Col.mfi, _OVERBOUGHT)
             )
         else:
-            return (
-                any([
-                    (prev_stoch_short < _OVERSOLD 
-                     and kline.is_above(KLine.Col.stoch_short_d, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.stoch_short_d)),
-                    (prev_stoch_long < _OVERSOLD 
-                     and kline.is_above(KLine.Col.stoch_long_d, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.stoch_long_d)),
-                    (prev_rsi < _OVERSOLD 
-                     and kline.is_above(KLine.Col.rsi, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.rsi)),
-                    (prev_mfi < _OVERSOLD 
-                     and kline.is_above(KLine.Col.mfi, _OVERSOLD)
-                     and kline.is_upward(KLine.Col.mfi)),
-                ])
+            is_over_price = (
+                kline.is_below(KLine.Col.stoch_short_d, _OVERSOLD)
+                and kline.is_below(KLine.Col.stoch_long_d, _OVERSOLD)                
+                or kline.is_below(KLine.Col.rsi, _OVERSOLD)
+                or kline.is_below(KLine.Col.mfi, _OVERSOLD)
             )
+        return is_over_price
 
 
     def is_long_entry(self, kline: KLine):    
