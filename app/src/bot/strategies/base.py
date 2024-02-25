@@ -23,6 +23,32 @@ from integration.telegram import post_signal, post_error, TradeEntrySignal, Trad
 
 _MIN_ATR_PERCENTAGE = 1
 
+class IndicatorSettings:
+    def __init__(
+            self,
+            ema_200_upward_lookback = 1,
+            ema_200_downward_lookback = 1,
+            long_gmma_above_200_ema_lookback = 1,
+            long_gmma_below_200_ema_lookback = 1,
+            short_gmma_above_long_gmma_lookback = 1,
+            short_gmma_below_long_gmma_lookback = 1,
+            long_gmma_upward_lookback = 1,
+            long_gmma_downward_lookback = 1,
+            short_gmma_upward_lookback = 1,
+            short_gmma_downward_lookback = 1,
+        ):
+        self.ema_200_upward_lookback = ema_200_upward_lookback
+        self.ema_200_downward_lookback = ema_200_downward_lookback
+        self.long_gmma_above_200_ema_lookback = long_gmma_above_200_ema_lookback
+        self.long_gmma_below_200_ema_lookback = long_gmma_below_200_ema_lookback
+        self.short_gmma_above_long_gmma_lookback = short_gmma_above_long_gmma_lookback
+        self.short_gmma_below_long_gmma_lookback = short_gmma_below_long_gmma_lookback
+        self.long_gmma_upward_lookback = long_gmma_upward_lookback
+        self.long_gmma_downward_lookback = long_gmma_downward_lookback
+        self.short_gmma_upward_lookback = short_gmma_upward_lookback
+        self.short_gmma_downward_lookback = short_gmma_downward_lookback
+        
+
 class Base(ABC):
     def __init__(
             self,

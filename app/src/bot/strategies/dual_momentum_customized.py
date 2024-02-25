@@ -12,7 +12,7 @@ from bot.exchange.binance import BinanceInterval, get_kline
 from typing import Optional
 from strategies.base import Base
 
-_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_LOOKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 # customized dual momentum
 # additional check of mfi upward, overbought/oversold
@@ -32,7 +32,7 @@ class DualMomentumCustomized(Base):
             greedy_profit_percentage:Optional[float] = None,
             hard_stop_loss_percentage:Optional[float] = None,
             is_over_price_exit:bool = False,
-            is_lower_timeframe_confirmation:bool = False,
+            confirmation_timeframe:Optional[BinanceInterval] = None,
             is_atr_stop_loss_exit:bool = False,
             is_stoch_and_rsi_exit:bool = False,
             atr_limit:Optional[float] = None,
@@ -40,13 +40,13 @@ class DualMomentumCustomized(Base):
             # x > 10 - high, x < 5 - low
             volatility_limit:Optional[float] = None,
         ):
-        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
+        super().__init__(timeframe, _LOOKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_stop_percentage = trailing_stop_percentage
         self.trailing_start_percentage = trailing_start_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
         self.is_over_price_exit = is_over_price_exit
-        self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
+        self.confirmation_timeframe = confirmation_timeframe
         self.atr_limit = atr_limit
         self.volatility_limit = volatility_limit
         self.is_atr_stop_loss_exit = is_atr_stop_loss_exit
@@ -63,9 +63,7 @@ class DualMomentumCustomized(Base):
         kline.add_atr()
 
         direction = None
-
-        current_atr_value = kline.df[KLine.Col.atr].iloc[-1]
-        atr_percentage = current_atr_value / kline.get_running_price() * 100
+        atr_percentage = kline.get_current_atr_percentage()
 
         if (self.greedy_profit_percentage 
             and self.greedy_profit_percentage > 0
@@ -86,8 +84,8 @@ class DualMomentumCustomized(Base):
             direction = TradeDirection.short
 
         if (direction 
-            and self.is_lower_timeframe_confirmation 
-            and not self.is_lower_timeframe_confirmed(direction, symbol)):
+            and self.confirmation_timeframe 
+            and not self.is_timeframe_confirmed(direction, symbol, self.confirmation_timeframe)):
             direction = None
 
         return direction
@@ -127,36 +125,19 @@ class DualMomentumCustomized(Base):
         return reason
     
     
-    def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
-        lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
-        lower_kline.add_rsi()
-        lower_kline.add_mfi()
+    def is_timeframe_confirmed(self, direction: TradeDirection, symbol: str, interval: BinanceInterval) -> bool:
+        lower_kline = get_kline(symbol, interval, _LOOKBACK)
+        lower_kline.add_gmma()
+        lookback = 3
 
-        return (
-            (direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline))
-            or
-            (direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline))
-        )
-
-
-    def is_lower_timeframe_long_entry(self, kline: KLine):    
-        return all([
-            kline.is_upward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT),
-
-            kline.is_upward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-        ])
-    
-
-    def is_lower_timeframe_short_entry(self, kline: KLine):
-        return all([
-            kline.is_downward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, _OVERSOLD, 50),
-
-            kline.is_downward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
-        ]) 
+        if direction.value == TradeDirection.long.value:
+            return (lower_kline.is_short_term_gmma_above_long_term_gmma(lookback=lookback)
+                    and lower_kline.is_long_gmma_upward(lookback=lookback)
+                    and lower_kline.is_short_gmma_upward())
+        else:
+            return (lower_kline.is_short_term_gmma_below_long_term_gmma(lookback=lookback)
+                    and lower_kline.is_long_gmma_downward(lookback=lookback)
+                    and lower_kline.is_short_gmma_downward())
 
 
     def is_over_price(self, kline: KLine, direction: TradeDirection):
@@ -183,10 +164,10 @@ class DualMomentumCustomized(Base):
         return all([
             kline.is_upward(KLine.Col.ema_200), 
 
-            kline.is_long_gmma_above_200ema(), 
+            kline.is_long_gmma_above_200_ema(), 
             kline.is_long_gmma_upward(),
 
-            kline.is_short_term_GMMA_above_long_term_GMMA(),
+            kline.is_short_term_gmma_above_long_term_gmma(),
             kline.is_short_gmma_upward(),
 
             kline.is_upward(KLine.Col.stoch_short_d),
@@ -210,10 +191,10 @@ class DualMomentumCustomized(Base):
         return all([
             kline.is_downward(KLine.Col.ema_200), 
 
-            kline.is_long_gmma_below_200ema(), 
+            kline.is_long_gmma_below_200_ema(), 
             kline.is_long_gmma_downward(),
 
-            kline.is_short_term_GMMA_below_long_term_GMMA(),
+            kline.is_short_term_gmma_below_long_term_gmma(),
             kline.is_short_gmma_downward(),
 
             kline.is_downward(KLine.Col.stoch_short_d),

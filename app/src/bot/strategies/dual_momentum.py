@@ -1,4 +1,4 @@
-from strategies.base import Base
+from strategies.base import Base, IndicatorSettings
 from bot.models.kline import KLine
 from bot.models.trade import (
     ExitReason,
@@ -13,10 +13,9 @@ from bot.exchange.binance import BinanceInterval, get_kline
 from typing import Optional
 
 
-_LOOCKBACK = 501 # precisely 501 is required to properly calculate 200 ema
+_LOOKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 _OVERBOUGHT = 80
 _OVERSOLD = 20
-_MIN_SLOPE = 5
 
 class DualMomentum(Base):
     def __init__(
@@ -28,23 +27,26 @@ class DualMomentum(Base):
             trailing_stop_percentage:Optional[float] = None,
             trailing_start_percentage:Optional[float] = None,
             greedy_profit_percentage:Optional[float] = None,
-            is_lower_timeframe_confirmation:bool = False,
+            confirmation_timeframe:Optional[BinanceInterval] = None,
             is_over_price_exit:bool = False,
             is_atr_stop_loss_exit:bool = False,
             is_stoch_and_rsi_exit:bool = False,
             hard_stop_loss_percentage:Optional[float] = None,
             stop_loss_atr_percentage:Optional[float] = None,
+            indicator_settings:IndicatorSettings = IndicatorSettings(),
         ):
-        super().__init__(timeframe, _LOOCKBACK, name, hold_period_hours, hold_exit_reason)
+        super().__init__(timeframe, _LOOKBACK, name, hold_period_hours, hold_exit_reason)
         self.trailing_start_percentage = trailing_start_percentage
         self.trailing_stop_percentage = trailing_stop_percentage
         self.greedy_profit_percentage = greedy_profit_percentage
-        self.is_lower_timeframe_confirmation = is_lower_timeframe_confirmation
+        self.confirmation_timeframe = confirmation_timeframe
         self.is_over_price_exit = is_over_price_exit
         self.hard_stop_loss_percentage = hard_stop_loss_percentage
         self.stop_loss_atr_percentage = stop_loss_atr_percentage
         self.is_atr_stop_loss_exit = is_atr_stop_loss_exit
         self.is_stoch_and_rsi_exit = is_stoch_and_rsi_exit
+        self.indicator_settings = indicator_settings
+
 
     def determine_trade_direction(self, kline: KLine, symbol: str) -> Optional[TradeDirection]:
         kline.add_ema(KLine.Col.ema_200, 200)
@@ -61,8 +63,8 @@ class DualMomentum(Base):
             direction = TradeDirection.short
 
         if (direction 
-            and self.is_lower_timeframe_confirmation 
-            and not self.is_lower_timeframe_confirmed(direction, symbol)):
+            and self.confirmation_timeframe 
+            and not self.is_timeframe_confirmed(direction, symbol, self.confirmation_timeframe)):
             direction = None
 
         return direction
@@ -109,41 +111,20 @@ class DualMomentum(Base):
         return reason
     
 
-    def is_lower_timeframe_confirmed(self, direction: TradeDirection, symbol: str) -> bool:
-        lower_kline = get_kline(symbol, BinanceInterval.h4, _LOOCKBACK)
-        lower_kline.add_rsi()
-        lower_kline.add_mfi()
+    def is_timeframe_confirmed(self, direction: TradeDirection, symbol: str, interval: BinanceInterval) -> bool:
+        lower_kline = get_kline(symbol, interval, _LOOKBACK)
+        lower_kline.add_gmma()
+        lookback = 3
 
-        return (
-            (direction.value == TradeDirection.long.value and self.is_lower_timeframe_long_entry(lower_kline))
-            or
-            (direction.value == TradeDirection.short.value and self.is_lower_timeframe_short_entry(lower_kline))
-        )
-            
-
-    def is_lower_timeframe_long_entry(self, kline: KLine):    
-        return (
-            kline.is_upward(KLine.Col.rsi)
-            and kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE)
-            and kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT)
-
-            and kline.is_upward(KLine.Col.mfi)
-            and kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE)
-            and kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT)
-        )
-    
-
-    def is_lower_timeframe_short_entry(self, kline: KLine):
-        return (
-            kline.is_downward(KLine.Col.rsi)
-            and kline.is_min_slope_diff(KLine.Col.rsi, _MIN_SLOPE)
-            and kline.is_between(KLine.Col.rsi, _OVERSOLD, 50)
-
-            and kline.is_downward(KLine.Col.mfi)
-            and kline.is_min_slope_diff(KLine.Col.mfi, _MIN_SLOPE)
-            and kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT)
-        ) 
-    
+        if direction.value == TradeDirection.long.value:
+            return (lower_kline.is_short_term_gmma_above_long_term_gmma(lookback=lookback)
+                    and lower_kline.is_long_gmma_upward(lookback=lookback)
+                    and lower_kline.is_short_gmma_upward())
+        else:
+            return (lower_kline.is_short_term_gmma_below_long_term_gmma(lookback=lookback)
+                    and lower_kline.is_long_gmma_downward(lookback=lookback)
+                    and lower_kline.is_short_gmma_downward())
+         
 
     def is_over_price(self, kline: KLine, direction: TradeDirection):
         # exit when an asset is overbought/oversold
@@ -165,13 +146,24 @@ class DualMomentum(Base):
 
     def is_long_entry(self, kline: KLine):      
         return (
-            kline.is_upward(KLine.Col.ema_200)
+            kline.is_upward(
+                source_column=KLine.Col.ema_200, 
+                lookback=self.indicator_settings.ema_200_upward_lookback
+            )
 
-            and kline.is_long_gmma_above_200ema()
-            and kline.is_long_gmma_upward()
+            and kline.is_long_gmma_above_200_ema(
+                lookback=self.indicator_settings.long_gmma_above_200_ema_lookback
+            )
+            and kline.is_long_gmma_upward(
+                lookback=self.indicator_settings.long_gmma_upward_lookback
+            )
 
-            and kline.is_short_term_GMMA_above_long_term_GMMA()
-            and kline.is_short_gmma_upward()
+            and kline.is_short_term_gmma_above_long_term_gmma(
+                lookback=self.indicator_settings.short_gmma_above_long_gmma_lookback
+            )
+            and kline.is_short_gmma_upward(
+                lookback=self.indicator_settings.short_gmma_upward_lookback
+            )
 
             and kline.is_upward(KLine.Col.stoch_short_d)
             and kline.is_upward(KLine.Col.stoch_long_d)
@@ -188,13 +180,24 @@ class DualMomentum(Base):
 
     def is_short_entry(self, kline: KLine):
         return (
-            kline.is_downward(KLine.Col.ema_200)
+            kline.is_downward(
+                source_column=KLine.Col.ema_200,
+                lookback=self.indicator_settings.ema_200_downward_lookback
+            )
 
-            and kline.is_long_gmma_below_200ema()
-            and kline.is_long_gmma_downward()
+            and kline.is_long_gmma_below_200_ema(
+                lookback=self.indicator_settings.long_gmma_below_200_ema_lookback
+            )
+            and kline.is_long_gmma_downward(
+                lookback=self.indicator_settings.long_gmma_downward_lookback
+            )
 
-            and kline.is_short_term_GMMA_below_long_term_GMMA()
-            and kline.is_short_gmma_downward()
+            and kline.is_short_term_gmma_below_long_term_gmma(
+                lookback=self.indicator_settings.short_gmma_below_long_gmma_lookback
+            )
+            and kline.is_short_gmma_downward(
+                lookback=self.indicator_settings.short_gmma_downward_lookback
+            )
 
             and kline.is_downward(KLine.Col.stoch_short_d)
             and kline.is_downward(KLine.Col.stoch_long_d)

@@ -2,6 +2,7 @@ import threading
 import time
 from bot.exchange.binance import BinanceInterval, cache_usdt_symbols_list, get_kline, get_all_usdt_symbols
 from strategies import (
+    IndicatorSettings,
     Base,
     DualMomentum,
     DualMomentumCustomized,
@@ -77,6 +78,35 @@ strategies: List[Base] = [
         hard_stop_loss_percentage=-3,
         is_over_price_exit=True,
         is_atr_stop_loss_exit=True,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_and_rsi_overprice_confirmation',
+        is_stoch_and_rsi_exit=True,
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.5,
+        is_over_price_exit=True,
+        confirmation_timeframe=BinanceInterval.week,
+    ),
+
+    DualMomentum(
+        name='dual_momentum_trailing_small_stoch_and_rsi_overprice_lookback',
+        is_stoch_and_rsi_exit=True,
+        trailing_start_percentage=0.5,
+        trailing_stop_percentage=0.5,
+        is_over_price_exit=True,
+        indicator_settings=IndicatorSettings(
+            ema_200_downward_lookback=30,
+            ema_200_upward_lookback=30,
+            long_gmma_above_200_ema_lookback=7,
+            long_gmma_below_200_ema_lookback=7,
+            long_gmma_downward_lookback=5,
+            long_gmma_upward_lookback=5,
+            short_gmma_above_long_gmma_lookback=7,
+            short_gmma_below_long_gmma_lookback=7,
+            short_gmma_downward_lookback=2,
+            short_gmma_upward_lookback=2,
+        ),
     ),
 
     DualMomentum(
@@ -257,6 +287,14 @@ strategies: List[Base] = [
         trailing_stop_percentage=0.25,
         trailing_start_percentage=0.25,
         is_over_price_exit=True,
+    ),
+
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_xs_stoch_and_rsi_overprice', 
+        trailing_stop_percentage=0.25,
+        trailing_start_percentage=0.25,
+        is_over_price_exit=True,
+        is_stoch_and_rsi_exit=True,
     ),
 
     # volume surge ##############################

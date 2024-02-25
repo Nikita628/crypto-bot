@@ -15,6 +15,7 @@ class BinanceInterval(Enum):
     h4 = '4h'
     h12 = '12h'
     day = '1d'
+    week = '1w'
 
 _RATE_LIMIT_CODE = 429
 class RateLimitException(Exception):

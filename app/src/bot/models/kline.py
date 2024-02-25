@@ -43,85 +43,114 @@ class KLine:
     def is_rsi_oversold(self, oversold_limit = 20) -> bool: 
         return self.is_below(KLine.Col.rsi, oversold_limit)
     
+
     def is_stoch_overbought(self, overbought_limit = 80) -> bool:
         return (
             self.is_above(KLine.Col.stoch_long_d, overbought_limit)
             or self.is_above(KLine.Col.stoch_short_d, overbought_limit)
         )
     
+
     def is_stoch_oversold(self, oversold_limit = 20) -> bool:
         return (
             self.is_below(KLine.Col.stoch_long_d, oversold_limit)
             or self.is_below(KLine.Col.stoch_short_d, oversold_limit)
         )
     
-    def is_long_gmma_above_200ema(self): 
-        return self.df[f'long_ema_{60}'].iloc[-1] > self.df[KLine.Col.ema_200].iloc[-1]
+
+    def is_long_gmma_above_200_ema(self, lookback=1): 
+        for i in range(-lookback, 0):
+            if self.df[f'long_ema_{60}'].iloc[i] <= self.df[KLine.Col.ema_200].iloc[i]:
+                return False
+            
+        return True
+        
+
+    def is_short_term_gmma_above_long_term_gmma(self, lookback=1):
+        for i in range(-lookback, 0):
+            if self.df[f'short_ema_{15}'].iloc[i] <= self.df[f'long_ema_{30}'].iloc[i]:
+                return False
+            
+        return True
     
-    def is_short_term_GMMA_above_long_term_GMMA(self):
-        return self.df[f'short_ema_{15}'].iloc[-1] > self.df[f'long_ema_{30}'].iloc[-1]
+
+    def is_long_gmma_below_200_ema(self, lookback=1):
+        for i in range(-lookback, 0):
+            if self.df[f'long_ema_{60}'].iloc[i] >= self.df[KLine.Col.ema_200].iloc[i]:
+                return False
+            
+        return True
     
-    def is_long_gmma_below_200ema(self):
-        return self.df[f'long_ema_{60}'].iloc[-1] < self.df[KLine.Col.ema_200].iloc[-1]
+
+    def is_short_term_gmma_below_long_term_gmma(self, lookback=1): 
+        for i in range(-lookback, 0):
+            if self.df[f'short_ema_{15}'].iloc[i] >= self.df[f'long_ema_{30}'].iloc[i]:
+                return False
+            
+        return True
     
-    def is_short_term_GMMA_below_long_term_GMMA(self): 
-        return self.df[f'short_ema_{15}'].iloc[-1] < self.df[f'long_ema_{30}'].iloc[-1]
 
-    def is_long_gmma_upward(self):
-        _is_long_gmma_upward = all(
-            (self.df[f'long_ema_{ema}'].iloc[-1] > self.df[f'long_ema_{ema}'].iloc[-2]) 
-            for ema in KLine.Col.long_emas
-        )
+    def is_long_gmma_upward(self, lookback=1): 
+        for i in range(-lookback, 0):
+            # check slope of each ema
+            for ema in KLine.Col.long_emas:
+                if self.df[f'long_ema_{ema}'].iloc[i] <= self.df[f'long_ema_{ema}'].iloc[i - 1]:
+                    return False
 
-        is_long_gmma_separation = True
-        for i in range(0, len(KLine.Col.long_emas) - 1):
-            if self.df[f'long_ema_{KLine.Col.long_emas[i]}'].iloc[-1] <= self.df[f'long_ema_{KLine.Col.long_emas[i + 1]}'].iloc[-1]:
-                is_long_gmma_separation = False
-                break
+            # check separation between emas
+            for ema_idx in range(0, len(KLine.Col.long_emas) - 1):
+                if (self.df[f'long_ema_{KLine.Col.long_emas[ema_idx]}'].iloc[i] 
+                    <= self.df[f'long_ema_{KLine.Col.long_emas[ema_idx + 1]}'].iloc[i]):
+                    return False
+                
+        return True
 
-        return _is_long_gmma_upward and is_long_gmma_separation
 
-    def is_short_gmma_upward(self):
-        _is_short_gmma_upward = all(
-            (self.df[f'short_ema_{ema}'].iloc[-1] > self.df[f'short_ema_{ema}'].iloc[-2]) 
-            for ema in KLine.Col.short_emas
-        )
+    def is_short_gmma_upward(self, lookback=1):
+        for i in range(-lookback, 0):
+            # check slope of each ema
+            for ema in KLine.Col.short_emas:
+                if self.df[f'short_ema_{ema}'].iloc[i] <= self.df[f'short_ema_{ema}'].iloc[i - 1]:
+                    return False
 
-        is_short_gmma_separation = True
-        for i in range(0, len(KLine.Col.short_emas) - 1):
-            if self.df[f'short_ema_{KLine.Col.short_emas[i]}'].iloc[-1] <= self.df[f'short_ema_{KLine.Col.short_emas[i + 1]}'].iloc[-1]:
-                is_short_gmma_separation = False
-                break
+            # check separation between emas
+            for ema_idx in range(0, len(KLine.Col.short_emas) - 1):
+                if (self.df[f'short_ema_{KLine.Col.short_emas[ema_idx]}'].iloc[i] 
+                    <= self.df[f'short_ema_{KLine.Col.short_emas[ema_idx + 1]}'].iloc[i]):
+                    return False
+                
+        return True
+    
 
-        return _is_short_gmma_upward and is_short_gmma_separation
+    def is_long_gmma_downward(self, lookback=1):
+        for i in range(-lookback, 0):
+            # check slope of each ema
+            for ema in KLine.Col.long_emas:
+                if self.df[f'long_ema_{ema}'].iloc[i] >= self.df[f'long_ema_{ema}'].iloc[i - 1]:
+                    return False
 
-    def is_long_gmma_downward(self):
-        _is_long_gmma_downward = all(
-            (self.df[f'long_ema_{ema}'].iloc[-1] < self.df[f'long_ema_{ema}'].iloc[-2]) 
-            for ema in KLine.Col.long_emas
-        )
+            # check separation between emas
+            for ema_idx in range(0, len(KLine.Col.long_emas) - 1):
+                if (self.df[f'long_ema_{KLine.Col.long_emas[ema_idx]}'].iloc[i] 
+                    >= self.df[f'long_ema_{KLine.Col.long_emas[ema_idx + 1]}'].iloc[i]):
+                    return False
+                
+        return True
 
-        is_long_gmma_separation = True
-        for i in range(0, len(KLine.Col.long_emas) - 1):
-            if self.df[f'long_ema_{KLine.Col.long_emas[i]}'].iloc[-1] >= self.df[f'long_ema_{KLine.Col.long_emas[i + 1]}'].iloc[-1]:
-                is_long_gmma_separation = False
-                break
+    def is_short_gmma_downward(self, lookback=1):
+        for i in range(-lookback, 0):
+            # check slope of each ema
+            for ema in KLine.Col.short_emas:
+                if self.df[f'short_ema_{ema}'].iloc[i] >= self.df[f'short_ema_{ema}'].iloc[i - 1]:
+                    return False
 
-        return _is_long_gmma_downward and is_long_gmma_separation
-
-    def is_short_gmma_downward(self):
-        _is_short_gmma_downward = all(
-            (self.df[f'short_ema_{ema}'].iloc[-1] < self.df[f'short_ema_{ema}'].iloc[-2]) 
-            for ema in KLine.Col.short_emas
-        )
-
-        is_short_gmma_separation = True
-        for i in range(0, len(KLine.Col.short_emas) - 1):
-            if self.df[f'short_ema_{KLine.Col.short_emas[i]}'].iloc[-1] >= self.df[f'short_ema_{KLine.Col.short_emas[i + 1]}'].iloc[-1]:
-                is_short_gmma_separation = False
-                break
-
-        return _is_short_gmma_downward and is_short_gmma_separation
+            # check separation between emas
+            for ema_idx in range(0, len(KLine.Col.short_emas) - 1):
+                if (self.df[f'short_ema_{KLine.Col.short_emas[ema_idx]}'].iloc[i] 
+                    >= self.df[f'short_ema_{KLine.Col.short_emas[ema_idx + 1]}'].iloc[i]):
+                    return False
+                
+        return True
 
     def add_gmma(self):
         for ema in KLine.Col.short_emas:
