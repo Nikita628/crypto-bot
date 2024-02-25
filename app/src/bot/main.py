@@ -252,6 +252,13 @@ strategies: List[Base] = [
         is_stoch_and_rsi_exit=True,
     ),
 
+    DualMomentumCustomized(
+        name='dual_momentum_customized_trailing_xs_stoch_or_rsi_overprice', 
+        trailing_stop_percentage=0.25,
+        trailing_start_percentage=0.25,
+        is_over_price_exit=True,
+    ),
+
     # volume surge ##############################
     # VolumeSurge(
     #     name='volume_surge_greedy_hard_stop_4h_1.5',
