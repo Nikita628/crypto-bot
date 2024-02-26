@@ -16,6 +16,8 @@ from typing import Optional
 _LOOKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 _OVERBOUGHT = 80
 _OVERSOLD = 20
+_ENTRY_OVERBOUGHT = 75
+_ENTRY_OVERSOLD = 25
 
 class DualMomentum(Base):
     def __init__(
@@ -169,10 +171,10 @@ class DualMomentum(Base):
             and kline.is_upward(KLine.Col.stoch_long_d)
 
             and kline.is_upward(KLine.Col.rsi)
-            and kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT)
+            and kline.is_between(KLine.Col.rsi, 50, _ENTRY_OVERBOUGHT)
 
-            and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
-            and kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70)
+            and kline.is_between(KLine.Col.stoch_long_d, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT)
+            and kline.is_between(KLine.Col.stoch_short_d, _ENTRY_OVERSOLD, 70)
 
             and kline.is_price_action_not_mixing_with_gmma(TradeDirection.long)
         )
@@ -203,10 +205,10 @@ class DualMomentum(Base):
             and kline.is_downward(KLine.Col.stoch_long_d)
 
             and kline.is_downward(KLine.Col.rsi)
-            and kline.is_between(KLine.Col.rsi, _OVERSOLD, 50)
+            and kline.is_between(KLine.Col.rsi, _ENTRY_OVERSOLD, 50)
 
-            and kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT)
-            and kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT)
+            and kline.is_between(KLine.Col.stoch_long_d, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT)
+            and kline.is_between(KLine.Col.stoch_short_d, 30, _ENTRY_OVERBOUGHT)
 
             and kline.is_price_action_not_mixing_with_gmma(TradeDirection.short)
         )

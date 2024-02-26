@@ -19,7 +19,8 @@ _LOOKBACK = 501 # precisely 501 is required to properly calculate 200 ema
 
 _OVERBOUGHT = 80
 _OVERSOLD = 20
-
+_ENTRY_OVERBOUGHT = 75
+_ENTRY_OVERSOLD = 25
 class DualMomentumCustomized(Base):
     def __init__(
             self, 
@@ -171,19 +172,19 @@ class DualMomentumCustomized(Base):
             kline.is_short_gmma_upward(),
 
             kline.is_upward(KLine.Col.stoch_short_d),
-            kline.is_between(KLine.Col.stoch_short_d, _OVERSOLD, 70),
+            kline.is_between(KLine.Col.stoch_short_d, _ENTRY_OVERSOLD, 70),
 
             kline.is_upward(KLine.Col.stoch_long_d),
-            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_long_d, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT),
 
             kline.is_upward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, 50, _OVERBOUGHT),
+            kline.is_between(KLine.Col.rsi, 50, _ENTRY_OVERBOUGHT),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.long),
 
             # custom tech indicators additionally to dual momentum 
             kline.is_upward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.mfi, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT),
         ])
     
 
@@ -198,19 +199,19 @@ class DualMomentumCustomized(Base):
             kline.is_short_gmma_downward(),
 
             kline.is_downward(KLine.Col.stoch_short_d),
-            kline.is_between(KLine.Col.stoch_short_d, 30, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_short_d, 30, _ENTRY_OVERBOUGHT),
 
             kline.is_downward(KLine.Col.stoch_long_d),
-            kline.is_between(KLine.Col.stoch_long_d, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.stoch_long_d, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT),
 
             kline.is_downward(KLine.Col.rsi),
-            kline.is_between(KLine.Col.rsi, _OVERSOLD, 50),
+            kline.is_between(KLine.Col.rsi, _ENTRY_OVERSOLD, 50),
 
             kline.is_price_action_not_mixing_with_gmma(TradeDirection.short),
 
             # custom tech indicators additionally to dual momentum      
             kline.is_downward(KLine.Col.mfi),
-            kline.is_between(KLine.Col.mfi, _OVERSOLD, _OVERBOUGHT),
+            kline.is_between(KLine.Col.mfi, _ENTRY_OVERSOLD, _ENTRY_OVERBOUGHT),
         ])
     
 
