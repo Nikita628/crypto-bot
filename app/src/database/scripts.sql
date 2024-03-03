@@ -20,6 +20,8 @@ SELECT
 
     ROUND(SUM(profit_percentage * 0.1)::DECIMAL, 3) AS "total_profit%",
 
+    ROUND((SUM(profit_percentage * 0.1)::DECIMAL) / NULLIF(EXTRACT(DAY FROM CURRENT_DATE - MIN(entry_date)), 0), 3) AS "avg_day_profit_%",
+
     COUNT(*) FILTER (WHERE exit_date IS NULL) AS opened_trades,
 
     ROUND((SUM(profit_percentage * 0.1) FILTER (WHERE exit_date IS NULL))::DECIMAL, 3) AS "opened_trades_profit%",
