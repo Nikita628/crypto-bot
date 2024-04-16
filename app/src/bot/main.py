@@ -208,9 +208,9 @@ strategies: List[Base] = [
     ),
 
     DualMomentumCustomized(
-        name='dual_momentum_customized_greedy', 
-        greedy_profit_percentage=0.5, 
-        hard_stop_loss_percentage=-3,
+        name='dual_momentum_customized_greedy_xs', 
+        greedy_profit_percentage=0.1, 
+        hard_stop_loss_percentage=-5,
         is_over_price_exit=True,
         is_atr_stop_loss_exit=True,
     ),
