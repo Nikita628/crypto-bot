@@ -20,6 +20,8 @@ git clone -b prod git@github.com:Nikita628/crypto-bot.git
 //executable file
 chmod +x ~/bot_scripts/files_update
 
+
+
 //run
 /var/www/scripts/deploying
 
